@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "baseUrl": "http://127.0.0.1:4173",
+  "timeoutMs": 10000,
+  "requests": [
+    {
+      "id": "health",
+      "method": "GET",
+      "path": "/api/health",
+      "expect": {
+        "status": 200,
+        "headers": { "content-type": "application/json" },
+        "jsonSchema": {
+          "type": "object",
+          "required": ["status"],
+          "properties": { "status": { "type": "string", "enum": ["ok"] } }
+        }
+      }
+    },
+    {
+      "id": "unauthenticated",
+      "method": "GET",
+      "path": "/api/private",
+      "expect": { "status": 401 }
+    }
+  ]
+}

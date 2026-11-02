@@ -22,6 +22,7 @@ runner/
 tools/
   looper/
   react-typescript-fullstack/
+  backend-api-diagnostics/       # local API contract, auth and server-log diagnostics
   agent-runtimes/
 workspaces/                     # disposable target checkout area
 results/                        # compute output area

@@ -92,6 +92,15 @@ jobs:
           cat artifacts/build/dev-server.log || true
           exit 1
 
+      - name: Run target API diagnostics when a manifest is provided
+        id: api
+        if: steps.ready.outcome == 'success' && hashFiles('workspaces/target/.agent-workspace/api-tests.json') != ''
+        continue-on-error: true
+        env:
+          API_BASE_URL: http://127.0.0.1:4173
+          SERVER_LOG_PATH: artifacts/build/dev-server.log
+        run: node tools/backend-api-diagnostics/scripts/run-api-diagnostics.mjs --manifest workspaces/target/.agent-workspace/api-tests.json --output artifacts/api
+
       - name: Inspect rendered application and accessibility
         id: browser
         if: steps.ready.outcome == 'success'
@@ -118,10 +127,12 @@ jobs:
           START: ${{ steps.start.outcome }}
           READY: ${{ steps.ready.outcome }}
           BROWSER: ${{ steps.browser.outcome }}
+          API_TESTS: ${{ steps.api.outcome }}
         run: |
-          printf 'prepare=%s quality=%s start=%s ready=%s browser=%s\n' "$PREPARE" "$QUALITY" "$START" "$READY" "$BROWSER"
+          printf 'prepare=%s quality=%s start=%s ready=%s api=%s browser=%s\n' "$PREPARE" "$QUALITY" "$START" "$READY" "$API_TESTS" "$BROWSER"
           test "$PREPARE" = success &&
           test "$QUALITY" = success &&
           test "$START" = success &&
           test "$READY" = success &&
-          test "$BROWSER" = success
+          test "$BROWSER" = success &&
+          { test "$API_TESTS" = success || test "$API_TESTS" = skipped; }

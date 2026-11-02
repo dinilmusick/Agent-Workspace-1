@@ -1,7 +1,7 @@
 ---
 name: "Task Ledger"
 slug: task-ledger
-version: 1.3.4
+version: 1.3.5
 source: Supabase Skills Database
 sourceId: 7
 status: active
@@ -28,7 +28,7 @@ The Task Ledger is the database-backed coordination substrate for multi-agent ex
 Use the authenticated Supabase connector as the shared read/write interface. The database is the source of truth for task definitions, claims, progress, results, evidence, and verification state.
 
 ## Goal-backed ChatGPT workflow precedence
-For a persistent named goal worked by manually opened ChatGPT conversations, the goal protocol in the v1.3.4 section below supersedes the generic legacy task procedures in this file. Use goal_ledger_create_with_tasks, goal_ledger_claim_task, task_ledger_record_loop_iteration, task_ledger_record_parent_loop_iteration, task_ledger_verify_result and goal_ledger_finalize. Each task, including every parent, must execute its own persisted Loop Generator contract. Each task stores the goal context version it was created against; do not silently change the meaning of in-flight tasks when goal context is revised.
+For a persistent named goal worked by manually opened ChatGPT conversations, the goal protocol in the v1.3.5 section below supersedes the generic legacy task procedures in this file. Use goal_ledger_create_with_tasks, goal_ledger_claim_task, task_ledger_record_loop_iteration, task_ledger_record_parent_loop_iteration, task_ledger_verify_result and goal_ledger_finalize. Each task, including every parent, must execute its own persisted Loop Generator contract. Each task stores the goal context version it was created against; do not silently change the meaning of in-flight tasks when goal context is revised.
 
 ## Core model
 - tasks is the canonical task record. A task is a formal execution contract, not merely a title and status.

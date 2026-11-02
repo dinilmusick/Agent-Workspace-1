@@ -35,6 +35,8 @@ jobs:
         run: npm install --prefix tools/react-typescript-fullstack --ignore-scripts --no-audit --no-fund
       - name: Install optional agent loop package
         run: npm install --prefix tools/agent-runtimes --ignore-scripts --no-audit --no-fund
+      - name: Install AutoHelix Python runtime
+        run: python -m pip install --disable-pip-version-check -r tools/agent-runtimes/requirements.txt && autohelix --help
       - name: Validate scripts and Looper behavior
         run: |
           node --check tools/looper/looper.mjs

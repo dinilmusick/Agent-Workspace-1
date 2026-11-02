@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "inspect": "node scripts/inspect.mjs",
+    "inspect": "node scripts/inspect-browser.mjs",
     "quality": "node scripts/quality-check-flat.mjs"
   },
   "devDependencies": {

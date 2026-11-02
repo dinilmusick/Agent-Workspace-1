@@ -25,9 +25,9 @@
 - Do not place credentials, private source or user secrets in this public repository.
 
 ## Supabase Task Ledger
-- The deployed Supabase Edge Function `task-ledger` is a legacy API gateway for the repository CLI runner only. Browser-chat agents use the connected Supabase PostgreSQL tools directly.
-- Use `runner/task-ledger.mjs` for authenticated API calls; configure `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and a dedicated agent's `SUPABASE_AGENT_JWT`.
-- Each agent must have a Supabase Auth user and an enabled `public.agent_registry` row. The service-role key must never be placed in an agent runtime.
+- Supabase Edge Functions are not used. Browser-chat agents use the connected Supabase PostgreSQL tools directly; the optional CLI runner uses Auth + PostgREST + RPC directly.
+- Use runner/task-ledger.mjs for optional CLI/runtime API calls; configure SUPABASE_URL, SUPABASE_ANON_KEY, and a dedicated agent's SUPABASE_AGENT_JWT.
+- Manually opened ChatGPT chats do not need separate Supabase Auth users; each supplies a unique agent_id and session_id. The optional CLI/runtime path requires an Auth user and enabled public.agent_registry row. Never expose the service-role key.
 - Orchestrators create task trees; workers claim tasks using leases; every claim-bound write requires the returned claim token; verifier workers inspect pending results and iteration evidence, independently accept/reject results, and finalize ancestors only after all children are verified.
 - Worker entrypoints: `runner/agent-worker.mjs` and `runner/verifier-worker.mjs`; both require a dedicated registered Supabase Auth identity and a runtime adapter contract.
 - Follow `docs/task-ledger-integration.md` for provisioning and command examples.

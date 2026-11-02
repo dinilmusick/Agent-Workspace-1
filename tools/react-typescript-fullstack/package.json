@@ -4,7 +4,9 @@
   "type": "module",
   "scripts": {
     "inspect": "node scripts/inspect-browser.mjs",
-    "quality": "node scripts/quality-check-flat.mjs"
+    "quality": "node scripts/quality-check-flat.mjs",
+    "test": "node --test test/*.test.mjs",
+    "test:e2e": "playwright test --config playwright.config.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.14.0",

@@ -1,0 +1,1 @@
+alter table public.tasks add column if not exists claimed_session_id text, add column if not exists loop_state jsonb not null default '{}'::jsonb, add column if not exists loop_iteration integer not null default 0; create index if not exists tasks_goal_claimable_idx on public.tasks (goal_id,status,priority,started_at) where goal_id is not null;

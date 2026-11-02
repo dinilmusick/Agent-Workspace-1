@@ -14,6 +14,8 @@ Shared database-backed task coordination for agents: formal task contracts, recu
 ## Linked tools
 
 - Supabase (`supabase`, connector, required): Read, create, claim, update, and verify shared task records through the authenticated Supabase connector.
+- Looper (`looper`, CLI, optional): Manage bounded loop input/output, criterion evidence and stop states; mirror iterations into `task_iterations`.
+- Agent Loops (`agent-loops`, CLI, optional): Run an orchestrator/worker/reviewer coding workflow when a task tree benefits from separate agent roles.
 
 ## Instructions
 

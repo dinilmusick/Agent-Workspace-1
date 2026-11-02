@@ -1,6 +1,6 @@
 # Supabase Task Ledger integration
 
-The Task Ledger Edge Function is the authenticated boundary between agent runtimes and the Skills Database.
+This document describes the legacy CLI worker API. The primary ChatGPT browser-conversation protocol uses the connected Supabase PostgreSQL tools directly and does not route task claims or goal operations through an Edge Function. See [persistent goal and chat worker protocol](persistent-goals.md). The `task-ledger` Edge Function remains a compatibility gateway for the repository CLI runtime only.
 
 ## Components
 

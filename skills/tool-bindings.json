@@ -165,16 +165,6 @@
       ]
     },
     {
-      "slug": "typescript-eslint",
-      "type": "library",
-      "package": "typescript-eslint@8.72.0",
-      "skills": [
-        "frontend-engineering",
-        "coding-router",
-        "coding-workflow"
-      ]
-    },
-    {
       "slug": "supabase",
       "type": "connector",
       "skills": [

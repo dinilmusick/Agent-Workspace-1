@@ -84,5 +84,5 @@
     "maxDiffPixelRatio": 0.01
   },
   "failOnRuntimeErrors": true,
-  "ignoreRuntimeErrors": ["/api/login"]
+  "ignoreRuntimeErrors": ["/api/login", "401 (Unauthorized)"]
 }

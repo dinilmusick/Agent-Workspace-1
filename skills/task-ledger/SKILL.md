@@ -1,7 +1,7 @@
 ---
 name: "Task Ledger"
 slug: task-ledger
-version: 1.7.5
+version: 1.7.6
 source: Supabase Skills Database
 sourceId: 7
 status: active
@@ -82,7 +82,7 @@ A task loop may pass only against that task's own criteria and evidence. Task su
 
 ## Stale-worker recovery
 
-A running task is eligible for reassignment when its claim lease expires or its last heartbeat is at least 60 minutes old. The standard goal-key claim path and generic claim RPCs enforce this inside the atomic `FOR UPDATE SKIP LOCKED` claim transaction. Do not manually rewrite task ownership.
+A running task is eligible for reassignment only when its last heartbeat is at least 60 minutes old. An expired lease alone must never permit reassignment before the one-hour threshold. The standard goal-key claim path and generic claim RPCs enforce this inside the atomic `FOR UPDATE SKIP LOCKED` claim transaction. New claims use a minimum 60-minute lease. Do not manually rewrite task ownership.
 
 A recovery rotates the claim token, increments the attempt count, assigns the new worker/session and appends a `lease_recovered` event with the previous agent, claim token, heartbeat timestamp and recovery reason. Existing task iterations, events, evidence and commit references remain intact.
 

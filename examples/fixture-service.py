@@ -25,4 +25,4 @@ class Handler(BaseHTTPRequestHandler):
 
 port = int(os.environ["PORT"])
 print(f"fixture service {os.environ.get('SERVICE_NAME')} listening on {port}", flush=True)
-ThreadingHTTPServer(("127.0.0.1", port), Handler).serve_forever()
+server = ThreadingHTTPServer(("127.0.0.1", port), Handler)\nif len(sys.argv) > 1 and sys.argv[1] == "--exit-after":\n    threading.Timer(float(sys.argv[2]), server.shutdown).start()\nserver.serve_forever()

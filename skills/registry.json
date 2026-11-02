@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "source": {
     "provider": "Supabase",
     "projectRef": "vcaerawuwffziufvpbvw",
@@ -313,5 +313,7 @@
       "path": "skills/cooking-culinary-skills/SKILL.md",
       "tools": []
     }
-  ]
+  ],
+  "toolBindingsPath": "skills/tool-bindings.json",
+  "exportedAt": "2026-11-02"
 }

@@ -98,6 +98,17 @@ begin
     raise exception 'Recovery event did not preserve previous worker evidence';
   end if;
 
+  begin
+    perform public.task_ledger_heartbeat_claim(
+      first_claim.id,'recovery-worker-old',first_claim.claim_token,'stale worker must be rejected',900
+    );
+    raise exception 'Previous worker unexpectedly retained authority after reassignment';
+  exception when others then
+    if sqlerrm='Previous worker unexpectedly retained authority after reassignment' then
+      raise;
+    end if;
+  end;
+
   overview := public.goal_ledger_overview(null);
   select item into goal_row
   from jsonb_array_elements(overview->'goals') item

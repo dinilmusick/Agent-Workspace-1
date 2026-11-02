@@ -6,7 +6,7 @@ The reusable quality contract lives in the target application's \`.agent-workspa
 
 | Gate | Implementation | Failure policy |
 |---|---|---|
-| Dependency vulnerabilities | \`npm audit\`, GitHub Dependency Review, Trivy filesystem scan | High or critical |
+| Dependency vulnerabilities | \`npm audit\`, Trivy filesystem scan; optional GitHub Dependency Review when repository dependency graph is enabled | High or critical |
 | Secret detection | Gitleaks full Git-history scan; Trivy secret scanner | Any confirmed finding |
 | Static security | CodeQL JavaScript/TypeScript and Python, security-extended queries | SARIF security severity 7+ |
 | Container security | Trivy Dockerfile/config scan and built-image scan | High or critical, ignoring unfixed CVEs |

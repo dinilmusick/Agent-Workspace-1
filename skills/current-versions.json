@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "sourceOfTruth": "Supabase Skills Database current_version_id",
+  "generatedAt": "2026-11-02",
+  "versions": {
+    "loop-generator": "1.1.0",
+    "task-ledger": "1.2.0",
+    "coding-router": "1.1.0",
+    "universal-task-router": "1.1.0"
+  }
+}

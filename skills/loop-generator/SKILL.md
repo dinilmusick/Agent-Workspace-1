@@ -9,6 +9,8 @@ tools:
   - playwright
   - supabase
   - github
+  - agent-loops
+  - autohelix
 ---
 
 # Loop Generator

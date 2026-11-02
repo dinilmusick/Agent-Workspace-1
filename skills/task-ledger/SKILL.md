@@ -1,7 +1,7 @@
 ---
 name: "Task Ledger"
 slug: task-ledger
-version: 1.7.6
+version: 1.7.7
 source: Supabase Skills Database
 sourceId: 7
 status: active
@@ -48,7 +48,7 @@ A parameter contract uses `required` for mandatory keys and `properties` for exp
 
 ## Universal goal discovery
 
-At the beginning of every orchestration session, and whenever asked what goals remain, call `goal_ledger_overview(null)`. Report every visible planning, ready, active and blocked goal with its readable key, task counts, running agents, queued tasks, blockers, stale-heartbeat flags and verification state. Explain dependency constraints: queued does not necessarily mean claimable. Use `goal_ledger_resume_by_key` to load the selected goal before claiming. The overview is read-only discovery; never infer or modify task ownership from it.
+At the beginning of every orchestration session, and whenever asked what goals remain, call `goal_ledger_overview(null)` through the trusted Supabase database/service-role connector. This RPC is intentionally unavailable to anon and ordinary authenticated roles because it exposes the single-owner workspace graph. Report every visible planning, ready, active and blocked goal with its readable key, task counts, running agents, queued tasks, blockers, stale-heartbeat flags and verification state. Explain dependency constraints: queued does not necessarily mean claimable. Use `goal_ledger_resume_by_key` to load the selected goal before claiming. The overview is read-only discovery; never infer or modify task ownership from it.
 
 ## Goal discovery and resume in a new chat
 

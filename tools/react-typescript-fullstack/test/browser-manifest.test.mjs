@@ -33,7 +33,7 @@ test("loads explicit routes and reports dynamic framework routes as untested", a
     process.env.TARGET_BASE_URL = "http://127.0.0.1:4173";
     const result = await loadBrowserManifest();
     assert.equal(result.routes.length, 1);
-    assert.deepEqual(result.untestedRoutes.map(route => route.path), ["/[slug]", "/about"]);
+    assert.deepEqual(result.untestedRoutes.map(route => route.path).sort(), ["/[slug]", "/about"]);
     const coverage = JSON.parse(await readFile(join(root, "artifacts/route-coverage.json"), "utf8"));
     assert.equal(coverage.routeDiscovery, "manifest");
     assert.equal(coverage.untestedRoutes.length, 2);

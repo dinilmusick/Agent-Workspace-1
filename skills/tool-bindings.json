@@ -179,7 +179,8 @@
       "type": "connector",
       "skills": [
         "task-ledger",
-        "loop-generator"
+        "loop-generator",
+        "universal-task-router"
       ]
     },
     {

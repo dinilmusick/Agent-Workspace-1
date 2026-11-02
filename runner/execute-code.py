@@ -9,7 +9,7 @@ import tempfile
 from pathlib import Path
 
 MAX_OUTPUT = 30000
-ROOT = Path(os.environ.get("GITHUB_WORKSPACE", Path(__file__).resolve().parents[1])).resolve()
+ROOT = Path(__file__).resolve().parents[1]
 
 
 def parse_arguments(value):

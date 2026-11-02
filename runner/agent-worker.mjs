@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { spawn } from "node:child_process";
+import { spawn } from "node:child_process";\nimport { randomUUID } from "node:crypto";
 import { setTimeout as sleep } from "node:timers/promises";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -25,13 +25,24 @@ export function normalizeRuntimeOutput(value) {
   if (output.result !== undefined && (output.result === null || typeof output.result !== "object")) throw new Error("Runtime result must be an object or array.");
   if (output.tools_used !== undefined && !Array.isArray(output.tools_used)) throw new Error("tools_used must be an array.");
   if (output.evidence !== undefined && !Array.isArray(output.evidence)) throw new Error("evidence must be an array.");
+  const criterionResults = output.criterion_results ?? output.criterionResults ?? [];
+  if (!Array.isArray(criterionResults) || criterionResults.length === 0) throw new Error("Runtime output must include non-empty criterion_results.");
+  const evidence = output.evidence ?? [];
+  const verdict = output.verdict ?? (output.status === "completed" ? "pass" : output.status === "blocked" ? "blocked" : output.status === "failed" ? "error" : "continue");
+  if (output.status === "completed" && (verdict !== "pass" || criterionResults.some(item => item.status !== "satisfied") || evidence.length === 0)) {
+    throw new Error("Completed output requires a passing verdict, every criterion satisfied, and evidence.");
+  }
   return {
     status: output.status,
     result: output.result ?? {},
     result_summary: String(output.result_summary ?? "").slice(0, 4000),
     tools_used: output.tools_used ?? [],
-    evidence: output.evidence ?? [],
+    evidence,
     observation: output.observation ?? {},
+    criterion_results: criterionResults,
+    loop_state: output.loop_state ?? output.loopState ?? {},
+    verdict,
+    next_action: output.next_action ?? output.nextAction ?? null,
   };
 }
 
@@ -95,23 +106,34 @@ export async function callLedger(action, payload = {}) {
   const base = process.env.SUPABASE_URL?.replace(/\/$/, "");
   const apiKey = process.env.SUPABASE_ANON_KEY;
   if (!base || !apiKey) throw new Error("Set SUPABASE_URL and SUPABASE_ANON_KEY.");
-  const send = async () => {
+  const run = async () => {
     const session = await getAuthSession();
-    return fetch(`${base}/functions/v1/task-ledger`, {
-      method: "POST",
-      headers: { "content-type": "application/json", apikey: apiKey, authorization: `Bearer ${session.access_token}` },
-      body: JSON.stringify({ action, payload }),
-      signal: AbortSignal.timeout(30_000),
+    const cli = fileURLToPath(new URL("./task-ledger.mjs", import.meta.url));
+    const child = spawn(process.execPath, [cli, action, "--payload", JSON.stringify(payload)], {
+      shell: false,
+      env: { ...process.env, SUPABASE_URL: base, SUPABASE_ANON_KEY: apiKey, SUPABASE_AGENT_JWT: session.access_token },
+      stdio: ["ignore", "pipe", "pipe"],
     });
+    let stdout = "";
+    let stderr = "";
+    const exitCode = await new Promise((resolve, reject) => {
+      child.stdout.on("data", chunk => { stdout = (stdout + chunk.toString()).slice(-MAX_OUTPUT); });
+      child.stderr.on("data", chunk => { stderr = (stderr + chunk.toString()).slice(-MAX_OUTPUT); });
+      child.on("error", reject);
+      child.on("close", resolve);
+    });
+    if (exitCode !== 0) throw new Error(`Task Ledger ${action} failed: ${stderr || stdout}`);
+    const body = JSON.parse(stdout);
+    if (!body.ok) throw new Error(`Task Ledger ${action} failed: ${JSON.stringify(body)}`);
+    return body.result;
   };
-  let response = await send();
-  if (response.status === 401) {
+  try {
+    return await run();
+  } catch (error) {
+    if (!/401|expired|invalid.*token/i.test(String(error))) throw error;
     await refreshAuthSession(base, apiKey);
-    response = await send();
+    return run();
   }
-  const body = await response.json();
-  if (!response.ok || !body.ok) throw new Error(`Task Ledger ${action} failed: ${JSON.stringify(body)}`);
-  return body.result;
 }
 
 export async function executeTask(task, command = parseRuntimeCommand()) {
@@ -154,6 +176,10 @@ export async function executeTask(task, command = parseRuntimeCommand()) {
       tools_used: [],
       evidence: [{ type: "runtime-error", stderr: stderr.slice(-4000) }],
       observation: { exit_failure: true },
+      criterion_results: [{ criterion: "runtime completed successfully", status: "unsatisfied" }],
+      loop_state: { last_error: String(error) },
+      verdict: "error",
+      next_action: "Diagnose runtime failure and retry within the loop budget",
     };
   } finally {
     clearInterval(heartbeat);
@@ -161,25 +187,27 @@ export async function executeTask(task, command = parseRuntimeCommand()) {
   }
 }
 
-export async function runWorker({ maxTasks = Infinity, pollMs = 5000 } = {}) {
+const workerSessionId = process.env.AGENT_SESSION_ID ?? randomUUID();\n\nexport async function runWorker({ maxTasks = Infinity, pollMs = 5000 } = {}) {
   const command = parseRuntimeCommand();
   let completed = 0;
   while (completed < maxTasks) {
-    const claimed = await callLedger("task.claim", { lease_seconds: Number(process.env.AGENT_LEASE_SECONDS ?? 900) });
+    const claimed = await callLedger("task.claim", { goal_name: process.env.AGENT_GOAL_NAME, session_id: process.env.AGENT_SESSION_ID ?? workerSessionId, lease_seconds: Number(process.env.AGENT_LEASE_SECONDS ?? 900) });
     const task = Array.isArray(claimed) ? claimed[0] : claimed;
     if (!task) { await sleep(pollMs); continue; }
     const result = await executeTask(task, command);
     await callLedger("task.iteration", {
       task_id: task.id,
       claim_token: task.claim_token,
-      iteration_no: task.attempt_count ?? 1,
+      iteration_no: Number(task.loop_iteration ?? 0) + 1,
       input_payload: { task_name: task.task_name, task_definition: task.task_definition ?? {} },
       output_payload: result.result,
       observation: result.observation,
-      decision: result.result_summary,
+      criterion_results: result.criterion_results,
+      loop_state: result.loop_state,
+      verdict: result.verdict,
+      next_action: result.next_action,
       tools_used: result.tools_used,
       evidence: result.evidence,
-      status: result.status === "completed" ? "completed" : "failed",
     });
     await callLedger("task.submit", {
       task_id: task.id,

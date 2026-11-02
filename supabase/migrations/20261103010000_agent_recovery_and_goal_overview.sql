@@ -202,7 +202,8 @@ create or replace function public.goal_ledger_overview(tags_in text[] default nu
 returns jsonb
 language sql
 stable
-set search_path to 'public'
+security definer
+set search_path to 'public', 'pg_temp'
 as $function$
 with visible_goals as (
   select g.*

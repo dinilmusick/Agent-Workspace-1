@@ -1,6 +1,6 @@
 {
   "id": "javascript.typescript.fullstack.react",
-  "version": 2,
+  "version": 3,
   "runtime": {"node": "22", "packageManagers": ["npm", "pnpm", "yarn"], "browser": "chromium"},
   "detection": {"required": ["package.json"], "signals": ["react", "typescript", "vite", "next", "react-scripts"]},
   "toolchain": {

@@ -41,9 +41,11 @@ begin
   where t.status in ('queued','running')
     and t.attempt_count<t.max_attempts
     and (
-      t.claim_expires_at is null
-      or t.claim_expires_at<now()
-      or (t.status='running' and t.heartbeat_at<=now()-interval '60 minutes')
+      t.status='queued'
+      or (t.status='running' and (
+        t.claim_expires_at<now()
+        or coalesce(t.heartbeat_at,'-infinity'::timestamptz)<=now()-interval '60 minutes'
+      ))
     )
     and t.required_capabilities<@coalesce(capabilities_in,'{}'::text[])
     and not exists(select 1 from public.tasks child where child.parent_task_id=t.id)
@@ -145,7 +147,7 @@ begin
     and (
       t.claim_expires_at is null
       or t.claim_expires_at<now()
-      or (t.status='running' and t.heartbeat_at<=now()-interval '60 minutes')
+      or (t.status='running' and coalesce(t.heartbeat_at,'-infinity'::timestamptz)<=now()-interval '60 minutes')
     )
     and t.required_capabilities<@coalesce(capabilities_in,'{}'::text[])
     and not exists(select 1 from public.tasks child where child.parent_task_id=t.id)
@@ -236,7 +238,7 @@ goal_rows as (
         'blocked',count(*) filter(where t.status='blocked')::int,
         'failed',count(*) filter(where t.status='failed')::int,
         'completed',count(*) filter(where t.status='completed')::int,
-        'awaiting_verification',count(*) filter(where t.status='completed' and t.verification_status not in ('verified','not_required'))::int
+        'awaiting_verification',count(*) filter(where t.status='completed' and coalesce(t.verification_status,'pending') not in ('verified','not_required'))::int
       )
       from public.tasks t where t.goal_id=g.id
     ) task_counts,

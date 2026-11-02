@@ -39,7 +39,7 @@
 - Every task in a newly created goal tree must have a complete Loop Generator contract. Use `goal_ledger_create_with_tasks`; incomplete loop contracts are rejected.
 - Persist each loop iteration through `task_ledger_record_loop_iteration`. Leaf tasks cannot be submitted as completed unless the latest iteration passes every acceptance criterion with evidence.
 - Use `goal_ledger_resume` to recover the complete goal, task tree, iterations and events. Use `goal_ledger_summary` for ready work and worker recommendations.
-- Supabase PostgreSQL is persistence and atomic coordination. The ChatGPT browser protocol uses the connected Supabase tools directly; do not route it through Supabase Edge Functions.
+- Supabase PostgreSQL is persistence and atomic coordination. The ChatGPT browser protocol uses owner-scoped PostgreSQL RPCs through the connected Supabase tools; it does not route through Supabase Edge Functions.
 - GitHub Actions remains for CI and finite repository jobs, not ChatGPT conversation creation or always-on orchestration.
 - See `docs/chat-agent-workflow.md` for exact orchestrator and worker prompts.
 

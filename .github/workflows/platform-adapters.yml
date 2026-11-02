@@ -47,8 +47,12 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Upgrade npm to pinned Arborist runtime
+        run: npm install --global npm@12.2.1 && npm --version
+
       - name: Install Cloudflare Workers test runtime
-        run: npm install --prefix examples/platforms/cloudflare --no-audit --no-fund
+        working-directory: examples/platforms/cloudflare
+        run: npm install --no-audit --no-fund
 
       - name: Run Cloudflare Worker tests in local workerd runtime
         run: python runner/platform_adapters.py cloudflare --project-path examples/platforms/cloudflare --output-dir artifacts/platforms

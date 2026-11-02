@@ -201,6 +201,7 @@ def supervise(manifest, root, state_dir, startup_timeout):
                     if healthy(item):
                         item["failures"] = 0
                         entry["health"] = "healthy"
+                        entry["status"] = "ready"
                     else:
                         item["failures"] += 1
                         entry["health"] = "unhealthy"

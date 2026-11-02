@@ -25,15 +25,17 @@ The user manually opens ChatGPT browser conversations. No GitHub workflow create
 
 ## Worker protocol
 
-1. Resolve the exact goal by name; call `goal_ledger_resume(name)` to load goal context, tasks, events and iterations.
-2. Claim one task with `goal_ledger_claim_task(goal_name, agent_id, agent_name, agent_type, capabilities, session_id, lease_seconds)`. It selects one eligible leaf task using row locking with skip-locked semantics. Each worker must use a distinct `agent_id` and `session_id`, different from the orchestrator identity, so the orchestrator can independently verify its result.
+1. Resolve the exact goal by name; call `goal_ledger_resume(name)` to load goal context, versions, dependencies, tasks, events and iterations.
+2. Claim one task with `goal_ledger_claim_task(goal_name, agent_id, agent_name, agent_type, capabilities, session_id, lease_seconds)`. It selects one eligible leaf task using row locking with skip-locked semantics. Each worker must use a distinct `agent_id` and `session_id`, different from the orchestrator identity, so the orchestrator can independently verify its result. The orchestrator's own parent-task loop is recorded separately with `task_ledger_record_parent_loop_iteration`.
 3. Read the complete task contract and prior loop state.
 4. Execute PLAN → ACT → OBSERVE → COMPARE → DIAGNOSE → UPDATE → CONTINUE.
 5. Renew the lease with `task_ledger_heartbeat_claim`. Stop writing if the lease expires or the claim token is rejected.
 6. Record every meaningful iteration using `task_ledger_record_loop_iteration`, including actual input/output, observation, criterionResults, loopState, tools, evidence, verdict and next action.
 7. Record `pass` only when every criterion is `satisfied` and supporting evidence exists. Otherwise use `continue`, `error` or a legitimate terminal state.
 8. Submit with `task_ledger_submit_result`. The database rejects completed submissions without a passing latest loop iteration.
-9. Do not self-verify. A separate orchestrator/verifier inspects artifacts and calls `task_ledger_verify_result`. After every leaf result is independently verified, call `goal_ledger_finalize(name, orchestrator_agent_id, report)`; it finalizes parent rows bottom-up and marks the goal completed only when every task is verified.
+9. Do not self-verify. A separate orchestrator/verifier inspects artifacts and calls `task_ledger_verify_result`.
+10. After all children of a parent are independently verified, the orchestrator runs that parent's own Loop Generator cycle using `task_ledger_record_parent_loop_iteration`. Every parent/root loop must pass with evidence.
+11. Call `goal_ledger_finalize(name, orchestrator_agent_id, report)` only after every leaf and parent loop has passed. It finalizes parent rows bottom-up and marks the goal completed only when every task is verified.
 10. Claim another task only when the user explicitly asks the worker to continue.
 
 ## Worker instruction

@@ -272,7 +272,7 @@
       "id": 28,
       "name": "Universal Task Router",
       "slug": "universal-task-router",
-      "version": "1.3.2",
+      "version": "1.3.3",
       "status": "active",
       "path": "skills/universal-task-router/SKILL.md",
       "tools": []

@@ -39,11 +39,11 @@ create table if not exists public.task_events (
 );
 
 create index if not exists tasks_agent_status_idx on public.tasks(agent_id,status,heartbeat_at desc);
-create index tasks_started_at_idx on public.tasks(started_at desc);
-create index tasks_status_heartbeat_idx on public.tasks(status,heartbeat_at desc);
-create index tasks_tags_gin_idx on public.tasks using gin(tags);
+create index if not exists tasks_started_at_idx on public.tasks(started_at desc);
+create index if not exists tasks_status_heartbeat_idx on public.tasks(status,heartbeat_at desc);
+create index if not exists tasks_tags_gin_idx on public.tasks using gin(tags);
 create index if not exists task_events_task_time_idx on public.task_events(task_id,occurred_at desc);
-create index task_events_time_idx on public.task_events(occurred_at desc);
+create index if not exists task_events_time_idx on public.task_events(occurred_at desc);
 
 alter table public.tasks enable row level security;
 alter table public.task_events enable row level security;

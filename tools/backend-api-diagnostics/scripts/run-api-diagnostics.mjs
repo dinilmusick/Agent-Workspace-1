@@ -1,10 +1,10 @@
 import { randomUUID } from "node:crypto";
 import { readFile, writeFile, mkdir } from "node:fs/promises";
-import { resolve, dirname } from "node:path";
+import { resolve } from "node:path";
 import process from "node:process";
 
 const MAX_BODY = 12000;
-const SECRET_HEADER = /authorization|cookie|token|api[-_]?key/i;
+const SECRET_HEADER = /authorization|cookie|token|secret|password|api[-_]?key/i;
 const args = Object.fromEntries(process.argv.slice(2).reduce((all, value, index, list) => {
   if (value.startsWith("--")) all.push([value.slice(2), list[index + 1]]);
   return all;
@@ -61,7 +61,7 @@ async function readCorrelatedLogs(path, ids) {
     try {
       const entry = JSON.parse(line);
       const id = entry.correlationId ?? entry.correlation_id ?? entry.requestId ?? entry.request_id ?? entry.request?.id;
-      return ids.has(id) ? [{ ...entry, message: String(entry.message ?? "").slice(0, 2000) }] : [];
+      return ids.has(id) ? [redactValue({ ...entry, message: String(entry.message ?? "").slice(0, 2000) })] : [];
     } catch { return []; }
   });
 }

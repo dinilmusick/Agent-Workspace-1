@@ -17,13 +17,9 @@ async function auditUrl(url, count, outputDir) {
     const args = [
       "--yes", "lighthouse@13.4.1", url,
       "--quiet",
-      "--only-categories=performance",
-      "--only-categories=accessibility",
-      "--only-categories=best-practices",
-      "--only-categories=seo",
+      "--only-categories=performance,accessibility,best-practices,seo",
       "--chrome-flags=--headless --no-sandbox --disable-dev-shm-usage",
-      "--output=json",
-      "--output=html",
+      "--output=json,html",
       "--output-path=" + base
     ];
     const result = spawnSync("npx", args, { cwd: process.cwd(), env: process.env, stdio: "inherit", timeout: 240000 });

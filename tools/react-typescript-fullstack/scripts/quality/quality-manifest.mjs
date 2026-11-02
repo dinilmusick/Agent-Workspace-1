@@ -18,7 +18,8 @@ function threshold(value, min, max, label) {
 
 export async function loadQualityManifest(options = {}) {
   const root = resolve(options.targetRoot ?? process.env.QUALITY_TARGET_ROOT ?? "workspaces/target");
-  const manifestFile = resolveInside(root, options.manifestPath ?? process.env.QUALITY_GATES_MANIFEST ?? ".agent-workspace/quality-gates.json", "manifest");
+  const manifestInput = options.manifestPath ?? (process.env.QUALITY_GATES_MANIFEST ? resolve(process.env.QUALITY_GATES_MANIFEST) : ".agent-workspace/quality-gates.json");
+  const manifestFile = resolveInside(root, manifestInput, "manifest");
   const manifest = JSON.parse(await readFile(manifestFile, "utf8"));
   if (manifest.version !== 1) throw new Error("Unsupported quality-gates manifest version");
 

@@ -33,6 +33,7 @@ jobs:
           node --check tools/looper/looper.mjs
           node --check tools/react-typescript-fullstack/scripts/quality-check-flat.mjs
           node --check tools/react-typescript-fullstack/scripts/inspect-browser.mjs
+          node --check runner/task-ledger.mjs
           node --test tools/looper/test/looper.test.mjs
       - name: Validate Python runners
         run: python -m compileall -q runner

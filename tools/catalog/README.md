@@ -42,3 +42,10 @@ The pinned toolchain is in `tools/react-typescript-fullstack/package.json`. The 
 ## Safety
 
 Target code is untrusted. The public workflow uses read-only repository permissions, disables persisted checkout credentials, passes no secrets to target code, and uploads execution evidence separately. Never place model credentials in this public repository. Pin tool versions and inspect upstream licenses before vendoring source.
+
+## Platform development adapters
+
+- `runner/platform_adapters.py`: shared local-only adapter runner.
+- `@cloudflare/vitest-plugin@1.4.12`, `vitest@5.0.5`, `vite@7.3.6`, `wrangler@4.156.1`: local Cloudflare Worker tests with bindings; only pinned esbuild/workerd install scripts are allowed.
+- `vercel@65.9.0`: preview-environment local builds and read-only deployment diagnostics.
+- `supabase@3.0.0`: local Postgres migrations and pgTAP tests only.

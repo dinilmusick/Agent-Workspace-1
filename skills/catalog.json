@@ -9,9 +9,9 @@
       "public.skill_tool_links",
       "public.skill_tools"
     ],
-    "exportedAt": "2026-11-02T11:20:23.789Z"
+    "exportedAt": "2026-11-03T00:00:00.000Z"
   },
-  "count": 29,
+  "count": 30,
   "skills": [
     {
       "id": 1,
@@ -467,6 +467,18 @@
           "type": "cli",
           "usage": "Use the registered project-local static analysis and verification tool when applicable.",
           "required": false
+        },
+        {
+          "slug": "platform-adapters",
+          "type": "cli",
+          "usage": "Run safe local/preview platform checks and collect sanitized provider evidence.",
+          "required": false
+        },
+        {
+          "slug": "cloudflare-workers",
+          "type": "cli",
+          "usage": "Run Cloudflare Worker integration tests in the local workerd runtime with Wrangler bindings.",
+          "required": false
         }
       ],
       "status": "active",
@@ -477,7 +489,26 @@
       "name": "Cloud Platform and Infrastructure Engineering",
       "path": "skills/cloud-platform-engineering/SKILL.md",
       "slug": "cloud-platform-engineering",
-      "tools": [],
+      "tools": [
+        {
+          "slug": "platform-adapters",
+          "type": "cli",
+          "usage": "Run safe local/preview platform checks and collect sanitized provider evidence.",
+          "required": true
+        },
+        {
+          "slug": "cloudflare-workers",
+          "type": "cli",
+          "usage": "Run Cloudflare Worker integration tests in the local workerd runtime with Wrangler bindings.",
+          "required": false
+        },
+        {
+          "slug": "vercel-cli",
+          "type": "cli",
+          "usage": "Build against preview environment and inspect an explicitly verified preview deployment; never deploy.",
+          "required": false
+        }
+      ],
       "status": "active",
       "version": "1.0.0"
     },
@@ -486,7 +517,20 @@
       "name": "Database Engineering",
       "path": "skills/database-engineering/SKILL.md",
       "slug": "database-engineering",
-      "tools": [],
+      "tools": [
+        {
+          "slug": "platform-adapters",
+          "type": "cli",
+          "usage": "Run safe local/preview platform checks and collect sanitized provider evidence.",
+          "required": true
+        },
+        {
+          "slug": "supabase-cli",
+          "type": "cli",
+          "usage": "Run local Postgres migrations and pgTAP integration tests only; never connect to a remote project.",
+          "required": false
+        }
+      ],
       "status": "active",
       "version": "1.0.0"
     },
@@ -534,6 +578,41 @@
       "tools": [],
       "status": "active",
       "version": "1.0.0"
+    },
+    {
+      "id": 33,
+      "name": "Platform Development Adapters",
+      "path": "skills/platform-adapters/SKILL.md",
+      "slug": "platform-adapters",
+      "tools": [
+        {
+          "slug": "platform-adapters",
+          "type": "cli",
+          "usage": "Run the shared provider adapter interface and persist sanitized local/preview evidence.",
+          "required": true
+        },
+        {
+          "slug": "cloudflare-workers",
+          "type": "cli",
+          "usage": "Execute Worker tests in local workerd/Miniflare with Wrangler bindings, Vitest and Vite peer dependencies.",
+          "required": false
+        },
+        {
+          "slug": "vercel-cli",
+          "type": "cli",
+          "usage": "Build locally with preview environment and inspect only explicitly verified preview deployments.",
+          "required": false
+        },
+        {
+          "slug": "supabase-cli",
+          "type": "cli",
+          "usage": "Run local-only Supabase migrations and pgTAP integration tests.",
+          "required": false
+        }
+      ],
+      "status": "active",
+      "version": "1.0.1"
     }
-  ]
+  ],
+  "exportedAt": "2026-11-03T00:00:00.000Z"
 }

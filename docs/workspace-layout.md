@@ -14,19 +14,24 @@
   inspect-react.yml             # rendered React/browser inspection
   validate-workspace.yml        # repository and compute validation
   validate-toolchain.yml        # pinned toolchain validation
+  platform-adapters.yml         # Cloudflare/Vercel/Supabase local checks
 runner/
   execute-code.py               # language-aware compute executor
   resolve-compute-request.py    # validates workflow/issue requests
   checkout-public-repository.py # public target checkout helper
   react-project.py              # React project preparation and checks
   service-runtime.py            # concurrent local service supervisor
+  platform_adapters.py          # local Cloudflare/Vercel/Supabase adapters
+  test_platform_adapters.py     # provider command and safety contract tests
   test_service_runtime.py       # multi-service lifecycle regression tests
 tools/
   looper/
   react-typescript-fullstack/
   backend-api-diagnostics/       # local API contract, auth and server-log diagnostics
+  platform-adapters/             # provider adapter contract and usage
   agent-runtimes/
 examples/
+  platforms/                     # Cloudflare, Vercel and Supabase fixtures
   services.json                  # multi-service target manifest example
   fixture-service.py             # test-only HTTP service fixture
 workspaces/                     # disposable target checkout area

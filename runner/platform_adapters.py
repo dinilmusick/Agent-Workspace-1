@@ -13,7 +13,7 @@ from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 
 ROOT = Path(__file__).resolve().parents[1]
-SUPABASE_EXCLUDES = "gotrue,realtime,storage-api,imgproxy,kong,mailpit,postgrest,postgres-meta,studio,edge-runtime,logflare,vector,supavisor"
+SUPABASE_EXCLUDES = "gotrue,realtime,storage-api,imgproxy,kong,mailpit,postgrest,postgres-meta,studio,edge-runtime,logflare,vector,supavisor,analytics"
 SECRET_NAMES = ("TOKEN", "SECRET", "PASSWORD", "API_KEY")
 
 class AdapterError(RuntimeError):

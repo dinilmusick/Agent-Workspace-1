@@ -38,9 +38,15 @@ export function normalizeRuntimeOutput(value) {
 export function runtimeEnvironment() {
   const allow = new Set((process.env.AGENT_RUNTIME_ENV_ALLOWLIST ?? "").split(",").map(x => x.trim()).filter(Boolean));
   const safeDefaults = new Set(["PATH", "HOME", "TMPDIR", "TEMP", "TMP", "SYSTEMROOT", "WINDIR", "LANG", "LC_ALL"]);
-  return Object.fromEntries(Object.entries(process.env).filter(([key]) =>
+  const environment = Object.fromEntries(Object.entries(process.env).filter(([key]) =>
     (safeDefaults.has(key) || allow.has(key)) && !/^(SUPABASE_|GITHUB_|ACTIONS_|INPUT_|RUNNER_)/i.test(key)
   ));
+  if (process.env.AGENT_RUNTIME_ENABLE_LEDGER_TOOLS === "true") {
+    environment.AGENT_TASK_LEDGER_URL = process.env.SUPABASE_URL;
+    environment.AGENT_TASK_LEDGER_ANON_KEY = process.env.SUPABASE_ANON_KEY;
+    environment.AGENT_TASK_LEDGER_JWT = authSession?.access_token ?? process.env.SUPABASE_AGENT_JWT;
+  }
+  return environment;
 }
 
 let authSession;

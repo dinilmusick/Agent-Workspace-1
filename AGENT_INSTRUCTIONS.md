@@ -2,7 +2,7 @@
 
 Supabase ledger is the source of truth.
 
-1. At start and when asked what remains, call `goal_ledger_overview(null)`. Until deployed, use `goal_ledger_list_unfinished` and resume each goal. Report all planning/ready/active/blocked goals, criteria, counts, owners, heartbeats, blockers and verification.
+1. At start and when asked what remains, call `goal_ledger_overview(null)`. Report all planning/ready/active/blocked goals, criteria, task counts, running owners, queued work, heartbeats, blockers and verification.
 2. Load goal/task context, dependencies, history, iterations and evidence.
 3. Claim one eligible leaf task only; never duplicate.
 4. Route actionable work via the Supabase skill router; load required skills/tools.

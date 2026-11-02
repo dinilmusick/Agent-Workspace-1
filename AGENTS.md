@@ -39,8 +39,11 @@
 - A goal is its own persisted Loop Generator loop (`goal_loop_definition`, `goal_loop_state`, `goal_iterations`). Every task, including nested parents, has a separate loop (`loop_definition`, `task_iterations`).
 - Top-level tasks are direct children of the goal. Do not create a synthetic root task.
 - Create goals with `goal_ledger_create_hierarchical`, including a goal loop, tags and top-level task definitions. Each task requires its own loop, acceptance criteria and optional `parameter_contract`.
+- At the start of every actionable orchestration session, call `goal_ledger_overview(null)`. When asked what goals remain, show the complete overview of all planning, ready, active and blocked goals, including acceptance criteria, task counts, task owners, heartbeats, current steps, blockers and verification states. Do not report only the first matching goal.
 - When asked to continue an unfinished goal, call `goal_ledger_list_unfinished`. If exactly one exists, resume it; if several exist, show titles/keys/tags/status and ask which to continue. Load with `goal_ledger_resume_by_key` and announce `Loaded goal: <title>` before claiming a task.
 - Claim one available leaf task using `goal_ledger_claim_task_by_key`. Load all context from Supabase, never from another chat's history.
+- A running task is reclaimable when its lease expires or its heartbeat is at least 60 minutes old. Reassignment must occur through the atomic claim RPC; never edit task ownership directly. The RPC rotates the claim token and records the previous worker in a `lease_recovered` event.
+- Never auto-reclaim tasks in `blocked` state or tasks blocked by an unresolved parent/dependency. Preserve previous iterations, events, evidence and commit references when resuming.
 - Persist goal iterations with `goal_ledger_record_loop_iteration` and task iterations with `task_ledger_record_loop_iteration`.
 - Task `parameter_contract.required` and `properties` define required values, types and enums. Workers return values through `result_in.parameter_values`; database validation blocks incomplete completion.
 - A goal cannot pass until all descendants are independently verified and goal criteria have evidence.

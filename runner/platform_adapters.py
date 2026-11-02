@@ -53,7 +53,8 @@ def run_cloudflare(project, output):
     deps = {**package.get("dependencies", {}), **package.get("devDependencies", {})}
     if "@cloudflare/vitest-plugin" not in deps:
         raise AdapterError("Use @cloudflare/vitest-plugin for local Worker-runtime tests; legacy vitest-pool-workers is not accepted")
-    if not any((project / name).is_file() for name in ("vitest.config.ts", "vitest.config.mts", "vitest.config.js", "vitest.config.mjs")):
+    config_file = next((project / name for name in ("vitest.config.ts", "vitest.config.mts", "vitest.config.js", "vitest.config.mjs") if (project / name).is_file()), None)
+    if config_file is None or "cloudflareTest" not in config_file.read_text(encoding="utf-8"):
         raise AdapterError("Cloudflare project is missing vitest.config with cloudflareTest()")
     command = package_command(project, "vitest") + ["run"]
     run(command, project, output / "cloudflare-vitest.log")
@@ -93,9 +94,12 @@ def run_vercel(project, output):
     results = {"status": "passed", "localBuild": "skipped", "preview": "skipped"}
     if token and link.is_file():
         env = os.environ.copy()
-        run(["vercel", "pull", "--yes", "--environment=preview"], project, output / "vercel-pull.log", env)
-        run(["vercel", "build"], project, output / "vercel-build.log", env)
-        results["localBuild"] = "passed"
+        try:
+            run(["vercel", "pull", "--yes", "--environment=preview"], project, output / "vercel-pull.log", env)
+            run(["vercel", "build"], project, output / "vercel-build.log", env)
+            results["localBuild"] = "passed"
+        finally:
+            (project / ".vercel" / ".env.preview.local").unlink(missing_ok=True)
     preview = os.environ.get("VERCEL_PREVIEW_URL")
     if preview:
         preview = validate_preview_url(preview)
@@ -130,6 +134,9 @@ def run_supabase(project, output):
         if key.startswith("SUPABASE_") and key != "SUPABASE_TELEMETRY_DISABLED":
             env.pop(key, None)
     env["SUPABASE_TELEMETRY_DISABLED"] = "1"
+    version = run(["supabase", "--version"], project, output / "supabase-version.log", env)
+    if not re.search(r"\b3\.\d+\.\d+\b", version):
+        raise AdapterError("Supabase CLI v3 is required for the local-only adapter")
     tests = project / "supabase" / "tests"
     test_files = list(tests.glob("*.sql")) + list(tests.glob("*.pg")) if tests.is_dir() else []
     started = False

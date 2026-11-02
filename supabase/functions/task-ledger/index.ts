@@ -22,7 +22,8 @@ Deno.serve(async (req: Request) => {
   if (agentError || !agent) return response(403, { error: "agent_not_registered_or_disabled" });
   const identity = agent as Agent;
   await db.from("agent_registry").update({ last_seen_at: new Date().toISOString() }).eq("user_id", identity.user_id);
-  const action = requiredString(body.action, "action");
+  const action = typeof body.action === "string" ? body.action.trim() : "";
+  if (!action) return response(400, { error: "action_required" });
   const payload = body.payload && typeof body.payload === "object" && !Array.isArray(body.payload) ? body.payload as Record<string, unknown> : {};
   const rpc = async (name: string, args: Record<string, unknown>) => { const { data, error } = await db.rpc(name, args); if (error) throw new Error(`${name}: ${error.message}`); return data; };
   try {
@@ -33,7 +34,10 @@ Deno.serve(async (req: Request) => {
         if (se) throw se; if (ve) throw ve; const byId = new Map((versions ?? []).map((v) => [v.id, v]));
         result = (skills ?? []).filter((s) => byId.has(s.current_version_id)).map((s) => ({ ...s, current_version: byId.get(s.current_version_id) })); break;
       }
-      case "task.create": result = await rpc("task_ledger_create_tree", { agent_id_in: identity.agent_id, agent_name_in: identity.agent_name, task_definition_in: payload.task_definition, parent_task_id_in: payload.parent_task_id ?? null, session_id_in: payload.session_id ?? null, agent_type_in: identity.agent_type }); break;
+      case "task.create":
+        if (!["orchestrator", "supervisor"].includes(identity.agent_type)) return response(403, { error: "orchestrator_role_required" });
+        result = await rpc("task_ledger_create_tree", { agent_id_in: identity.agent_id, agent_name_in: identity.agent_name, task_definition_in: payload.task_definition, parent_task_id_in: payload.parent_task_id ?? null, session_id_in: payload.session_id ?? null, agent_type_in: identity.agent_type });
+        break;
       case "task.claim": result = await rpc("task_ledger_claim_next", { agent_id_in: identity.agent_id, agent_name_in: identity.agent_name, agent_type_in: identity.agent_type, capabilities_in: identity.capabilities ?? [], lease_seconds_in: payload.lease_seconds ?? 900 }); break;
       case "task.heartbeat": result = await rpc("task_ledger_heartbeat_claim", { task_id_in: requiredString(payload.task_id, "task_id"), agent_id_in: identity.agent_id, claim_token_in: requiredString(payload.claim_token, "claim_token"), current_step_in: payload.current_step ?? null, lease_seconds_in: payload.lease_seconds ?? 900 }); break;
       case "task.iteration": result = await rpc("task_ledger_record_iteration", { task_id_in: requiredString(payload.task_id, "task_id"), agent_id_in: identity.agent_id, claim_token_in: requiredString(payload.claim_token, "claim_token"), iteration_no_in: payload.iteration_no, input_payload_in: payload.input_payload ?? {}, output_payload_in: payload.output_payload ?? {}, observation_in: payload.observation ?? {}, decision_in: payload.decision ?? null, tools_used_in: payload.tools_used ?? [], evidence_in: payload.evidence ?? [], status_in: payload.status ?? "completed" }); break;

@@ -13,7 +13,8 @@ const inside = (root, value) => {
 };
 
 export async function loadBrowserManifest() {
-  const repositoryRoot = resolve(process.env.TARGET_ROOT ?? "workspaces/target", process.env.PROJECT_PATH ?? ".");
+  const targetBase = resolve(process.env.TARGET_ROOT ?? "workspaces/target");
+  const repositoryRoot = inside(targetBase, process.env.PROJECT_PATH ?? ".");
   const manifestPath = process.env.BROWSER_TEST_MANIFEST
     ? resolve(process.env.BROWSER_TEST_MANIFEST)
     : join(repositoryRoot, ".agent-workspace", "browser-tests.json");

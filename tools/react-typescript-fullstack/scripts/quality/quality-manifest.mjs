@@ -35,6 +35,13 @@ export async function loadQualityManifest(options = {}) {
   const staticSeverity = security.staticSeverity ?? { high: 7, critical: 9 };
   threshold(staticSeverity.high, 0, 10, "security.staticSeverity.high");
   threshold(staticSeverity.critical, staticSeverity.high, 10, "security.staticSeverity.critical");
+  const trivySeverity = security.trivySeverity ?? ["HIGH", "CRITICAL"];
+  if (!Array.isArray(trivySeverity) || !trivySeverity.length || trivySeverity.some(item => !["LOW", "MEDIUM", "HIGH", "CRITICAL"].includes(item))) {
+    throw new Error("security.trivySeverity must contain valid Trivy severities");
+  }
+  if (security.ignoreUnfixed !== undefined && typeof security.ignoreUnfixed !== "boolean") {
+    throw new Error("security.ignoreUnfixed must be a boolean");
+  }
 
   const lighthouse = manifest.lighthouse ?? { enabled: false };
   let lighthouseUrls = [];

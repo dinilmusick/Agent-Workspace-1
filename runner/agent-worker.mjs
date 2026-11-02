@@ -3,6 +3,8 @@ import { spawn } from "node:child_process";
 import { setTimeout as sleep } from "node:timers/promises";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { mkdir, readFile, writeFile, chmod } from "node:fs/promises";
+import { dirname } from "node:path";
 
 const MAX_OUTPUT = 1_000_000;
 const VALID_STATUSES = new Set(["completed", "failed", "blocked", "waiting"]);
@@ -41,17 +43,66 @@ function runtimeEnvironment() {
   ));
 }
 
-export async function callLedger(action, payload = {}) {
-  const base = process.env.SUPABASE_URL?.replace(/\/$/, "");
-  const apiKey = process.env.SUPABASE_ANON_KEY;
-  const jwt = process.env.SUPABASE_AGENT_JWT;
-  if (!base || !apiKey || !jwt) throw new Error("Set SUPABASE_URL, SUPABASE_ANON_KEY and SUPABASE_AGENT_JWT.");
-  const response = await fetch(`${base}/functions/v1/task-ledger`, {
+let authSession;
+
+async function getAuthSession() {
+  if (authSession) return authSession;
+  const sessionFile = process.env.SUPABASE_AGENT_SESSION_FILE;
+  if (sessionFile) {
+    try {
+      authSession = JSON.parse(await readFile(sessionFile, "utf8"));
+    } catch (error) {
+      if (error.code !== "ENOENT") throw error;
+    }
+  }
+  authSession ??= {
+    access_token: process.env.SUPABASE_AGENT_JWT,
+    refresh_token: process.env.SUPABASE_AGENT_REFRESH_TOKEN,
+  };
+  if (!authSession.access_token) throw new Error("Set SUPABASE_AGENT_JWT or provide SUPABASE_AGENT_SESSION_FILE.");
+  return authSession;
+}
+
+async function persistAuthSession() {
+  const sessionFile = process.env.SUPABASE_AGENT_SESSION_FILE;
+  if (!sessionFile) return;
+  await mkdir(dirname(sessionFile), { recursive: true, mode: 0o700 });
+  await writeFile(sessionFile, JSON.stringify(authSession), { mode: 0o600 });
+  await chmod(sessionFile, 0o600);
+}
+
+async function refreshAuthSession(base, apiKey) {
+  if (!authSession?.refresh_token) throw new Error("Agent access token expired; configure SUPABASE_AGENT_REFRESH_TOKEN or a refreshable session file.");
+  const response = await fetch(`${base}/auth/v1/token?grant_type=refresh_token`, {
     method: "POST",
-    headers: { "content-type": "application/json", apikey: apiKey, authorization: `Bearer ${jwt}` },
-    body: JSON.stringify({ action, payload }),
+    headers: { "content-type": "application/json", apikey: apiKey },
+    body: JSON.stringify({ refresh_token: authSession.refresh_token }),
     signal: AbortSignal.timeout(30_000),
   });
+  const body = await response.json();
+  if (!response.ok || !body.access_token) throw new Error(`Supabase agent token refresh failed: ${JSON.stringify(body)}`);
+  authSession = { access_token: body.access_token, refresh_token: body.refresh_token ?? authSession.refresh_token };
+  await persistAuthSession();
+}
+
+export async function callLedger(action, payload = {}) {
+  const base = process.env.SUPABASE_URL?.replace(/\\/$/, "");
+  const apiKey = process.env.SUPABASE_ANON_KEY;
+  if (!base || !apiKey) throw new Error("Set SUPABASE_URL and SUPABASE_ANON_KEY.");
+  const send = async () => {
+    const session = await getAuthSession();
+    return fetch(`${base}/functions/v1/task-ledger`, {
+      method: "POST",
+      headers: { "content-type": "application/json", apikey: apiKey, authorization: `Bearer ${session.access_token}` },
+      body: JSON.stringify({ action, payload }),
+      signal: AbortSignal.timeout(30_000),
+    });
+  };
+  let response = await send();
+  if (response.status === 401) {
+    await refreshAuthSession(base, apiKey);
+    response = await send();
+  }
   const body = await response.json();
   if (!response.ok || !body.ok) throw new Error(`Task Ledger ${action} failed: ${JSON.stringify(body)}`);
   return body.result;

@@ -37,6 +37,14 @@ Set these environment variables in the agent runtime (never in a public reposito
 
 The service-role key is never needed by or exposed to agents.
 
+## Run an agent worker
+
+An agent worker polls the queue, claims tasks with a lease, invokes a configured runtime adapter, records an iteration, and submits its result. The runtime adapter is an executable argv array that reads one JSON task object from stdin and writes one JSON result object to stdout. Its result must include a status (`completed`, `failed`, `blocked`, or `waiting`) and may include `result`, `result_summary`, `tools_used`, `evidence`, and `observation`.
+
+Configure `AGENT_RUNTIME_COMMAND_JSON` as a JSON argv array, for example `["node","adapters/codex-adapter.mjs"]`. Configure `AGENT_RUNTIME_ENV_ALLOWLIST` as a comma-separated list of model/tool environment variable names the adapter needs. The worker intentionally strips all `SUPABASE_*`, `GITHUB_*`, `ACTIONS_*`, `INPUT_*`, and `RUNNER_*` variables before starting the runtime. It does not pass the agent JWT or Supabase keys to the model process.
+
+Run continuously with `node runner/agent-worker.mjs`; use `node runner/agent-worker.mjs --once` to process at most one task. The worker never performs final verification. A separately registered verifier/orchestrator must accept the result and finalize the parent task.
+
 ## API examples
 
 ```bash

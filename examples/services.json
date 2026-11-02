@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "services": [
+    {
+      "id": "api",
+      "command": ["python", "server.py"],
+      "cwd": ".",
+      "port": 4174,
+      "port_env": "PORT",
+      "host_env": "HOST",
+      "env": { "APP_ENV": "inspection" },
+      "healthcheck": { "type": "http", "path": "/health", "interval_seconds": 2 },
+      "restart": { "policy": "on-failure", "max_restarts": 2, "delay_seconds": 1 },
+      "shutdown_grace_seconds": 5
+    },
+    {
+      "id": "web",
+      "command": ["npm", "run", "dev", "--", "--host", "127.0.0.1"],
+      "cwd": ".",
+      "port": 4173,
+      "port_env": "PORT",
+      "env": { "API_BASE_URL": "http://127.0.0.1:${service.api.port}" },
+      "healthcheck": { "type": "http", "path": "/", "interval_seconds": 2 },
+      "restart": { "policy": "on-failure", "max_restarts": 1 }
+    }
+  ]
+}

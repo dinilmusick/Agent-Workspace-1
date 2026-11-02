@@ -1,0 +1,140 @@
+name: Security Gates
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: security-gates-\${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  security:
+    name: Dependency, secret, static and container security
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - name: Checkout full history
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+
+      - name: Resolve security thresholds
+        id: security_config
+        run: |
+          python - <<'PY'
+          import json, os
+          manifest = json.load(open("examples/quality-sample/.agent-workspace/quality-gates.json", encoding="utf-8"))
+          security = manifest.get("security", {})
+          audit = security.get("npmAuditLevel", "high")
+          severities = ",".join(security.get("trivySeverity", ["HIGH", "CRITICAL"]))
+          static = security.get("staticSeverity", {"high": 7, "critical": 9})
+          ignore_unfixed = str(security.get("ignoreUnfixed", True)).lower()
+          values = {
+              "npm_audit_level": audit,
+              "trivy_severity": severities,
+              "codeql_high": str(static["high"]),
+              "codeql_critical": str(static["critical"])
+          }
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
+              for key, value in values.items():
+                  output.write(f"{key}={value}\n")
+          with open(os.environ["GITHUB_ENV"], "a", encoding="utf-8") as env:
+              env.write(f"NPM_AUDIT_LEVEL={audit}\n")
+              env.write(f"TRIVY_SEVERITY={severities}\n")
+              env.write(f"TRIVY_IGNORE_UNFIXED={ignore_unfixed}\n")
+              env.write(f"CODEQL_HIGH_THRESHOLD={static['high']}\n")
+              env.write(f"CODEQL_CRITICAL_THRESHOLD={static['critical']}\n")
+          PY
+
+      - name: Dependency review
+        if: github.event_name == 'pull_request'
+        uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294
+        with:
+          fail-on-severity: \${{ steps.security_config.outputs.npm_audit_level }}
+          vulnerability-check: true
+          license-check: false
+
+      - name: Set up Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 22
+
+      - name: Install canonical toolchain
+        run: npm ci --prefix tools/react-typescript-fullstack --ignore-scripts --no-audit --no-fund
+
+      - name: Audit toolchain and sample dependencies
+        run: |
+          mkdir -p artifacts/security
+          npm audit --prefix tools/react-typescript-fullstack --audit-level="$NPM_AUDIT_LEVEL" --json > artifacts/security/toolchain-npm-audit.json
+          npm audit --prefix examples/quality-sample --audit-level="$NPM_AUDIT_LEVEL" --json > artifacts/security/sample-npm-audit.json
+
+      - name: Install pinned Gitleaks binary
+        run: |
+          curl -fsSL https://github.com/gitleaks/gitleaks/releases/download/v8.28.0/gitleaks_8.28.0_linux_x64.tar.gz -o /tmp/gitleaks.tar.gz
+          echo "a65b5253807a68ac0cafa4414031fd740aeb55f54fb7e55f386acb52e6a840eb  /tmp/gitleaks.tar.gz" | sha256sum --check
+          tar -xzf /tmp/gitleaks.tar.gz -C /tmp gitleaks
+          sudo install -m 0755 /tmp/gitleaks /usr/local/bin/gitleaks
+
+      - name: Scan repository history for secrets
+        run: |
+          mkdir -p artifacts/security
+          gitleaks git . --redact --exit-code 1 --report-format sarif --report-path artifacts/security/gitleaks.sarif
+
+      - name: Install pinned Trivy
+        uses: aquasecurity/setup-trivy@81e514348e19b6112ce2a7e3ecbafe19c1e1f567
+        with:
+          version: v0.76.1
+          cache: true
+
+      - name: Scan source, dependencies, secrets and configuration
+        run: |
+          mkdir -p artifacts/security
+          ignore_flag=""
+          if [ "$TRIVY_IGNORE_UNFIXED" = "true" ]; then ignore_flag="--ignore-unfixed"; fi
+          trivy fs --scanners vuln,misconfig,secret --severity "$TRIVY_SEVERITY" $ignore_flag --exit-code 1 --format sarif --output artifacts/security/trivy-fs.sarif --skip-dirs .git --skip-dirs node_modules --skip-dirs artifacts .
+          trivy config --severity "$TRIVY_SEVERITY" --exit-code 1 --format sarif --output artifacts/security/trivy-config.sarif examples/quality-sample
+
+      - name: Build sample container
+        run: docker build --pull --tag quality-sample:\${{ github.sha }} examples/quality-sample
+
+      - name: Scan built container image
+        run: |
+          ignore_flag=""
+          if [ "$TRIVY_IGNORE_UNFIXED" = "true" ]; then ignore_flag="--ignore-unfixed"; fi
+          trivy image --scanners vuln,secret --severity "$TRIVY_SEVERITY" $ignore_flag --exit-code 1 --format sarif --output artifacts/security/trivy-image.sarif quality-sample:\${{ github.sha }}
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@9b3254085494b55a0f7c4c2b3d2d52cc712ce370
+        with:
+          languages: javascript-typescript,python
+          build-mode: none
+          queries: security-extended
+
+      - name: Analyze with CodeQL
+        uses: github/codeql-action/analyze@9b3254085494b55a0f7c4c2b3d2d52cc712ce370
+        with:
+          upload: never
+          upload-database: false
+          output: artifacts/codeql
+
+      - name: Enforce CodeQL severity threshold
+        run: node tools/react-typescript-fullstack/scripts/quality/sarif-gate.mjs
+
+      - name: Upload security evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: security-quality-reports
+          path: |
+            artifacts/security/
+            artifacts/codeql/
+          if-no-files-found: warn
+          retention-days: 14

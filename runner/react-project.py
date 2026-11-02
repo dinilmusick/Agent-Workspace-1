@@ -139,7 +139,14 @@ def main():
             service_runtime("status", path, args.startup_timeout)
         else:
             pid_file = ARTIFACTS / "dev-server.pid"
-            print(f"single_server_pid={pid_file.read_text().strip()}" if pid_file.exists() else "stopped")
+            if not pid_file.exists():
+                raise SystemExit("single-server process is not running")
+            pid = int(pid_file.read_text(encoding="utf-8"))
+            try:
+                os.kill(pid, 0)
+            except ProcessLookupError:
+                raise SystemExit(f"single-server process {pid} exited unexpectedly")
+            print(f"single_server_pid={pid}")
 
 if __name__ == "__main__":
     main()

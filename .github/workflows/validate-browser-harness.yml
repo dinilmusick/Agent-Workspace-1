@@ -2,13 +2,17 @@ name: Browser End-to-End and Visual Checks
 
 on:
   push:
-    branches: [main, "feat/**"]
+    branches: [main]
   pull_request:
     branches: [main]
   workflow_dispatch:
 
 permissions:
   contents: read
+
+concurrency:
+  group: browser-harness-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   browser:

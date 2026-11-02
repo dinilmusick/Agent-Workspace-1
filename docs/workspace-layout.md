@@ -25,7 +25,6 @@ runner/
   test_platform_adapters.py     # provider command and safety contract tests
   test_service_runtime.py       # multi-service lifecycle regression tests
 tools/
-  platform-adapters/
   looper/
   react-typescript-fullstack/
   backend-api-diagnostics/       # local API contract, auth and server-log diagnostics

@@ -1,0 +1,43 @@
+{
+  "id": "javascript.typescript.fullstack.react",
+  "version": 1,
+  "runtime": {
+    "node": "22",
+    "packageManagers": [
+      "npm",
+      "pnpm",
+      "yarn"
+    ],
+    "browser": "chromium"
+  },
+  "detection": {
+    "required": [
+      "package.json"
+    ],
+    "signals": [
+      "react",
+      "typescript",
+      "vite",
+      "next",
+      "react-scripts"
+    ]
+  },
+  "commands": {
+    "install": "lockfile-detected",
+    "build": "npm run build when present",
+    "test": "npm test -- --run when present",
+    "start": "npm run dev -- --host 0.0.0.0"
+  },
+  "inspection": {
+    "tool": "Playwright",
+    "capture": [
+      "screenshots",
+      "DOM text snapshot",
+      "console errors",
+      "uncaught page errors",
+      "failed requests",
+      "HTTP errors",
+      "trace"
+    ]
+  }
+}

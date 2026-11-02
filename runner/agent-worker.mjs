@@ -95,23 +95,34 @@ export async function callLedger(action, payload = {}) {
   const base = process.env.SUPABASE_URL?.replace(/\/$/, "");
   const apiKey = process.env.SUPABASE_ANON_KEY;
   if (!base || !apiKey) throw new Error("Set SUPABASE_URL and SUPABASE_ANON_KEY.");
-  const send = async () => {
+  const run = async () => {
     const session = await getAuthSession();
-    return fetch(`${base}/functions/v1/task-ledger`, {
-      method: "POST",
-      headers: { "content-type": "application/json", apikey: apiKey, authorization: `Bearer ${session.access_token}` },
-      body: JSON.stringify({ action, payload }),
-      signal: AbortSignal.timeout(30_000),
+    const cli = fileURLToPath(new URL("./task-ledger.mjs", import.meta.url));
+    const child = spawn(process.execPath, [cli, action, "--payload", JSON.stringify(payload)], {
+      shell: false,
+      env: { ...process.env, SUPABASE_URL: base, SUPABASE_ANON_KEY: apiKey, SUPABASE_AGENT_JWT: session.access_token },
+      stdio: ["ignore", "pipe", "pipe"],
     });
+    let stdout = "";
+    let stderr = "";
+    const exitCode = await new Promise((resolve, reject) => {
+      child.stdout.on("data", chunk => { stdout = (stdout + chunk.toString()).slice(-MAX_OUTPUT); });
+      child.stderr.on("data", chunk => { stderr = (stderr + chunk.toString()).slice(-MAX_OUTPUT); });
+      child.on("error", reject);
+      child.on("close", resolve);
+    });
+    if (exitCode !== 0) throw new Error(`Task Ledger ${action} failed: ${stderr || stdout}`);
+    const body = JSON.parse(stdout);
+    if (!body.ok) throw new Error(`Task Ledger ${action} failed: ${JSON.stringify(body)}`);
+    return body.result;
   };
-  let response = await send();
-  if (response.status === 401) {
+  try {
+    return await run();
+  } catch (error) {
+    if (!/401|expired|invalid.*token/i.test(String(error))) throw error;
     await refreshAuthSession(base, apiKey);
-    response = await send();
+    return run();
   }
-  const body = await response.json();
-  if (!response.ok || !body.ok) throw new Error(`Task Ledger ${action} failed: ${JSON.stringify(body)}`);
-  return body.result;
 }
 
 export async function executeTask(task, command = parseRuntimeCommand()) {

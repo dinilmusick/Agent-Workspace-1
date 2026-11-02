@@ -39,7 +39,7 @@ The manual `.github/workflows/inspect-react.yml` workflow:
 ## Evidence
 
 `artifacts/` contains install/build/test/quality logs plus:
-- screenshot and DOM text snapshot;
+- screenshots and rendered HTML DOM snapshots;
 - browser console errors and uncaught page exceptions;
 - failed network requests and HTTP responses with status >= 400;
 - Playwright trace;
@@ -47,7 +47,7 @@ The manual `.github/workflows/inspect-react.yml` workflow:
 
 ## Browser test manifest
 
-Add `.agent-workspace/browser-tests.json` to a target repository. Version 1 supports explicit `routes` with title/heading/visible assertions, named `viewports`, `authStates` backed by target-local Playwright storage-state files, and declarative `workflows` with navigation, click, fill, check, select, visibility, text, URL and enabled assertions. Routes in Next.js App Router and Pages Router are discovered automatically; dynamic routes are listed as untested until concrete paths are supplied.
+Add `.agent-workspace/browser-tests.json` to a target repository. Set `frontendServiceId` when the frontend is not the default `web` service; otherwise the inspection workflow resolves the URL from the multi-service runtime state. Version 1 supports explicit `routes` with title/heading/visible assertions, named `viewports`, `authStates` backed by target-local Playwright storage-state files, and declarative `workflows` with navigation, click, fill, check, select, visibility, text, URL and enabled assertions. Routes in Next.js App Router and Pages Router are discovered automatically; dynamic routes are listed as untested until concrete paths are supplied.
 
 Set `visual.enabled` to true and `visual.baselineDir` to a target-local directory to enable `toHaveScreenshot` comparisons. Baselines are never overwritten by default. Set `UPDATE_VISUAL_BASELINES=1` only when intentionally refreshing them; the workflow uploads generated baselines as evidence. Accessibility checks use axe-core and can be configured to fail on violations.
 

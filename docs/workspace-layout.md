@@ -2,38 +2,35 @@
 
 ## Storage boundary
 
-`workspaces/` is the disposable experiment area. The workflow checks a target repository out to `workspaces/target/` for one run. It is not committed, packaged into the tools, or treated as canonical source. GitHub-hosted runners are ephemeral, so required outputs are uploaded as workflow artifacts.
+`workspaces/` is the disposable experiment area. Agent Compute checks the selected source revision out to a temporary workspace during each run. It is not committed or treated as canonical source. GitHub-hosted runners are ephemeral; required outputs are uploaded as workflow artifacts.
 
-`tools/` is the permanent, version-controlled tool catalogue. Tool source, pinned dependencies, environment manifests, scripts, test fixtures and tool documentation live here. Tools operate on a workspace path supplied by the task; they must not assume a particular application repository.
+`tools/` is the permanent, version-controlled tool catalogue. Tool source, pinned dependencies, environment manifests, scripts, test fixtures and tool documentation live here.
 
 ## Current layout
 
 ```text
-workspaces/
-  .gitkeep
-  target/                         # created at runtime; ignored by git
-tools/
-  react-typescript-fullstack/
-    environment.json
-    package.json
-    README.md
-    scripts/
-      inspect.mjs
+.github/workflows/
+  agent-compute.yml             # sole general-purpose finite compute workflow
+  inspect-react.yml             # rendered React/browser inspection
+  validate-workspace.yml        # repository and compute validation
+  validate-toolchain.yml        # pinned toolchain validation
 runner/
-  checkout-public-repository.py
-  react-project.py
-  execute.py
-  verify.py
-inspectors/                        # future shared inspectors
-tasks/                             # task manifests
-artifacts/                         # runtime evidence; uploaded per run
+  execute-code.py               # language-aware compute executor
+  resolve-compute-request.py    # validates workflow/issue requests
+  checkout-public-repository.py # public target checkout helper
+  react-project.py              # React project preparation and checks
+tools/
+  looper/
+  react-typescript-fullstack/
+  agent-runtimes/
+workspaces/                     # disposable target checkout area
+results/                        # compute output area
 ```
 
 ## Rules
 
 1. Never commit checked-out application repositories under `workspaces/`.
-2. Never store credentials, private source, or personal data in this public repository.
-3. Tools are permanent; workspaces are disposable.
-4. A tool accepts an explicit workspace/project path and emits evidence under `artifacts/`.
-5. Keep environment detection and tool selection declarative in each environment manifest.
-6. Do not execute untrusted target code with repository write permissions or secrets.
+2. Never store credentials, private source or personal data in this public repository.
+3. Tools are permanent; workspaces and hosted runners are disposable.
+4. Compute accepts an explicit source file and runtime; it does not use task manifests.
+5. Do not execute untrusted target code with repository write permissions or secrets.

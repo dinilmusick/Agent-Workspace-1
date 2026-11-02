@@ -1,55 +1,55 @@
 # Architecture
 
-## Responsibilities
+## System of record
 
-1. **Task manifest** — declares the command, working directory, timeout and non-secret environment values.
-2. **GitHub Actions** — provisions a fresh hosted VM, checks out the repository and invokes the runner.
-3. **Execution runner** — validates the manifest, launches the process without a shell, bounds execution time and captures output.
-4. **Result verifier** — validates the machine-readable evidence contract independently of task success.
-5. **Artifact store** — preserves result JSON and any files placed under `results/` for 14 days.
+Supabase PostgreSQL is the only persistent coordination layer. It stores goals, hierarchical tasks, claims, leases, loop iterations, parameters, dependencies, evidence, verification and guarded finalization. Database RPCs enforce atomic transitions and completion invariants.
+
+## Reasoning and orchestration
+
+ChatGPT conversations are the agents. The user manually opens the orchestrator and worker conversations. Each chat loads the current goal/task state directly through connected Supabase tools, claims work using database RPCs, records iterations and submits evidence. A separate chat performs independent verification.
+
+## Finite compute
+
+GitHub Actions provides the only general-purpose execution environment. `.github/workflows/agent-compute.yml` checks out the requested repository revision on an ephemeral hosted runner, validates the request, executes the selected source file and uploads result artifacts.
 
 ## Execution sequence
 
 ```text
-Caller / Agent
-    |
-    | workflow_dispatch(task_file, runner)
-    v
-GitHub Actions
-    |
-    +--> ephemeral hosted VM
-    |
-    +--> checkout repository
-    |
-    +--> runner/execute.py
-    |       |
-    |       +--> validate manifest and workspace paths
-    |       +--> spawn argv with shell=False
-    |       +--> enforce timeout
-    |       +--> capture stdout/stderr/exit code
-    |       +--> write results/execution.json
-    |
-    +--> runner/verify.py
-    |
-    +--> upload execution-result artifact
-    |
-    v
-Caller polls workflow and downloads artifact
+User
+ |
+ v
+ChatGPT orchestrator / worker conversations
+ |                         |
+ | direct PostgreSQL RPCs  | request finite computation
+ v                         v
+Supabase PostgreSQL      GitHub Actions
+ |                         |
+ | goals, tasks, leases    +--> ephemeral Ubuntu runner
+ | loops, evidence         +--> execute selected language
+ | verification            +--> upload artifact
+ |                         |
+ +<---- result/evidence ---+
+ |
+ v
+Independent chat verification
+ |
+ v
+Database-guarded finalization
 ```
 
-## Extension points
+## Boundaries
 
-- Add language-specific task examples and setup scripts.
-- Add a Playwright task profile that installs pinned browser dependencies and uploads HTML reports, screenshots and traces.
-- Add build adapters for Rust, Go, Java, .NET and application-specific toolchains.
-- Add a dispatcher service that creates workflow-dispatch requests, polls run status and downloads artifacts.
-- Persist task state, claims, retries and verification decisions in a separate coordination database. GitHub Actions should remain an execution provider, not the system of record.
+- Supabase is the system of record and atomic coordination provider.
+- ChatGPT is the reasoning, planning, implementation and verification layer.
+- GitHub Actions is a disposable compute provider only.
+- PostgreSQL RPCs are the sole goal/task mutation interface used by ChatGPT chats.
+- Supabase Edge Functions are not part of the architecture.
+- GitHub Actions does not create or run ChatGPT conversations and is not a persistent worker service.
 
-## Design decisions
+## Compute request entry points
 
-- One execution request maps to one fresh hosted VM.
-- The task command is an argv array; the runner never evaluates a shell command string.
-- The workflow accepts only a repository task manifest path.
-- The task process receives no GitHub Actions token or workflow secrets.
-- Task execution is manually dispatched by default. Repository validation does not execute arbitrary task manifests.
-- The selected runner image is explicit in workflow input; pin tool versions in the project/task itself for reproducibility.
+Agent Compute supports `workflow_dispatch` and an issue route restricted to repository owners, members and collaborators. Both routes resolve to the same validated request contract and runner. See [compute request contract](compute-request.md).
+
+## Security boundary
+
+The runner has read-only repository permissions, checkout credentials are not persisted, application secrets are not passed to executed code, and execution is time-bounded. It is ephemeral compute, not a hardened hostile multi-tenant sandbox. See [security](security.md).

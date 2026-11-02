@@ -1,7 +1,0 @@
-{
-  "version": 1,
-  "name": "node-smoke",
-  "command": ["node", "examples/hello.mjs"],
-  "cwd": ".",
-  "timeout_seconds": 60
-}

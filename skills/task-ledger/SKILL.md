@@ -1,7 +1,7 @@
 ---
 name: "Task Ledger"
 slug: task-ledger
-version: 1.3.0
+version: 1.3.1
 source: Supabase Skills Database
 sourceId: 7
 status: active
@@ -166,7 +166,7 @@ Use queued for unclaimed work, running for active work, blocked for an external 
 - Existing task_ledger_register, task_ledger_heartbeat, and task_ledger_update remain available for legacy/simple task records. Prefer the structured tree/claim/result workflow for delegated multi-agent work.
 
 
-## Persistent goals and manually opened ChatGPT workers (v1.3)
+## Persistent goals and manually opened ChatGPT workers (v1.3.1)
 
 The user's ChatGPT browser conversations are the interactive agents. The user manually opens each conversation; do not design GitHub Actions to spawn or launch ChatGPT chats.
 

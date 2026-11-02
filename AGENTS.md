@@ -49,7 +49,7 @@
 
 ## GitHub compute workspace
 - Use `.github/workflows/agent-compute.yml` for finite arbitrary code execution when an actual computation is required.
-- Supported runtimes: Python, Node.js, TypeScript, Bash, Go, Rust, Java, Ruby, PHP, C# and PowerShell.
+- Supported runtimes: Python, Node.js, TypeScript, Bash, Go, Rust, Java, C, C++, C#, Ruby, PHP, Perl, R and PowerShell.
 - Source must be in the selected repository revision. The ephemeral GitHub-hosted runner has read-only repository permissions, checkout credentials are not persisted, and no application secrets are passed to executed code. Execution is bounded to 1,200 seconds and returns an artifact.
 - Do not treat GitHub Actions as a persistent machine or as a mechanism to spawn ChatGPT chats. The current GitHub connector does not expose workflow dispatch; use an authorized dispatch tool or the Actions UI, and never claim execution without a completed workflow run.
 

@@ -16,6 +16,11 @@ on:
         required: false
         default: .
         type: string
+      update_visual_baselines:
+        description: Intentionally refresh target visual baselines
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -149,6 +154,7 @@ jobs:
           TARGET_ROOT: ${{ github.workspace }}/workspaces/target
           PROJECT_PATH: ${{ inputs.project_path }}
           BROWSER_EVIDENCE_KIND: real-target-preview
+          UPDATE_VISUAL_BASELINES: ${{ inputs.update_visual_baselines && '1' || '0' }}
           ARTIFACT_DIR: ${{ github.workspace }}/artifacts/browser
         run: node tools/react-typescript-fullstack/scripts/inspect-browser.mjs
 
@@ -166,6 +172,17 @@ jobs:
         env:
           PROJECT_PATH: ${{ inputs.project_path }}
         run: python runner/react-project.py stop --project-path "$PROJECT_PATH"
+
+      - name: Retain target visual baselines
+        if: always()
+        env:
+          PROJECT_PATH: ${{ inputs.project_path }}
+        run: |
+          baseline_dir="workspaces/target/$PROJECT_PATH/.agent-workspace/visual-baselines"
+          if test -d "$baseline_dir"; then
+            mkdir -p artifacts/browser/visual-baselines
+            cp -R "$baseline_dir/." artifacts/browser/visual-baselines/
+          fi
 
       - name: Upload build, quality and browser evidence
         if: always()

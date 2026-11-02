@@ -1,0 +1,317 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "provider": "Supabase",
+    "projectRef": "vcaerawuwffziufvpbvw",
+    "tables": [
+      "public.skills",
+      "public.skill_versions",
+      "public.skill_tool_links",
+      "public.skill_tools"
+    ],
+    "exportedAt": "2026-11-02T11:19:57.699Z"
+  },
+  "count": 29,
+  "skills": [
+    {
+      "id": 1,
+      "name": "tldraw",
+      "slug": "tldraw",
+      "version": "1.0.0",
+      "status": "active",
+      "path": "skills/tldraw/SKILL.md",
+      "tools": []
+    },
+    {
+      "id": 3,
+      "name": "Prompt Map",
+      "slug": "prompt-map",
+      "version": "1.2.0",
+      "status": "active",
+      "path": "skills/prompt-map/SKILL.md",
+      "tools": [
+        {
+          "slug": "tldraw-connector",
+          "type": "mcp",
+          "required": true,
+          "usage": "Render the canonical graph: one rectangle per node object and one arrow per link object; verify the resulting board."
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Loop Generator",
+      "slug": "loop-generator",
+      "version": "1.0.0",
+      "status": "active",
+      "path": "skills/loop-generator/SKILL.md",
+      "tools": [
+        {
+          "slug": "playwright",
+          "type": "browser",
+          "required": false,
+          "usage": "Verify rendered browser behavior, console errors and user-visible outcomes when relevant."
+        },
+        {
+          "slug": "supabase",
+          "type": "connector",
+          "required": false,
+          "usage": "Persist goal state, iteration history, evidence and skill metadata when configured."
+        },
+        {
+          "slug": "github",
+          "type": "connector",
+          "required": false,
+          "usage": "Inspect and modify repositories, branches, commits, pull requests and CI workflows when authorized."
+        },
+        {
+          "slug": "looper",
+          "type": "cli",
+          "required": true,
+          "usage": "Initialize loop state, record every iteration verdict and evidence, and enforce bounded continuation/terminal stop decisions."
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "name": "Task Ledger",
+      "slug": "task-ledger",
+      "version": "1.1.0",
+      "status": "active",
+      "path": "skills/task-ledger/SKILL.md",
+      "tools": [
+        {
+          "slug": "supabase",
+          "type": "connector",
+          "required": true,
+          "usage": "Read, create, claim, update, and verify shared task records through the authenticated Supabase connector."
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "name": "Application Security Audit",
+      "slug": "security-audit",
+      "version": "1.0.0",
+      "status": "active",
+      "path": "skills/security-audit/SKILL.md",
+      "tools": []
+    },
+    {
+      "id": 9,
+      "name": "DevOps, CI/CD and Release Engineering",
+      "slug": "devops-ci-release",
+      "version": "1.0.0",
+      "status": "active",
+      "path": "skills/devops-ci-release/SKILL.md",
+      "tools": []
+    },
+    {
+      "id": 10,
+      "name": "Browser QA and Runtime Inspection",
+      "slug": "browser-qa",
+      "version": "1.0.0",
+      "status": "active",
+      "path": "skills/browser-qa/SKILL.md",
+      "tools": []
+    },
+    {
+      "id": 11,
+      "name": "React Performance and Composition",
+      "slug": "react-performance-composition",
+      "version": "1.0.0",
+      "status": "active",
+      "path": "skills/react-performance-composition/SKILL.md",
+      "tools": []
+    },
+    {
+      "id": 12,
+      "name": "Refactoring",
+      "slug": "refactoring",
+      "version": "1.0.0",
+      "status": "active",
+      "path": "skills/refactoring/SKILL.md",
+      "tools": []
+    },
+    {
+      "id": 13,
+      "name": "Code Review",
+      "slug": "code-review",
+      "version": "1.0.0",
+      "status": "active",
+      "path": "skills/code-review/SKILL.md",
+      "tools": []
+    },
+    {
+      "id": 14,
+      "name": "Codebase Architecture",
+      "slug": "codebase-architecture",
+      "version": "1.0.0",
+      "status": "active",
+      "path": "skills/codebase-architecture/SKILL.md",
+      "tools": []
+    },
+    {
+      "id": 15,
+      "name": "Technical Research and Documentation Discovery",
+      "slug": "technical-research",
+      "version": "1.0.0",
+      "status": "active",
+      "path": "skills/technical-research/SKILL.md",
+      "tools": []
+    },
+    {
+      "id": 16,
+      "name": "Frontend Engineering",
+      "slug": "frontend-engineering",
+      "version": "1.0.0",
+      "status": "active",
+      "path": "skills/frontend-engineering/SKILL.md",
+      "tools": []
+    },
+    {
+      "id": 17,
+      "name": "Coding Router",
+      "slug": "coding-router",
+      "version": "1.0.0",
+      "status": "active",
+      "path": "skills/coding-router/SKILL.md",
+      "tools": []
+    },
+    {
+      "id": 18,
+      "name": "Debugging and Root-Cause Analysis",
+      "slug": "debugging-root-cause",
+      "version": "1.0.0",
+      "status": "active",
+      "path": "skills/debugging-root-cause/SKILL.md",
+      "tools": []
+    },
+    {
+      "id": 19,
+      "name": "Feature Implementation",
+      "slug": "feature-implementation",
+      "version": "1.0.0",
+      "status": "active",
+      "path": "skills/feature-implementation/SKILL.md",
+      "tools": []
+    },
+    {
+      "id": 20,
+      "name": "Coding Workflow",
+      "slug": "coding-workflow",
+      "version": "1.0.0",
+      "status": "active",
+      "path": "skills/coding-workflow/SKILL.md",
+      "tools": []
+    },
+    {
+      "id": 21,
+      "name": "Code Documentation and Developer Handoff",
+      "slug": "documentation-engineering",
+      "version": "1.0.0",
+      "status": "active",
+      "path": "skills/documentation-engineering/SKILL.md",
+      "tools": []
+    },
+    {
+      "id": 22,
+      "name": "API Contract and Integration Design",
+      "slug": "api-contract-design",
+      "version": "1.0.0",
+      "status": "active",
+      "path": "skills/api-contract-design/SKILL.md",
+      "tools": []
+    },
+    {
+      "id": 23,
+      "name": "AI Agent and Tooling Engineering",
+      "slug": "agent-systems-engineering",
+      "version": "1.0.0",
+      "status": "active",
+      "path": "skills/agent-systems-engineering/SKILL.md",
+      "tools": []
+    },
+    {
+      "id": 24,
+      "name": "Backend and API Engineering",
+      "slug": "backend-api-engineering",
+      "version": "1.0.0",
+      "status": "active",
+      "path": "skills/backend-api-engineering/SKILL.md",
+      "tools": []
+    },
+    {
+      "id": 25,
+      "name": "Testing Strategy",
+      "slug": "testing-strategy",
+      "version": "1.0.0",
+      "status": "active",
+      "path": "skills/testing-strategy/SKILL.md",
+      "tools": []
+    },
+    {
+      "id": 26,
+      "name": "Cloud Platform and Infrastructure Engineering",
+      "slug": "cloud-platform-engineering",
+      "version": "1.0.0",
+      "status": "active",
+      "path": "skills/cloud-platform-engineering/SKILL.md",
+      "tools": []
+    },
+    {
+      "id": 27,
+      "name": "Database Engineering",
+      "slug": "database-engineering",
+      "version": "1.0.0",
+      "status": "active",
+      "path": "skills/database-engineering/SKILL.md",
+      "tools": []
+    },
+    {
+      "id": 28,
+      "name": "Universal Task Router",
+      "slug": "universal-task-router",
+      "version": "1.0.0",
+      "status": "active",
+      "path": "skills/universal-task-router/SKILL.md",
+      "tools": []
+    },
+    {
+      "id": 29,
+      "name": "Personal Growth Router",
+      "slug": "personal-growth-router",
+      "version": "1.0.0",
+      "status": "active",
+      "path": "skills/personal-growth-router/SKILL.md",
+      "tools": []
+    },
+    {
+      "id": 30,
+      "name": "Relational Skills",
+      "slug": "relational-skills",
+      "version": "1.0.0",
+      "status": "active",
+      "path": "skills/relational-skills/SKILL.md",
+      "tools": []
+    },
+    {
+      "id": 31,
+      "name": "Fitness Coaching",
+      "slug": "fitness-coaching",
+      "version": "1.0.0",
+      "status": "active",
+      "path": "skills/fitness-coaching/SKILL.md",
+      "tools": []
+    },
+    {
+      "id": 32,
+      "name": "Cooking and Culinary Skills",
+      "slug": "cooking-culinary-skills",
+      "version": "1.0.0",
+      "status": "active",
+      "path": "skills/cooking-culinary-skills/SKILL.md",
+      "tools": []
+    }
+  ]
+}

@@ -17,7 +17,7 @@ on:
       source_file:
         description: Repository-relative source file
         required: true
-        default: examples/python-smoke.py
+        default: examples/hello.py
         type: string
       arguments:
         description: JSON array of string arguments

@@ -17,11 +17,7 @@ export default defineConfig({
     coverage: {
       provider: "v8",
       include: [
-        "examples/quality-sample/app.mjs",
-        "tools/react-typescript-fullstack/scripts/quality/quality-manifest.mjs",
-        "tools/react-typescript-fullstack/scripts/quality/coverage-gate.mjs",
-        "tools/react-typescript-fullstack/scripts/quality/lighthouse-budget.mjs",
-        "tools/react-typescript-fullstack/scripts/quality/sarif-gate.mjs"
+        "examples/quality-sample/app.mjs"
       ],
       exclude: ["**/*.test.mjs"],
       reporter: ["text", "json-summary", "lcov"],

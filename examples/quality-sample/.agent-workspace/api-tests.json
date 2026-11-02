@@ -1,0 +1,75 @@
+{
+  "version": 1,
+  "baseUrl": "http://127.0.0.1:4173",
+  "defaults": {
+    "timeoutMs": 5000,
+    "headers": {
+      "accept": "application/json"
+    }
+  },
+  "tests": [
+    {
+      "name": "health endpoint is ready",
+      "request": { "method": "GET", "path": "/health" },
+      "expect": {
+        "status": 200,
+        "jsonSchema": {
+          "type": "object",
+          "required": ["status"],
+          "properties": { "status": { "type": "string", "enum": ["ok"] } }
+        }
+      }
+    },
+    {
+      "name": "invalid credentials are rejected",
+      "request": {
+        "method": "POST",
+        "path": "/api/login",
+        "body": { "email": "qa@example.com", "password": "invalid" }
+      },
+      "expect": { "status": 401, "jsonPath": { "error": "invalid_credentials" } }
+    },
+    {
+      "name": "valid credentials issue a session",
+      "request": {
+        "method": "POST",
+        "path": "/api/login",
+        "body": { "email": "qa@example.com", "password": { "$env": "QUALITY_TEST_PASSWORD" } }
+      },
+      "expect": { "status": 200, "jsonPath": { "token": "quality-sample-session" } }
+    },
+    {
+      "name": "private API rejects missing authorization",
+      "request": { "method": "GET", "path": "/api/private" },
+      "expect": { "status": 401, "jsonPath": { "error": "unauthenticated" } }
+    },
+    {
+      "name": "private API rejects invalid authorization",
+      "request": {
+        "method": "GET",
+        "path": "/api/private",
+        "headers": { "authorization": "Bearer invalid-session" }
+      },
+      "expect": { "status": 403, "jsonPath": { "error": "forbidden" } }
+    },
+    {
+      "name": "private API accepts a valid session",
+      "request": {
+        "method": "GET",
+        "path": "/api/private",
+        "headers": { "authorization": { "$env": "QUALITY_VALID_AUTHORIZATION" } }
+      },
+      "expect": { "status": 200, "jsonPath": { "data": "private" } }
+    },
+    {
+      "name": "protected page rejects anonymous access",
+      "request": { "method": "GET", "path": "/dashboard" },
+      "expect": { "status": 401 }
+    },
+    {
+      "name": "unknown routes return not found",
+      "request": { "method": "GET", "path": "/missing" },
+      "expect": { "status": 404 }
+    }
+  ]
+}

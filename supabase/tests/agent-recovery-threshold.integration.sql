@@ -13,8 +13,10 @@ begin
     'recovery-threshold-session','worker',3,'Testing heartbeat-based recovery','{}'::jsonb,null
   );
   select * into first_claim from public.task_ledger_claim_next(
-    'recovery-threshold-old','Old Worker','worker',array[]::text[],900
+    'recovery-threshold-old','Old Worker','worker',array['recovery-threshold']::text[],900
   );
+  update public.tasks set required_capabilities=array['recovery-threshold']::text[] where id=registered.id;
+
   if first_claim.id is distinct from registered.id then
     raise exception 'Initial worker did not claim the test task';
   end if;
@@ -25,7 +27,7 @@ begin
   where id=first_claim.id;
 
   select * into early_claim from public.task_ledger_claim_next(
-    'recovery-threshold-early','Early Worker','worker',array[]::text[],900
+    'recovery-threshold-early','Early Worker','worker',array['recovery-threshold']::text[],900
   );
   if early_claim.id is not null then
     raise exception 'Expired lease incorrectly allowed reassignment before 60 minutes';
@@ -37,7 +39,7 @@ begin
   where id=first_claim.id;
 
   select * into recovered from public.task_ledger_claim_next(
-    'recovery-threshold-new','Recovery Worker','worker',array[]::text[],900
+    'recovery-threshold-new','Recovery Worker','worker',array['recovery-threshold']::text[],900
   );
   if recovered.id is distinct from first_claim.id then
     raise exception 'Stale heartbeat did not allow reassignment after 60 minutes';

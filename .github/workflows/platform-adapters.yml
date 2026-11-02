@@ -57,6 +57,10 @@ jobs:
       - name: Run Cloudflare Worker tests in local workerd runtime
         run: python runner/platform_adapters.py cloudflare --project-path examples/platforms/cloudflare --output-dir artifacts/platforms
 
+      - name: Print Cloudflare Worker test diagnostics
+        if: failure()
+        run: cat artifacts/platforms/cloudflare/cloudflare-vitest.log || true
+
       - name: Build Vercel fixture locally
         run: npm run build --prefix examples/platforms/vercel
 

@@ -146,9 +146,9 @@ def run_supabase(project, output):
         start_attempted = True
         run(["supabase", "start", "--exclude", SUPABASE_EXCLUDES], project, output / "supabase-start.log", env)
         started = True
-        run(["supabase", "db", "reset"], project, output / "supabase-migrations.log", env)
+        run(["supabase", "db", "reset", "--yes"], project, output / "supabase-migrations.log", env)
         if test_files:
-            run(["supabase", "test", "db"], project, output / "supabase-pgtap.log", env)
+            run(["supabase", "test", "db", "--yes"], project, output / "supabase-pgtap.log", env)
         return {"status": "passed", "target": "local-postgres-only", "migrations": "applied",
             "databaseTests": "passed" if test_files else "skipped (no supabase/tests/*.sql or *.pg)"}
     finally:

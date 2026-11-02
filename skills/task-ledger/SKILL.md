@@ -1,7 +1,7 @@
 ---
 name: "Task Ledger"
 slug: task-ledger
-version: 1.7.3
+version: 1.7.4
 source: Supabase Skills Database
 sourceId: 7
 status: active
@@ -112,6 +112,12 @@ GoalComplete =
   AND EveryDescendantTaskIndependentlyVerified
   AND GoalEvidenceNonEmpty
 ```
+
+## Workspace identity and ownership
+
+This connected project currently has no Supabase Auth users. Browser ChatGPT conversations therefore use distinct `agent_id` and `session_id` values under one project-scoped workspace identity (`owner_user_id=null`). A different chat may independently verify a worker's result and finalize the goal, but it must use a different agent ID from the worker. The database rejects self-verification, worker-driven goal evaluation and finalization by a task worker.
+
+This is a single-owner project boundary, not multi-tenant authentication. If the Supabase project is later shared by multiple human owners, provision Supabase Auth users, bind every goal to `owner_user_id`, and use owner-scoped JWT/RLS access before sharing the connector. Do not rely on null-owner project scope for a multi-user deployment.
 
 ## Security and compute boundary
 

@@ -19,7 +19,8 @@ runner/
   resolve-compute-request.py    # validates workflow/issue requests
   checkout-public-repository.py # public target checkout helper
   react-project.py              # React project preparation and checks
-  service-runtime.py            # concurrent local service supervisor\n  platform_adapters.py          # local Cloudflare/Vercel/Supabase adapters
+  service-runtime.py            # concurrent local service supervisor
+  platform_adapters.py          # local Cloudflare/Vercel/Supabase adapters
   test_service_runtime.py       # multi-service lifecycle regression tests
 tools/
   looper/

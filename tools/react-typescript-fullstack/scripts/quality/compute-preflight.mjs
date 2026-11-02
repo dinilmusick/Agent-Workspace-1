@@ -60,7 +60,9 @@ async function main() {
     "tools/react-typescript-fullstack/scripts/quality/sarif-gate.mjs"
   ]) run("node", ["--check", file], env);
 
-  run("ruby", ["-e", "require 'yaml'; YAML.load_file('.github/workflows/quality-gates.yml')"], env);
+  for (const workflow of [".github/workflows/quality-gates.yml", ".github/workflows/security-gates.yml"]) {
+    run("ruby", ["-e", "require 'yaml'; YAML.load_file(ARGV[0])", workflow], env);
+  }
   run("npm", ["ci", "--prefix", "tools/react-typescript-fullstack", "--ignore-scripts", "--no-audit", "--no-fund"], env);
   run("npm", ["audit", "--prefix", "tools/react-typescript-fullstack", "--audit-level=high"], env);
   run("npm", ["audit", "--prefix", "workspaces/target", "--audit-level=high"], env);

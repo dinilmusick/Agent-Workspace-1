@@ -11,6 +11,7 @@ Route platform-specific development checks through one local-only adapter contra
 - Use the current `@cloudflare/vitest-plugin` with Vitest, Vite and Wrangler. Vitest 5 requires Vite as a direct peer dependency.
 - The plugin runs tests in the local Workers runtime (Miniflare/workerd) and loads real bindings from `wrangler.jsonc`/Wrangler configuration.
 - Test binding access through `env` from `cloudflare:workers` and call the Worker entry point through `exports.default.fetch()`.
+- The fixture explicitly allows only the pinned `esbuild@0.28.2` and `workerd@1.20261101.1` install scripts required by the local runtime; do not blanket-allow dependency scripts.
 - Do not introduce the legacy `@cloudflare/vitest-pool-workers` package for new integrations.
 - Run the target project's installed Vitest binary; do not deploy the Worker.
 

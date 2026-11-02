@@ -1,7 +1,7 @@
 ---
 name: "Task Ledger"
 slug: task-ledger
-version: 1.7.1
+version: 1.7.2
 source: Supabase Skills Database
 sourceId: 7
 status: active
@@ -54,7 +54,8 @@ When asked to continue, finish or resume an unfinished goal:
 2. If exactly one unfinished goal exists, select it. If multiple exist, show title, readable key, tags and status, then ask which one to continue.
 3. Load the complete state using `goal_ledger_resume_by_key(goal_key_in)`.
 4. Tell the user **Loaded goal: <title>**. If asked what goal is loaded, answer with the title. Never answer with the UUID.
-5. Only after selection and resume, claim one available task.
+5. If the selected goal is blocked, report its blocker and do not claim a task until it is resolved.
+6. Only after selection and resume, claim one available task.
 
 Useful operations:
 - `goal_ledger_list_unfinished`
@@ -90,7 +91,7 @@ The orchestrator records goal-level iterations as tasks progress. A new worker c
 
 ## GitHub compute workspace
 
-Use `.github/workflows/agent-compute.yml` for finite code execution when a real computation, parser, simulation, test or generated artifact is needed. It supports Python, Node.js, TypeScript, Bash, Go, Rust, Java, Ruby, PHP, C# and PowerShell on an ephemeral GitHub-hosted Ubuntu runner.
+Use `.github/workflows/agent-compute.yml` for finite code execution when a real computation, parser, simulation, test or generated artifact is needed. It supports Python, Node.js, TypeScript, Bash, Go, Rust, Java, C, C++, C#, Ruby, PHP, Perl, R and PowerShell on an ephemeral GitHub-hosted Ubuntu runner.
 
 Provide the repository `ref`, source file, runtime, JSON string arguments and timeout (maximum 1,200 seconds). The result is uploaded as an artifact. The workflow uses read-only repository permission, checkout credentials are not persisted, and no application secrets are passed to the executed process. It is finite compute, not a persistent machine or a ChatGPT worker.
 

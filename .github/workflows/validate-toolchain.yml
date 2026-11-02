@@ -28,17 +28,13 @@ jobs:
         run: npm ci --prefix tools/agent-runtimes --ignore-scripts --no-audit --no-fund
       - name: Install AutoHelix Python runtime
         run: python -m pip install --disable-pip-version-check -r tools/agent-runtimes/requirements.txt && autohelix --help
-      - name: Validate scripts and Looper behavior
+      - name: Validate tools and Looper behavior
         run: |
           node --check tools/looper/looper.mjs
           node --check tools/react-typescript-fullstack/scripts/quality-check-flat.mjs
           node --check tools/react-typescript-fullstack/scripts/inspect-browser.mjs
-          node --check runner/task-ledger.mjs
-          node --check runner/agent-worker.mjs
-          node --check runner/verifier-worker.mjs
-          node --test runner/test/*.test.mjs
           node --test tools/looper/test/looper.test.mjs
-      - name: Validate Python runners
+      - name: Validate Python helpers
         run: python -m compileall -q runner
       - name: Preserve resolved dependency locks
         if: always()

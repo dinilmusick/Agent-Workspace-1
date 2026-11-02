@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "sourceOfTruth": "Supabase Skills Database",
+  "databaseProjectRef": "vcaerawuwffziufvpbvw",
+  "skills": [
+    {
+      "slug": "loop-generator",
+      "name": "Loop Generator",
+      "sourceTable": "public.skills",
+      "sourceId": 4,
+      "version": "1.0.0",
+      "path": "skills/loop-generator/SKILL.md",
+      "tools": [
+        {
+          "slug": "looper",
+          "path": "tools/looper/looper.mjs",
+          "kind": "local-cli"
+        },
+        {
+          "slug": "playwright",
+          "kind": "browser",
+          "documentation": "https://playwright.dev/docs/intro"
+        },
+        {
+          "slug": "supabase",
+          "kind": "connector",
+          "documentation": "https://supabase.com/docs"
+        },
+        {
+          "slug": "github",
+          "kind": "connector",
+          "documentation": "https://docs.github.com/"
+        }
+      ]
+    }
+  ]
+}

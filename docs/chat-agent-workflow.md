@@ -19,7 +19,7 @@ The user manually opens ChatGPT browser conversations. No GitHub workflow create
 5. Each task loop must define `enabled=true`, objective, input_contract, output_contract, transformation, observation, evaluation, revision_policy, initial_input, tools, iteration_policy, stop_conditions and max_iterations (1–100). Each task must also have non-empty acceptance_criteria (the Loop Generator successCriteria) and an independent verification plan.
 6. Create the goal and task tree atomically with `goal_ledger_create_with_tasks`.
 7. Add blocking/advisory dependencies. Blocking work becomes eligible only after its predecessor is completed and verified.
-8. Call `goal_ledger_summary`; report ready leaf count and recommended worker chats.
+8. Call `goal_ledger_summary`; report ready leaf count and recommended worker chats (one per ready independent leaf by default, subject to the configured cap).
 9. Give the user the exact worker instruction below.
 10. Resume with `goal_ledger_resume(name)`; never depend on original chat history.
 
@@ -49,7 +49,7 @@ Load all context from the Supabase Goal and Task Ledger. Do not ask me to restat
 
 ```text
 Resume goal: <GOAL NAME>.
-Load its canonical context, latest version, each task's pinned context version, task tree, dependencies, loop states, iterations, evidence and verification status from Supabase. Reconcile current state before planning or assigning more work. Report completed, active, blocked and ready tasks, then recommend additional worker chats based on ready independent leaf tasks.
+Load its canonical context, latest version, each task's pinned context version, task tree, dependencies, loop states, iterations, evidence and verification status from Supabase. Reconcile current state before planning or assigning more work. Report completed, active, blocked and ready tasks, then recommend one additional worker chat per ready independent leaf task, bounded by the goal's configured max_parallel_workers.
 ```
 
 ## Safety

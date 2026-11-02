@@ -43,7 +43,7 @@ An agent worker polls the queue, claims tasks with a lease, invokes a configured
 
 Configure `AGENT_RUNTIME_COMMAND_JSON` as a JSON argv array, for example `["node","adapters/codex-adapter.mjs"]`. Configure `AGENT_RUNTIME_ENV_ALLOWLIST` as a comma-separated list of model/tool environment variable names the adapter needs. The worker intentionally strips all `SUPABASE_*`, `GITHUB_*`, `ACTIONS_*`, `INPUT_*`, and `RUNNER_*` variables before starting the runtime. It does not pass the agent JWT or Supabase keys to the model process.
 
-Run continuously with `node runner/agent-worker.mjs`; use `node runner/agent-worker.mjs --once` to process at most one task. The worker never performs final verification. A separately registered verifier/orchestrator must accept the result and finalize the parent task.
+Run continuously with `node runner/agent-worker.mjs`; use `node runner/agent-worker.mjs --once` to process at most one task. The worker never performs final verification. A separately registered verifier/orchestrator must accept the result and finalize the parent task. Run `node runner/verifier-worker.mjs` for a continuous independent-verification queue, or add `--once` to process at most one pending result. The verifier runtime receives the task result and iteration evidence, returns `{ "verified": true|false, "verification_report": { ... } }`, and the worker finalizes ancestor tasks only after every child is verified.
 
 ## API examples
 

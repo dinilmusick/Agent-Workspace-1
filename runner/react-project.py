@@ -23,13 +23,14 @@ def package_manager(path):
         return ["corepack", "pnpm"]
     if (path / "yarn.lock").exists():
         return ["corepack", "yarn"]
-    if (path / "package-lock.json").exists() or (path / "npm-shrinkwrap.json").exists():
-        return ["npm"]
     return ["npm"]
 
 def run(command, cwd, log_name):
     ARTIFACTS.mkdir(parents=True, exist_ok=True)
-    result = subprocess.run(command, cwd=cwd, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    result = subprocess.run(
+        command, cwd=cwd, text=True, stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT, env={**os.environ, "CI": "true"}
+    )
     (ARTIFACTS / log_name).write_text(result.stdout, encoding="utf-8")
     print(result.stdout)
     if result.returncode:
@@ -42,10 +43,12 @@ def main():
     args = parser.parse_args()
     path = project_dir(args.project_path)
     manager = package_manager(path)
-    scripts = json.loads((path / "package.json").read_text(encoding="utf-8")).get("scripts", {})
+    manifest = json.loads((path / "package.json").read_text(encoding="utf-8"))
+    scripts = manifest.get("scripts", {})
+    dependencies = {**manifest.get("dependencies", {}), **manifest.get("devDependencies", {})}
     if args.action == "prepare":
         if manager[0] == "npm":
-            install = manager + (["ci"] if (path / "package-lock.json").exists() or (path / "npm-shrinkwrap.json").exists() else ["install"])
+            install = manager + (["ci", "--no-audit", "--no-fund"] if (path / "package-lock.json").exists() or (path / "npm-shrinkwrap.json").exists() else ["install", "--no-audit", "--no-fund"])
         elif manager[1] == "pnpm":
             install = manager + ["install", "--frozen-lockfile"]
         else:
@@ -54,23 +57,31 @@ def main():
         if "build" in scripts:
             run(manager + ["run", "build"], path, "build.log")
         if "test" in scripts:
-            test_args = manager + ["test"]
-            if manager[1:] == ["pnpm"]:
-                test_args += ["--", "--run"]
-            elif manager[1:] == ["yarn"]:
-                test_args += ["--run"]
-            else:
-                test_args += ["--", "--run"]
-            run(test_args, path, "test.log")
+            run(manager + ["test"], path, "test.log")
     else:
-        if "dev" not in scripts:
-            raise SystemExit("No package.json 'dev' script; browser inspection cannot start this app automatically.")
+        start_script = "dev" if "dev" in scripts else ("start" if "start" in scripts else ("preview" if "preview" in scripts else None))
+        if not start_script:
+            raise SystemExit("No package.json dev, start, or preview script; cannot start browser inspection.")
+        is_next = "next" in dependencies
+        is_vite = "vite" in dependencies
+        is_react_scripts = "react-scripts" in dependencies
+        command = manager + ["run", start_script]
+        env = os.environ.copy()
+        env.update({"HOST": "0.0.0.0", "HOSTNAME": "0.0.0.0", "PORT": "4173", "CI": "true"})
+        if is_next:
+            command += ["--", "--hostname", "0.0.0.0", "--port", "4173"]
+        elif is_vite:
+            command += ["--", "--host", "0.0.0.0", "--port", "4173"]
+        elif is_react_scripts:
+            env["PORT"] = "4173"
+        elif start_script == "preview":
+            command += ["--", "--host", "0.0.0.0", "--port", "4173"]
         log_path = ARTIFACTS / "dev-server.log"
         ARTIFACTS.mkdir(parents=True, exist_ok=True)
         log = log_path.open("w", encoding="utf-8")
-        command = manager + ["run", "dev", "--", "--host", "0.0.0.0", "--port", "4173"]
-        process = subprocess.Popen(command, cwd=path, stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
+        process = subprocess.Popen(command, cwd=path, env=env, stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
         (ARTIFACTS / "dev-server.pid").write_text(str(process.pid), encoding="utf-8")
-        print(f"Started dev server pid={process.pid}; log={log_path}")
+        print(f"Started {start_script} server pid={process.pid}; log={log_path}")
+
 if __name__ == "__main__":
     main()

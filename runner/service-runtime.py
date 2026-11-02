@@ -56,6 +56,13 @@ def load_services(manifest_path, root):
         if health.get("type", "process") in ("http", "tcp") and item.get("port") is None:
             raise ValueError(f"{name}: HTTP/TCP healthchecks require a port")
         port = item.get("port")
+        if port is not None and (not isinstance(port, int) or not 0 <= port <= 65535):
+            raise ValueError(f"{name}: port must be an integer from 0 to 65535")
+        restart = item.get("restart", {})
+        if restart.get("policy", "never") not in ("never", "on-failure", "always"):
+            raise ValueError(f"{name}: restart policy must be never, on-failure or always")
+        if restart.get("max_restarts", 0) < 0:
+            raise ValueError(f"{name}: max_restarts cannot be negative")
         ports[name] = free_port() if port == 0 else port
         configs[name] = {**item, "cwd_path": cwd, "healthcheck": health}
     for name, item in configs.items():

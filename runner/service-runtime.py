@@ -259,7 +259,7 @@ def main():
     state_dir.mkdir(parents=True, exist_ok=True)
     if state_path.exists():
         old = json.loads(state_path.read_text(encoding="utf-8"))
-        if old.get("pid"):
+        if old.get("status") in ("starting", "ready", "stopping") and old.get("pid"):
             try:
                 os.kill(old["pid"], 0)
                 raise SystemExit("service supervisor already running; stop it before starting again")

@@ -1,7 +1,7 @@
 ---
 name: "Universal Task Router"
 slug: universal-task-router
-version: 1.2.0
+version: 1.3.0
 source: Supabase Skills Database
 sourceId: 28
 status: active
@@ -93,3 +93,20 @@ When the user agrees on an actionable goal that requires multiple tasks, persist
 
 Ordinary conversation and bounded one-step requests must not create goals or load the Task Ledger unnecessarily. This workflow uses direct Supabase connector/PostgREST and transactional PostgreSQL RPCs; never call Supabase Edge Functions.
 
+
+
+## Goal identity, selection and recursive loops
+
+For persistent goals, load Task Ledger and Loop Generator. A goal has a descriptive display title (`goals.name`), a readable stable key (`goals.goal_key`), and searchable tags. Never present the internal UUID as the goal's title or primary identifier.
+
+When a new conversation is asked to continue an unfinished goal:
+1. Call `goal_ledger_list_unfinished` and load the unfinished-goal index.
+2. If exactly one unfinished goal exists, resume it. If multiple exist, show their titles, keys, tags and statuses and ask the user to select one.
+3. Resume the selected goal and tell the user **Loaded goal: <title>**. If asked what goal is loaded, answer with that title.
+4. Only then claim one eligible task; do not claim work before goal selection.
+
+A multi-task goal is itself a Loop Generator loop, persisted in `goal_loop_definition`, `goal_loop_state` and `goal_iterations`. Every task is also its own loop, persisted in `loop_definition` and `task_iterations`. Top-level tasks are direct children of the goal; never create a synthetic root task. The goal loop coordinates child task loops and may pass only after every descendant task is independently verified, goal acceptance criteria are satisfied and evidence is recorded.
+
+Create goals with `goal_ledger_create_hierarchical`, including a title, tags, a goal-level loop contract and an array of top-level task definitions. Require task-specific parameter contracts where a task needs custom inputs or outputs. Use `goal_ledger_record_loop_iteration` for goal cycles.
+
+When an agent needs actual code execution for a computation, use the repository's GitHub Actions Agent Compute Workspace workflow where an authorized workflow-dispatch capability is available. It runs source files on an ephemeral, read-only, secret-free runner and returns an artifact. If the connected GitHub tools cannot dispatch workflows, state that limitation; do not claim code ran.

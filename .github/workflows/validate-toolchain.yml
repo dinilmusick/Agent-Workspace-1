@@ -33,7 +33,7 @@ jobs:
           node --check tools/looper/looper.mjs
           node --check tools/react-typescript-fullstack/scripts/quality-check-flat.mjs
           node --check tools/react-typescript-fullstack/scripts/inspect-browser.mjs
-          node --test tools/looper/test/looper.test.mjs
+          node --test tools/looper/test/looper.test.mjs tools/react-typescript-fullstack/test/entrypoint.test.mjs
       - name: Validate Python helpers
         run: python -m compileall -q runner
       - name: Preserve resolved dependency locks

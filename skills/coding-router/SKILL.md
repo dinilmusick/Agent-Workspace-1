@@ -14,7 +14,7 @@ Top-level coding task router that classifies engineering intent and selects the 
 ## Linked tools
 
 - Tool bindings are registered in Supabase `skill_tool_links` / `skill_tools` and mirrored in `skills/tool-bindings.json`.
-- Optional agent backends: Codex CLI, OpenCode, Gemini CLI, Goose, Aider, Agent Loops and AutoHelix; verify installation and model authentication before use.
+- Optional agent backends: Codex CLI, OpenCode, Gemini CLI, Goose, Aider, OpenHands, Cline, Agent Loops and AutoHelix; verify installation and model authentication before use.
 - TypeScript/React toolchain: TypeScript, ESLint, typescript-eslint, Prettier, Biome, Vitest, Playwright, axe-core, Knip and dependency-cruiser.
 
 ## Instructions

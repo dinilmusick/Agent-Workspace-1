@@ -47,6 +47,11 @@
 - GitHub Actions remains for CI and finite repository jobs, not ChatGPT conversation creation or always-on orchestration.
 - See `docs/chat-agent-workflow.md` for exact orchestrator and worker prompts.
 
+## Workspace identity
+- The current Supabase project has no Auth users. Browser chats use unique agent/session IDs within a single-owner project-scoped workspace when `auth.uid()` is null.
+- A separate chat may verify/finalize, but its agent ID must differ from task workers. The database rejects self-verification and worker-driven goal finalization.
+- This is not multi-tenant isolation. Before sharing the project with multiple owners, provision Supabase Auth users and owner-scoped JWT/RLS boundaries.
+
 ## GitHub compute workspace
 - Use `.github/workflows/agent-compute.yml` for finite arbitrary code execution when an actual computation is required.
 - Supported runtimes: Python, Node.js, TypeScript, Bash, Go, Rust, Java, C, C++, C#, Ruby, PHP, Perl, R and PowerShell.

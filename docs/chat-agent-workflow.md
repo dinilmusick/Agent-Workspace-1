@@ -16,7 +16,7 @@ The user manually opens ChatGPT browser conversations. No GitHub workflow create
 2. Resolve the active Loop Generator and Task Ledger skills from Supabase.
 3. Create a uniquely named goal with complete context, instructions and observable goal acceptance criteria.
 4. Decompose into independent leaf tasks. Every task, including parent/root tasks, must have a Loop Generator contract.
-5. Each task loop must define `enabled=true`, objective, input_contract, output_contract, cycle, evaluation, stop_conditions and max_iterations (1–100). Each task must also have non-empty acceptance_criteria and an independent verification plan.
+5. Each task loop must define `enabled=true`, objective, input_contract, output_contract, transformation, observation, evaluation, revision_policy, initial_input, tools, iteration_policy, stop_conditions and max_iterations (1–100). Each task must also have non-empty acceptance_criteria (the Loop Generator successCriteria) and an independent verification plan.
 6. Create the goal and task tree atomically with `goal_ledger_create_with_tasks`.
 7. Add blocking/advisory dependencies. Blocking work becomes eligible only after its predecessor is completed and verified.
 8. Call `goal_ledger_summary`; report ready leaf count and recommended worker chats.

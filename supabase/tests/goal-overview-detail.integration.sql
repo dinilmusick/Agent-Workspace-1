@@ -54,7 +54,7 @@ begin
     raise exception 'Overview omitted goal loop contract/state';
   end if;
   select item into task_row from jsonb_array_elements(goal_row->'tasks') item
-  where item->>'task_name'='Overview fixture task';
+  where item->>'name'='Overview fixture task';
   if task_row is null then raise exception 'Overview omitted the task tree'; end if;
   if task_row->'acceptance_criteria' is null or task_row->'loop_definition' is null then
     raise exception 'Overview omitted task acceptance criteria or loop definition';

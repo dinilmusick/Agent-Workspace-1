@@ -25,7 +25,7 @@ Shared database-backed task coordination for agents: formal task contracts, recu
 ## Role
 The Task Ledger is the database-backed coordination substrate for multi-agent execution. Agents do not need direct agent-to-agent messaging: they coordinate by creating task trees, claiming work, recording progress, submitting structured results, and verifying one another through shared Supabase records.
 
-Use the authenticated Supabase connector as the shared read/write interface. The database is the source of truth for task definitions, claims, progress, results, evidence, and verification state.
+Use the authenticated Supabase connector directly through the Supabase Data API and database RPCs. Never call Supabase Edge Functions. Supabase stores goals, task definitions, claims, progress, results, evidence, and verification state. PostgreSQL RPCs are restricted to atomic database transactions; reasoning and orchestration remain in ChatGPT conversations or GitHub-hosted CI.
 
 ## Core model
 - tasks is the canonical task record. A task is a formal execution contract, not merely a title and status.
@@ -88,7 +88,7 @@ Example shape:
   ]
 }
 
-## Orchestrator procedure
+## Goal lifecycle\n1. Create a goal with a globally unique human-readable name, full context, instructions, acceptance criteria, creator agent ID, and owner user ID using goal_ledger_create.\n2. Resume by exact name or ID using goal_ledger_get, then inspect goal_ledger_summary.\n3. Decompose the goal into independently executable tasks and subtasks. Every task MUST contain a Loop Generator-produced loop definition with input/output contracts, cycle, evaluation, revision policy, evidence requirements, finite max iterations, and explicit stop conditions.\n4. Create the tree with task_ledger_create_tree and set goal_id on its root; descendants inherit the goal.\n5. Tell the user the goal ID/name, task count, claimable count, blockers, and recommended number of worker chats. The user starts those chats manually; GitHub Actions must not attempt to spawn ChatGPT conversations.\n\n## Orchestrator procedure
 1. Interpret the goal and define the parent task contract.
 2. Decompose work into independently executable child tasks. Keep dependencies explicit; avoid artificial decomposition.
 3. Create the complete tree with task_ledger_create_tree. The parent is the orchestration record; each child is an independently claimable unit.
@@ -102,7 +102,7 @@ Example shape:
 ## Worker procedure
 A newly started agent should:
 1. Identify itself with a stable agent_id, agent_name, and agent_type.
-2. Call task_ledger_claim_next(agent_id, agent_name, agent_type, capabilities, lease_seconds). This is an atomic claim using row locking; never select a queued row and update it manually.
+2. Call task_ledger_claim_goal_next(goal_id, agent_id, agent_name, agent_type, capabilities, lease_seconds) when a goal is specified. This is an atomic goal-scoped claim using row locking; never select a queued row and update it manually. Use task_ledger_claim_next only when explicitly asked to claim across all goals.
 3. Read the full task contract, parent context, dependency state, and relevant task events before acting.
 4. Execute only the assigned scope. Respect permissions and use only available tools.
 5. Renew long-running claims with task_ledger_heartbeat_claim(task_id, agent_id, claim_token, current_step, lease_seconds). If a worker stops heartbeating, the lease expires and another agent may claim the task.
@@ -112,7 +112,7 @@ A newly started agent should:
 9. If blocked, submit status blocked or waiting with a clear explanation and required next action. Do not mark work completed when acceptance criteria are unmet.
 
 ## Claiming and concurrency
-- Use task_ledger_claim_next to atomically claim one eligible task. It uses FOR UPDATE SKIP LOCKED so concurrent agents do not normally claim the same row.
+- Use task_ledger_claim_goal_next to atomically claim one eligible task from the named goal. It uses FOR UPDATE SKIP LOCKED so concurrent agents do not normally claim the same row.
 - A task is claimable when queued, or when a prior running claim lease has expired; attempt_count is below max_attempts; required capabilities are supported; its parent is not failed, cancelled, or abandoned; and all blocking dependencies are completed and verified.
 - Claims include claim_token and expiry. Treat the token as a task lease credential; do not share it outside the worker/orchestrator handoff.
 - Heartbeat before lease expiry. After expiry, the previous worker must stop mutating the task and reacquire it through the claim function.
@@ -156,7 +156,7 @@ Use queued for unclaimed work, running for active work, blocked for an external 
 ## Available database operations
 - task_ledger_create_tree: create a parent and arbitrarily nested child task definitions.
 - task_ledger_add_dependency: add a blocking/advisory dependency; rejects cycles.
-- task_ledger_claim_next: atomically claim one eligible task for a fresh worker.
+- task_ledger_claim_goal_next: atomically claim one eligible task from a specific goal.\n- goal_ledger_create/get/summary/update: persist and resume named goals.
 - task_ledger_heartbeat_claim: renew a worker lease and record progress.
 - task_ledger_record_iteration: append a loop iteration with inputs, outputs, observations, tools, and evidence.
 - task_ledger_submit_result: write a worker result to its task row and release the claim.

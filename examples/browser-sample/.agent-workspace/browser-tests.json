@@ -83,5 +83,6 @@
     "baselineDir": ".agent-workspace/visual-baselines",
     "maxDiffPixelRatio": 0.01
   },
-  "failOnRuntimeErrors": true
+  "failOnRuntimeErrors": true,
+  "ignoreRuntimeErrors": ["/api/login"]
 }

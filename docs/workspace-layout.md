@@ -12,6 +12,7 @@
 .github/workflows/
   agent-compute.yml             # sole general-purpose finite compute workflow
   inspect-react.yml             # rendered React/browser inspection
+  validate-browser-harness.yml  # real preview E2E, accessibility and visual baselines
   validate-workspace.yml        # repository and compute validation
   validate-toolchain.yml        # pinned toolchain validation
 runner/
@@ -23,12 +24,13 @@ runner/
   test_service_runtime.py       # multi-service lifecycle regression tests
 tools/
   looper/
-  react-typescript-fullstack/
+  react-typescript-fullstack/    # Playwright Test, route discovery and browser evidence
   backend-api-diagnostics/       # local API contract, auth and server-log diagnostics
   agent-runtimes/
 examples/
   services.json                  # multi-service target manifest example
-  fixture-service.py             # test-only HTTP service fixture
+  fixture-service.py             # multi-service lifecycle test fixture
+  browser-sample/                # real app for browser E2E and visual validation
 workspaces/                     # disposable target checkout area
 results/                        # compute output area
 ```

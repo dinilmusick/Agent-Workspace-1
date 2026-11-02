@@ -1,0 +1,1 @@
+drop policy if exists tasks_goal_owner_access on public.tasks; create policy tasks_goal_owner_access on public.tasks for all to authenticated using (exists(select 1 from public.goals g where g.id=goal_id and g.owner_user_id=(select auth.uid()))) with check (exists(select 1 from public.goals g where g.id=goal_id and g.owner_user_id=(select auth.uid())));

@@ -1,7 +1,7 @@
 ---
 name: "Universal Task Router"
 slug: universal-task-router
-version: 1.3.5
+version: 1.3.6
 source: Supabase Skills Database
 sourceId: 28
 status: active
@@ -51,6 +51,13 @@ Treat skill routing as a graph with arbitrary practical nesting depth:
 ## 6. Canonical persistent-goal workflow
 
 For an agreed actionable goal requiring persistent progress, multiple tasks or independent ChatGPT conversations, load Task Ledger and Loop Generator.
+
+### Universal goal overview
+- At the beginning of every orchestration session, and whenever the user asks what goals remain, call `goal_ledger_overview(null)`.
+- Present every visible planning, ready, active and blocked goal, not only the first unfinished goal. Include readable key, status, task counts, running workers, queued tasks, blockers, stale-heartbeat flags and verification state.
+- Explain dependencies and why apparently queued work may not yet be claimable.
+- Use `goal_ledger_resume_by_key` to load complete context for the selected goal. The overview is discovery, not ownership; never infer a claim from it.
+- Use the atomic goal-key claim RPC only after resume. Never directly update task ownership.
 
 ### Goal identity
 - `goals.name` is the descriptive title shown to the user.

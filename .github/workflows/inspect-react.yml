@@ -51,7 +51,7 @@ jobs:
         run: python runner/checkout-public-repository.py --repository "$TARGET_REPOSITORY" --ref "$TARGET_REF"
 
       - name: Install permanent workspace toolchain
-        run: npm install --prefix tools/react-typescript-fullstack --ignore-scripts --no-audit --no-fund
+        run: npm ci --prefix tools/react-typescript-fullstack --ignore-scripts --no-audit --no-fund
 
       - name: Install Chromium and system dependencies
         run: tools/react-typescript-fullstack/node_modules/.bin/playwright install --with-deps chromium

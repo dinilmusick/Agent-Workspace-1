@@ -7,7 +7,7 @@ Supabase PostgreSQL is the canonical persistent ledger. GitHub is the canonical 
 - `public.goals`: stable UUID, case-insensitive unique name, complete context, instructions, acceptance criteria, lifecycle status and context version.
 - `public.goal_versions`: immutable context snapshots.
 - `public.goal_events`: append-only lifecycle history.
-- `public.tasks.goal_id`: links every root, parent and child task to its goal.
+- `public.tasks.goal_id`: links every root, parent and child task to its goal; `goal_context_version` records the context version used when that task was planned.
 - `public.task_dependencies`: blocking/advisory dependency edges.
 - `public.task_iterations`: append-only execution observations, criteria results, loop state and evidence.
 - `public.task_events`: append-only task lifecycle history.

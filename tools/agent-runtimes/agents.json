@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "loopRuntimes": [
+    {"id":"agent-loops","package":"@andromarces/agent-loops","version":"0.8.0","license":"MIT","repository":"https://github.com/andromarces/agent-loops","role":"orchestrator-worker-reviewer","requirements":["Node.js >=22.18","Git","authenticated coding-agent CLI"],"features":["separate orchestrator/worker/reviewer roles","reviewer mutation guard","step budget","timeouts","run transcript","resume"],"defaultEnabled":false},
+    {"id":"autohelix","package":"autohelix","version":"0.1.1","license":"Apache-2.0","repository":"https://github.com/awslabs/AutoHelix","role":"verified-improvement-loop","requirements":["Python >=3.11","Claude Code, Codex CLI or OpenCode"],"features":["fresh git worktree per iteration","editable-file scope","test/typecheck constraints","metrics gates","persistent iteration notes","iteration/time/cost budgets"],"defaultEnabled":false}
+  ],
+  "codingAgentBackends": [
+    {"id":"codex-cli","repository":"https://github.com/openai/codex","license":"Apache-2.0","install":"npm install -g @openai/codex"},
+    {"id":"opencode","repository":"https://github.com/anomalyco/opencode","license":"MIT","install":"npm install -g @opencode/cli"},
+    {"id":"gemini-cli","repository":"https://github.com/google-gemini/gemini-cli","license":"Apache-2.0","install":"npm install -g @google/gemini-cli"},
+    {"id":"openhands","repository":"https://github.com/OpenHands/OpenHands","license":"MIT","install":"official Agent Canvas self-hosting instructions"},
+    {"id":"goose","repository":"https://github.com/aaif-goose/goose","license":"Apache-2.0","install":"official CLI installation instructions"},
+    {"id":"aider","repository":"https://github.com/Aider-AI/aider","license":"Apache-2.0","install":"pip install aider-chat"},
+    {"id":"cline","repository":"https://github.com/cline/cline","license":"Apache-2.0","install":"official Cline CLI installation instructions"}
+  ]
+}

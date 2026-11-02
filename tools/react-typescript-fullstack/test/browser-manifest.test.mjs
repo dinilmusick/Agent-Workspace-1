@@ -18,7 +18,9 @@ test("loads explicit routes and reports dynamic framework routes as untested", a
   try {
     await mkdir(join(root, ".agent-workspace"), { recursive: true });
     await mkdir(join(root, "src/app/[slug]"), { recursive: true });
+    await mkdir(join(root, "src/app/about"), { recursive: true });
     await writeFile(join(root, "src/app/[slug]/page.tsx"), "export default function Page() { return null; }");
+    await writeFile(join(root, "src/app/about/page.tsx"), "export default function Page() { return null; }");
     await writeFile(join(root, ".agent-workspace/browser-tests.json"), JSON.stringify({
       version: 1,
       routes: [{ name: "home", path: "/" }],
@@ -31,10 +33,10 @@ test("loads explicit routes and reports dynamic framework routes as untested", a
     process.env.TARGET_BASE_URL = "http://127.0.0.1:4173";
     const result = await loadBrowserManifest();
     assert.equal(result.routes.length, 1);
-    assert.equal(result.untestedRoutes[0].path, "/[slug]");
+    assert.deepEqual(result.untestedRoutes.map(route => route.path), ["/[slug]", "/about"]);
     const coverage = JSON.parse(await readFile(join(root, "artifacts/route-coverage.json"), "utf8"));
     assert.equal(coverage.routeDiscovery, "manifest");
-    assert.equal(coverage.untestedRoutes.length, 1);
+    assert.equal(coverage.untestedRoutes.length, 2);
     assert.equal(coverage.evidenceKind, "real-target-preview");
   } finally {
     restoreEnv(saved);

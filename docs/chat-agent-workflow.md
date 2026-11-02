@@ -35,8 +35,8 @@ The user manually opens ChatGPT browser conversations. No GitHub workflow create
 8. Submit with `task_ledger_submit_result`. The database rejects completed submissions without a passing latest loop iteration.
 9. Do not self-verify. A separate orchestrator/verifier inspects artifacts and calls `task_ledger_verify_result`.
 10. After all children of a parent are independently verified, the orchestrator runs that parent's own Loop Generator cycle using `task_ledger_record_parent_loop_iteration`. Every parent/root loop must pass with evidence.
-11. Call `goal_ledger_finalize(name, orchestrator_agent_id, report)` only after every leaf and parent loop has passed. It finalizes parent rows bottom-up and marks the goal completed only when every task is verified.
-10. Claim another task only when the user explicitly asks the worker to continue.
+12. Call `goal_ledger_finalize(name, orchestrator_agent_id, report)` only after every leaf and parent loop has passed. It finalizes parent rows bottom-up and marks the goal completed only when every task is verified.
+13. Claim another task only when the user explicitly asks the worker to continue.
 
 ## Worker instruction
 
@@ -49,7 +49,7 @@ Load all context from the Supabase Goal and Task Ledger. Do not ask me to restat
 
 ```text
 Resume goal: <GOAL NAME>.
-Load its canonical context, latest version, task tree, dependencies, loop states, iterations, evidence and verification status from Supabase. Reconcile current state before planning or assigning more work. Report completed, active, blocked and ready tasks, then recommend additional worker chats based on ready independent leaf tasks.
+Load its canonical context, latest version, each task's pinned context version, task tree, dependencies, loop states, iterations, evidence and verification status from Supabase. Reconcile current state before planning or assigning more work. Report completed, active, blocked and ready tasks, then recommend additional worker chats based on ready independent leaf tasks.
 ```
 
 ## Safety

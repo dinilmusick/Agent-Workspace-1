@@ -38,7 +38,7 @@ jobs:
         run: python -m compileall -q runner
       - name: Preserve resolved dependency locks
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.2.2
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: workspace-toolchain-locks-${{ github.run_id }}
           path: |

@@ -1,0 +1,10 @@
+{
+  "$schema": "https://developers.cloudflare.com/workers/wrangler.schema.json",
+  "name": "agent-workspace-worker-fixture",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-11-03",
+  "kv_namespaces": [
+    { "binding": "TEST_KV", "id": "00000000000000000000000000000000" }
+  ],
+  "vars": { "APP_STAGE": "test" }
+}

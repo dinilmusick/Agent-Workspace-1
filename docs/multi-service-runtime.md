@@ -24,7 +24,7 @@ Add `.agent-workspace/services.json` to the target application repository:
     },
     {
       "id": "web",
-      "command": ["npm", "run", "dev", "--", "--host", "127.0.0.1"],
+      "command": ["npm", "run", "dev", "--", "--host", "127.0.0.1", "--port", "${service.web.port}"],
       "cwd": ".",
       "port": 4173,
       "port_env": "PORT",

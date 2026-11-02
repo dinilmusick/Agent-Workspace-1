@@ -73,7 +73,7 @@
     {
       "slug": "typescript",
       "type": "cli",
-      "package": "typescript@7.0.2",
+      "package": "typescript@6.0.3",
       "skills": [
         "react-performance-composition",
         "frontend-engineering",

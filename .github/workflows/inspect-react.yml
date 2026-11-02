@@ -16,8 +16,13 @@ on:
         required: false
         default: .
         type: string
+      update_visual_baselines:
+        description: Intentionally refresh target visual baselines
+        required: false
+        default: false
+        type: boolean
       vercel_preview_url:
-        description: Optional Vercel preview deployment URL for read-only diagnostics
+        description: Optional Vercel preview URL for read-only diagnostics
         required: false
         type: string
 
@@ -81,13 +86,35 @@ jobs:
           PROJECT_PATH: ${{ inputs.project_path }}
         run: python runner/react-project.py start --project-path "$PROJECT_PATH"
 
+      - name: Resolve target browser URL
+        id: browser_url
+        if: steps.start.outcome == 'success'
+        env:
+          PROJECT_PATH: ${{ inputs.project_path }}
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          project = Path("workspaces/target") / os.environ.get("PROJECT_PATH", ".")
+          manifest_path = project / ".agent-workspace" / "browser-tests.json"
+          manifest = json.loads(manifest_path.read_text()) if manifest_path.is_file() else {}
+          state_path = Path("artifacts/services/state.json")
+          state = json.loads(state_path.read_text()) if state_path.is_file() else {}
+          service_id = manifest.get("frontendServiceId", "web")
+          service = state.get("services", {}).get(service_id, {})
+          base_url = manifest.get("baseUrl") or (f"http://127.0.0.1:{service['port']}" if service else "http://127.0.0.1:4173")
+          with open(os.environ["GITHUB_ENV"], "a") as env:
+              env.write(f"TARGET_BASE_URL={base_url}\n")
+          print(f"Browser target: {base_url}")
+          PY
+
       - name: Wait for application readiness
         id: ready
         continue-on-error: true
         shell: bash
         run: |
           for attempt in $(seq 1 60); do
-            if curl --fail --silent http://127.0.0.1:4173/ >/dev/null; then
+            if curl --fail --silent "$TARGET_BASE_URL" >/dev/null; then
               exit 0
             fi
             sleep 2
@@ -127,7 +154,11 @@ jobs:
         if: steps.ready.outcome == 'success'
         continue-on-error: true
         env:
-          TARGET_BASE_URL: http://127.0.0.1:4173
+          TARGET_BASE_URL: ${{ env.TARGET_BASE_URL }}
+          TARGET_ROOT: ${{ github.workspace }}/workspaces/target
+          PROJECT_PATH: ${{ inputs.project_path }}
+          BROWSER_EVIDENCE_KIND: real-target-preview
+          UPDATE_VISUAL_BASELINES: ${{ inputs.update_visual_baselines && '1' || '0' }}
           ARTIFACT_DIR: ${{ github.workspace }}/artifacts/browser
         run: node tools/react-typescript-fullstack/scripts/inspect-browser.mjs
 
@@ -161,6 +192,17 @@ jobs:
           PROJECT_PATH: ${{ inputs.project_path }}
         run: python runner/react-project.py stop --project-path "$PROJECT_PATH"
 
+      - name: Retain target visual baselines
+        if: always()
+        env:
+          PROJECT_PATH: ${{ inputs.project_path }}
+        run: |
+          baseline_dir="workspaces/target/$PROJECT_PATH/.agent-workspace/visual-baselines"
+          if test -d "$baseline_dir"; then
+            mkdir -p artifacts/browser/visual-baselines
+            cp -R "$baseline_dir/." artifacts/browser/visual-baselines/
+          fi
+
       - name: Upload build, quality and browser evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
@@ -183,7 +225,7 @@ jobs:
           SERVICE_HEALTH: ${{ steps.service_health.outcome }}
           PLATFORMS: ${{ steps.platforms.outcome }}
         run: |
-          printf 'prepare=%s quality=%s start=%s ready=%s api=%s browser=%s platforms=%s service_health=%s stop=%s\n' "$PREPARE" "$QUALITY" "$START" "$READY" "$API_TESTS" "$BROWSER" "$PLATFORMS" "$SERVICE_HEALTH" "$STOP"
+          printf 'prepare=%s quality=%s start=%s ready=%s api=%s browser=%s service_health=%s stop=%s\n' "$PREPARE" "$QUALITY" "$START" "$READY" "$API_TESTS" "$BROWSER" "$SERVICE_HEALTH" "$STOP"
           test "$PREPARE" = success &&
           test "$QUALITY" = success &&
           test "$START" = success &&

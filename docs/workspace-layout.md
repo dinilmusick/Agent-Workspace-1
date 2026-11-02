@@ -12,9 +12,11 @@
 .github/workflows/
   agent-compute.yml             # sole general-purpose finite compute workflow
   inspect-react.yml             # rendered React/browser inspection
+  validate-browser-harness.yml  # real preview E2E, accessibility and visual baselines
   validate-workspace.yml        # repository and compute validation
   validate-toolchain.yml        # pinned toolchain validation
   platform-adapters.yml         # Cloudflare/Vercel/Supabase local checks
+  database-integration.yml      # disposable Supabase migration replay and SQL tests
 runner/
   execute-code.py               # language-aware compute executor
   resolve-compute-request.py    # validates workflow/issue requests
@@ -26,16 +28,17 @@ runner/
   test_service_runtime.py       # multi-service lifecycle regression tests
 tools/
   looper/
-  react-typescript-fullstack/
-  backend-api-diagnostics/       # local API contract, auth and server-log diagnostics
-  platform-adapters/             # provider adapter contract and usage
+  react-typescript-fullstack/   # Playwright Test, route discovery and browser evidence
+  backend-api-diagnostics/      # local API contract, auth and server-log diagnostics
+  platform-adapters/            # provider adapter contract and usage
   agent-runtimes/
 examples/
   platforms/                     # Cloudflare, Vercel and Supabase fixtures
   services.json                  # multi-service target manifest example
-  fixture-service.py             # test-only HTTP service fixture
-workspaces/                     # disposable target checkout area
-results/                        # compute output area
+  fixture-service.py             # multi-service lifecycle test fixture
+  browser-sample/                # real app for browser E2E and visual validation
+workspaces/                      # disposable target checkout area
+results/                          # compute output area
 ```
 
 ## Rules

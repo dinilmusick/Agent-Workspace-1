@@ -1,6 +1,6 @@
 {
   "id": "javascript.typescript.fullstack.react",
-  "version": 2,
+  "version": 3,
   "runtime": {"node": "22", "packageManagers": ["npm", "pnpm", "yarn"], "browser": "chromium"},
   "detection": {"required": ["package.json"], "signals": ["react", "typescript", "vite", "next", "react-scripts"]},
   "toolchain": {
@@ -18,6 +18,13 @@
       {"name":"Knip","package":"knip","version":"6.43.0","purpose":"unused files, exports and dependencies"},
       {"name":"dependency-cruiser","package":"dependency-cruiser","version":"18.7.0","purpose":"dependency-boundary and cycle checks"}
     ]
+  },
+  "browserTests": {
+    "manifest": ".agent-workspace/browser-tests.json",
+    "routeDiscovery": ["Next.js App Router", "Next.js Pages Router"],
+    "workflows": ["navigate", "click", "fill", "check", "uncheck", "selectOption", "expectVisible", "expectHidden", "expectText", "expectUrl", "expectEnabled"],
+    "evidence": ["Playwright JSON report", "trace", "screenshots", "DOM snapshots", "console errors", "page errors", "request failures", "HTTP errors", "axe violations", "route coverage"],
+    "visualBaselines": "target-local; update only when UPDATE_VISUAL_BASELINES=1"
   },
   "commands": {
     "installTarget": "runner/react-project.py prepare --project-path <path>",

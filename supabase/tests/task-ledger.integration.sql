@@ -26,7 +26,6 @@ begin
     'root pass','[]','[{"type":"test","name":"root"}]','completed');
   perform public.task_ledger_submit_result(claimed.id,'integration-test-orchestrator',
     claimed.claim_token,'{"ok":true}','root result','[]','[{"type":"test","name":"root"}]','completed');
-  perform public.task_ledger_verify_result(claimed.id,'integration-test-orchestrator',true,'{"verified":true}');
 
   select * into claimed from public.task_ledger_claim_next(
     'integration-test-worker','Integration Test Worker','worker',array['test-capability']::text[],900);
@@ -40,6 +39,12 @@ begin
     claimed.claim_token,'{"ok":true}','child result','[]','[{"type":"test","name":"child"}]','completed');
   perform public.task_ledger_verify_result(claimed.id,'integration-test-orchestrator',true,'{"verified":true}');
 
+  select * into claimed from public.task_ledger_pending_verification();
+  if claimed.id is null or claimed.task_name <> 'integration-test-child' then
+    raise exception 'Verifier queue did not return the leaf child result first';
+  end if;
+  perform public.task_ledger_verify_result(claimed.id,'integration-test-orchestrator',true,'{"verified":true}');
+
   summary := public.task_ledger_children_summary(root_id);
   if coalesce((summary->>'all_verified')::boolean,false) is not true then
     raise exception 'Child summary failed verification: %',summary;
@@ -49,6 +54,8 @@ begin
   if not exists(select 1 from public.tasks where id=root_id and status='completed' and verification_status='verified') then
     raise exception 'Parent did not reach verified completion';
   end if;
+  select * into claimed from public.task_ledger_pending_verification();
+  if claimed.id is not null then raise exception 'Pending verifier queue should be empty after parent finalization'; end if;
 
   delete from public.task_events where task_id in (select id from public.tasks where id=root_id or parent_task_id=root_id);
   delete from public.task_iterations where task_id in (select id from public.tasks where id=root_id or parent_task_id=root_id);

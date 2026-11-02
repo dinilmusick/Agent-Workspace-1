@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 import { spawn } from "node:child_process";
 import { setTimeout as sleep } from "node:timers/promises";
+import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const MAX_OUTPUT = 1_000_000;
 const VALID_STATUSES = new Set(["completed", "failed", "blocked", "waiting"]);
@@ -33,8 +35,9 @@ export function normalizeRuntimeOutput(value) {
 
 function runtimeEnvironment() {
   const allow = new Set((process.env.AGENT_RUNTIME_ENV_ALLOWLIST ?? "").split(",").map(x => x.trim()).filter(Boolean));
+  const safeDefaults = new Set(["PATH", "HOME", "TMPDIR", "TEMP", "TMP", "SYSTEMROOT", "WINDIR", "LANG", "LC_ALL"]);
   return Object.fromEntries(Object.entries(process.env).filter(([key]) =>
-    allow.has(key) && !/^(SUPABASE_|GITHUB_|ACTIONS_|INPUT_|RUNNER_)/i.test(key)
+    (safeDefaults.has(key) || allow.has(key)) && !/^(SUPABASE_|GITHUB_|ACTIONS_|INPUT_|RUNNER_)/i.test(key)
   ));
 }
 
@@ -135,7 +138,7 @@ export async function runWorker({ maxTasks = Infinity, pollMs = 5000 } = {}) {
   return completed;
 }
 
-if (import.meta.url === new URL(process.argv[1], "file:").href) {
+if (process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1])) {
   const maxTasks = process.argv.includes("--once") ? 1 : Number(process.env.AGENT_MAX_TASKS ?? 0) || Infinity;
   const pollMs = Number(process.env.AGENT_POLL_MS ?? 5000);
   runWorker({ maxTasks, pollMs }).then(count => {

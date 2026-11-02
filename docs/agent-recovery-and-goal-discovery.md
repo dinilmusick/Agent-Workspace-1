@@ -22,4 +22,4 @@ The overview follows the same owner visibility rule as `goal_ledger_list_unfinis
 
 ## Verification
 
-Run `supabase/tests/agent-recovery-and-overview.integration.sql` against a disposable database. It proves that a worker with an expired lease but a 59-minute-old heartbeat cannot be reclaimed, while a worker with a 61-minute-old heartbeat can be reclaimed even if its lease has not expired. It also verifies claim-token rotation, previous-worker evidence and full goal overview output.
+Run `supabase/tests/agent-recovery-and-overview.integration.sql`, `agent-recovery-threshold.integration.sql` and `goal-overview-detail.integration.sql` against a disposable database. Together they prove the 59/61-minute heartbeat boundary, lease-independent atomic reassignment, claim-token rotation, previous-worker evidence and complete goal/task overview output. The existing `persistent-goals.integration.sql` and `task-ledger.integration.sql` continue to cover the core ledger workflows.

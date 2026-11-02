@@ -49,7 +49,7 @@ class ServiceRuntimeTests(unittest.TestCase):
         for name, service in state["services"].items():
             with urllib.request.urlopen(f"http://127.0.0.1:{service['port']}/health") as response:
                 self.assertEqual(json.loads(response.read())["service"], name)
-            self.assertTrue(Path(service["log"]).is_file())
+            self.assertTrue(Path(service["log"]).is_file())\n            self.assertIn("fixture service", Path(service["log"]).read_text(encoding="utf-8"))
         stopped = self.run_cli("stop")
         self.assertEqual(stopped.returncode, 0, stopped.stderr)
         self.assertEqual(json.loads((self.state / "state.json").read_text())["status"], "stopped")

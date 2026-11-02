@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { readFile } from "node:fs/promises";
+import { readFile } from "node:fs/promises";\nimport { randomUUID } from "node:crypto";
 
 const [action, ...args] = process.argv.slice(2);
 if (!action) {
@@ -146,7 +146,7 @@ try {
           agent_name_in: agent.agent_name,
           agent_type_in: agent.agent_type,
           capabilities_in: agent.capabilities ?? [],
-          session_id_in: p.session_id ?? process.env.AGENT_SESSION_ID,
+          session_id_in: p.session_id ?? process.env.AGENT_SESSION_ID ?? randomUUID(),
           lease_seconds_in: p.lease_seconds ?? 900,
         })
         : await rpc("task_ledger_claim_next", {

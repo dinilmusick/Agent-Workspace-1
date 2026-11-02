@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createServer } from "node:http";
-import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
@@ -19,7 +19,7 @@ async function fixture(t) {
     if (request.url === "/private" && request.headers.authorization !== "Bearer valid") {
       response.statusCode = request.headers.authorization ? 403 : 401;
       response.end(JSON.stringify({ error: "unauthorized" }));
-    } else if (request.url === "/slow") {
+    } else if (request.url === "/invalid") {\n      response.statusCode = 422;\n      response.end(JSON.stringify({ error: "invalid payload" }));\n    } else if (request.url === "/explode") {\n      response.statusCode = 500;\n      response.end(JSON.stringify({ error: "internal error", token: "must-not-leak" }));\n    } else if (request.url === "/slow") {
       await new Promise(resolve => setTimeout(resolve, 150));
       response.end(JSON.stringify({ ok: true }));
     } else response.end(JSON.stringify({ ok: true, count: 2 }));
@@ -44,7 +44,7 @@ test("validates real HTTP responses, auth outcomes and correlates structured ser
     { id: "health", path: "/health", expect: { status: 200, headers: { "content-type": "application/json" },
       jsonSchema: { type: "object", required: ["ok", "count"], properties: { ok: { type: "boolean" }, count: { type: "number" } } } } },
     { id: "anonymous", path: "/private", expect: { status: 401, jsonPath: { error: "unauthorized" } } },
-    { id: "authorized", path: "/private", headers: { authorization: "Bearer valid" }, expect: { status: 200, jsonPath: { ok: true } } }
+    { id: "forbidden", path: "/private", headers: { authorization: "Bearer invalid" }, expect: { status: 403 } },\n    { id: "authorized", path: "/private", headers: { authorization: "Bearer valid" }, expect: { status: 200, jsonPath: { ok: true } } },\n    { id: "validation", path: "/invalid", method: "POST", body: { malformed: true }, expect: { status: 422 } },\n    { id: "exception", path: "/explode", expect: { status: 500 } }
   ], { logs });
   assert.equal(result.status, 0, result.stderr);
   const report = JSON.parse(await readFile(join(result.output, "api-diagnostics.json"), "utf8"));

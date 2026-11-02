@@ -25,7 +25,8 @@
 - Do not place credentials, private source or user secrets in this public repository.
 
 ## Supabase Task Ledger
-- The authenticated integration is deployed as Supabase Edge Function `task-ledger`.
+- Supabase PostgreSQL is the canonical persistent Goal and Task Ledger. Goal schema and RPC contracts are documented in `docs/persistent-goals.md`.
+- The authenticated integration is deployed as Supabase Edge Function `task-ledger` as a compatibility API gateway; task planning, execution and LLM processing must not run inside it.
 - Use `runner/task-ledger.mjs` for authenticated API calls; configure `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and a dedicated agent's `SUPABASE_AGENT_JWT`.
 - Each agent must have a Supabase Auth user and an enabled `public.agent_registry` row. The service-role key must never be placed in an agent runtime.
 - Orchestrators create task trees; workers claim tasks using leases; every claim-bound write requires the returned claim token; verifier workers inspect pending results and iteration evidence, independently accept/reject results, and finalize ancestors only after all children are verified.

@@ -251,8 +251,12 @@ def main():
     if args.action == "supervise":
         return supervise(args.manifest.resolve(), args.project_root.resolve(), state_dir, args.startup_timeout)
     if args.action == "status":
-        print(state_path.read_text(encoding="utf-8") if state_path.exists() else "{}")
-        return 0
+        if not state_path.exists():
+            print("{}")
+            return 0
+        state = json.loads(state_path.read_text(encoding="utf-8"))
+        print(json.dumps(state, indent=2))
+        return 1 if state.get("status") == "failed" else 0
     if args.action == "stop":
         if not state_path.exists():
             print("No service runtime state; nothing to stop.")

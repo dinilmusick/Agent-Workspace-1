@@ -1,0 +1,39 @@
+name: Validate Workspace
+
+on:
+  push:
+    branches: [main, "feat/**"]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Validate Python syntax
+        run: python -m compileall -q runner examples
+
+      - name: Validate task manifests
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          for path in sorted(Path("examples").glob("*.json")):
+              data = json.loads(path.read_text(encoding="utf-8"))
+              assert data.get("version") == 1, path
+              assert isinstance(data.get("command"), list), path
+              assert data["command"] and all(isinstance(x, str) for x in data["command"]), path
+              print(f"VALID {path}")
+          PY
+
+      - name: Runner self-test
+        run: |
+          python runner/execute.py --task-file examples/python-smoke.json --output results/self-test.json
+          python runner/verify.py --result results/self-test.json

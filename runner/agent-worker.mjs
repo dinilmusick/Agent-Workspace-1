@@ -86,7 +86,7 @@ async function refreshAuthSession(base, apiKey) {
 }
 
 export async function callLedger(action, payload = {}) {
-  const base = process.env.SUPABASE_URL?.replace(/\\/$/, "");
+  const base = process.env.SUPABASE_URL?.replace(/\/$/, "");
   const apiKey = process.env.SUPABASE_ANON_KEY;
   if (!base || !apiKey) throw new Error("Set SUPABASE_URL and SUPABASE_ANON_KEY.");
   const send = async () => {

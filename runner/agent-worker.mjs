@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-import { spawn } from "node:child_process";\nimport { randomUUID } from "node:crypto";
+import { spawn } from "node:child_process";
+import { randomUUID } from "node:crypto";
 import { setTimeout as sleep } from "node:timers/promises";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -187,7 +188,9 @@ export async function executeTask(task, command = parseRuntimeCommand()) {
   }
 }
 
-const workerSessionId = process.env.AGENT_SESSION_ID ?? randomUUID();\n\nexport async function runWorker({ maxTasks = Infinity, pollMs = 5000 } = {}) {
+const workerSessionId = process.env.AGENT_SESSION_ID ?? randomUUID();
+
+export async function runWorker({ maxTasks = Infinity, pollMs = 5000 } = {}) {
   const command = parseRuntimeCommand();
   let completed = 0;
   while (completed < maxTasks) {

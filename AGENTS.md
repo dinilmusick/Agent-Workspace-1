@@ -35,6 +35,7 @@
 
 ## Goal and task invariants
 
+- Call the goal overview through the trusted Supabase database connector/service-role context only. The RPC is intentionally not executable by anonymous or ordinary authenticated API roles because it exposes the single-owner workspace's complete goal/task graph; do not grant it publicly.
 - At the start of every orchestration session, and whenever asked what goals remain, call `goal_ledger_overview(null)` and report the complete visible set of planning, ready, active and blocked goals with task counts, running agents, queued work, blockers and verification state. Do not limit discovery to one selected goal.
 - Use `goal_ledger_resume_by_key` to load the selected goal's full persisted context before claiming work. The overview is discovery, not a claim; always use the atomic claim RPC.
 - A running task is eligible for reassignment only when its heartbeat is at least 60 minutes old. Lease expiry alone must never bypass the one-hour inactivity threshold. New claims use a minimum 60-minute lease; reassignment must happen through the transactional claim RPC; never overwrite task ownership directly.

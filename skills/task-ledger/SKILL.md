@@ -1,7 +1,7 @@
 ---
 name: "Task Ledger"
 slug: task-ledger
-version: 1.6.0
+version: 1.7.0
 source: Supabase Skills Database
 sourceId: 7
 status: active
@@ -194,3 +194,58 @@ For a new goal, call goal_ledger_create_with_tasks with the goal context and a f
 ```json
 {}
 ```
+
+## Hierarchical goal model (canonical)
+
+- `goals.name` is the human-readable display title. Always show this title when reporting which goal is loaded.
+- `goals.goal_key` is the stable readable identifier generated from the title (for example, `rebuild-agent-workflow`). It is the user's normal reference key. The UUID is an internal relational key only; do not present it as the goal's identity.
+- `goals.tags` is the searchable classification set. Use tags when listing or filtering goals.
+- A goal is itself a persisted Loop Generator loop: `goal_loop_definition`, `goal_loop_state`, `goal_loop_iteration`, and append-only `goal_iterations`.
+- Top-level tasks are direct members of a goal (`goal_id`, `parent_task_id=null`). Nested tasks remain child rows linked by `parent_task_id`. Do not create a synthetic root task to represent the goal.
+- Every task, including intermediate parent tasks, has its own Loop Generator contract and iteration history. The goal loop coordinates the task loops and evaluates the overall outcome.
+
+### Create a goal
+
+Use `goal_ledger_create_hierarchical`, not the legacy root-task creator. Supply:
+- `title_in`: descriptive title, which becomes the display name.
+- `tags_in`: normalized searchable tags.
+- `goal_loop_definition_in`: complete Loop Generator contract.
+- `task_definitions_in`: array of direct top-level task definitions; each task and nested child must have its own loop and acceptance criteria.
+- Full context, instructions, acceptance criteria, creator identity, owner and metadata.
+
+The database generates a readable, unique `goal_key` from the title. Return both title and goal_key to the user. UUIDs remain internal.
+
+### Resume an unfinished goal in a new chat
+
+1. On an instruction such as "start finishing an unfinished goal", call `goal_ledger_list_unfinished` before claiming work.
+2. If exactly one unfinished goal exists, resume it. If multiple exist, show their titles, readable keys, tags and statuses, then ask which one to continue.
+3. Load the complete state with `goal_ledger_resume_by_key`.
+4. Immediately identify it in the response as: **Loaded goal: <title>** (include its readable key and tags). If the user asks which goal is loaded, answer with the title, not the UUID.
+5. Only after selecting and loading the goal should the worker atomically claim one available task with `goal_ledger_claim_task_by_key`.
+
+Useful operations:
+- `goal_ledger_list_unfinished(tags_in)`
+- `goal_ledger_resume_by_key(goal_key_in)`
+- `goal_ledger_get_by_key(goal_key_in)`
+- `goal_ledger_claim_task_by_key(goal_key_in, ...)`
+- `goal_ledger_record_loop_iteration(...)`
+- `goal_ledger_finalize_by_key(goal_key_in, ...)`
+
+### Goal loop lifecycle
+
+The goal loop and task loops are separate persisted loops. After a meaningful batch of child-task progress, the orchestrator records a goal iteration with `goal_ledger_record_loop_iteration`: actual input/output, observations, criterion results, updated loop state, tools, evidence, verdict and next action. A goal-loop `pass` is rejected until every task is completed and independently verified, all goal criteria are satisfied, and evidence is non-empty. Goal finalization is rejected unless the latest goal iteration passed and all tasks remain verified.
+
+### Task-specific parameters
+
+Task definitions may include:
+- `parameters`: task-specific configuration and input values.
+- `parameter_contract`: `required` parameter names and `properties` with expected JSON `type` and optional `enum`.
+- `parameter_values`: values already known at creation.
+
+Workers return their fulfilled values in `result_in.parameter_values` when calling `task_ledger_submit_result`. The database validates required keys, types and enum constraints before accepting a completed result. Missing required values keep the task incomplete.
+
+### GitHub compute workspace
+
+Use `.github/workflows/agent-compute.yml` for finite code execution when reasoning requires an actual computation, program, parser, simulation, test or generated artifact. The workflow supports Python, Node.js, TypeScript, Bash, Go, Rust, Java, Ruby, PHP, C# and PowerShell on an ephemeral GitHub-hosted runner. Supply the source file on a workspace branch, selected `ref`, runtime, JSON string arguments and timeout (maximum 1,200 seconds). Retrieve the uploaded `agent-compute-<run-id>` artifact as evidence.
+
+The compute runner has read-only repository permission, does not persist checkout credentials, receives no application secrets, and uploads a bounded result artifact. It is finite CI compute, not a persistent machine or a ChatGPT worker. Do not put credentials in source files. The current GitHub connector may not expose workflow dispatch; if no authorized dispatch action is available, use the repository's Actions UI or report that limitation rather than claiming execution occurred.

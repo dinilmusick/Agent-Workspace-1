@@ -38,7 +38,13 @@ async function main() {
   const targetRoot = resolve("workspaces/target");
   await rm(targetRoot, { recursive: true, force: true });
   await mkdir(targetRoot, { recursive: true });
-  await cp(resolve("examples/quality-sample"), targetRoot, { recursive: true });
+  const sampleRoot = resolve("examples/quality-sample");
+  for (const entry of await readdir(sampleRoot)) {
+    await cp(join(sampleRoot, entry), join(targetRoot, entry), { recursive: true, force: true });
+  }
+  if (!await stat(join(targetRoot, ".agent-workspace/quality-gates.json")).then(() => true, () => false)) {
+    throw new Error("Quality manifest was not copied into workspaces/target");
+  }
 
   const env = {
     ...process.env,

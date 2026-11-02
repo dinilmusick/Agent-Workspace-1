@@ -7,9 +7,9 @@ const ignored = new Set(["api", "__tests__", "__test__", "node_modules"]);
 
 function routePath(root, file, router) {
   const parts = relative(root, file).split(sep);
-  parts.pop();
+  const filename = parts.pop().replace(extensions, "");
+  if (router === "pages" && filename !== "index") parts.push(filename);
   const clean = parts.filter(part => !/^\(.*\)$/.test(part) && !part.startsWith("@"));
-  if (router === "pages" && clean.at(-1) === "index") clean.pop();
   const dynamic = clean.some(part => /^\[.+\]$/.test(part));
   return { path: ("/" + clean.join("/")).replace(/\/$/, "") || "/", dynamic };
 }

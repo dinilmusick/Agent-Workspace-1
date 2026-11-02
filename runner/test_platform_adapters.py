@@ -20,7 +20,7 @@ class PlatformAdapterTests(unittest.TestCase):
     def test_cloudflare_requires_current_workers_vitest_plugin(self):
         (self.root / "wrangler.jsonc").write_text('{"name":"worker"}')
         (self.root / "package.json").write_text(json.dumps({"devDependencies": {"@cloudflare/vitest-pool-workers": "0.8.0"}}))
-        (self.root / "vitest.config.ts").write_text("export default {};")
+        (self.root / "vitest.config.ts").write_text("import { cloudflareTest } from \"@cloudflare/vitest-plugin\"; export default { plugins: [cloudflareTest()] };")
         with self.assertRaisesRegex(adapters.AdapterError, "vitest-plugin"):
             adapters.run_cloudflare(self.root, self.out)
 
@@ -45,7 +45,7 @@ class PlatformAdapterTests(unittest.TestCase):
         (self.root / ".vercel" / "project.json").write_text('{"projectId":"prj_test","orgId":"team_test"}')
         env = {"VERCEL_TOKEN": "test-token", "VERCEL_PREVIEW_URL": "https://preview-my-app.vercel.app"}
         with patch.dict(os.environ, env, clear=True), patch.object(adapters, "run") as command:
-            command.side_effect = ["Target: Preview", "", "", ""]
+            command.side_effect = ["", "", "Target: Preview", "", "", ""]
             result = adapters.run_vercel(self.root, self.out)
         commands = [call.args[0] for call in command.call_args_list]
         self.assertEqual(result["localBuild"], "passed")

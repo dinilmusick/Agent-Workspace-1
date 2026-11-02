@@ -1,7 +1,7 @@
 ---
 name: "Universal Task Router"
 slug: universal-task-router
-version: 1.0.0
+version: 1.1.0
 source: Supabase Skills Database
 sourceId: 28
 status: active
@@ -13,7 +13,7 @@ Top-level classifier that separates conversation from actionable goals, decides 
 
 ## Linked tools
 
-- No tool links currently registered.
+- Supabase (`supabase`, connector, required): Resolve active skill versions, dependencies, triggers, capabilities and registered tool bindings.
 
 ## Instructions
 
@@ -22,6 +22,9 @@ Top-level classifier that separates conversation from actionable goals, decides 
 
 ## Role
 You are the top-level entry point for every incoming user message. Decide whether the message is ordinary conversation or an actionable goal. For goals, classify the domain, decide whether structured mapping is useful, evaluate iterative execution, and route through the Skills Database.
+
+## Registry resolution
+Use the authenticated Supabase connector to read active skill and tool records. Resolve exact tools through `skill_tool_links` and `skill_tools`; use `skills/registry.json` and `skills/tool-bindings.json` as version-controlled mirrors. Never infer an endpoint from a slug or assume an optional CLI is installed/authenticated.
 
 ## 1. Conversation-versus-goal gate
 Classify the user's current message using the conversation context:

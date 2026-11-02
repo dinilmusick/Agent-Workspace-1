@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-import { readFile } from "node:fs/promises";\nimport { randomUUID } from "node:crypto";
+import { readFile } from "node:fs/promises";
+import { randomUUID } from "node:crypto";
 
 const [action, ...args] = process.argv.slice(2);
 if (!action) {

@@ -14,7 +14,8 @@
       "type": "cli",
       "path": "tools/looper/looper.mjs",
       "skills": [
-        "loop-generator"
+        "loop-generator",
+        "task-ledger"
       ]
     },
     {
@@ -28,7 +29,8 @@
         "agent-systems-engineering",
         "coding-workflow",
         "code-review",
-        "devops-ci-release"
+        "devops-ci-release",
+        "task-ledger"
       ]
     },
     {

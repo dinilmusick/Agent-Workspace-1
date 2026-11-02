@@ -31,16 +31,24 @@ The manual `.github/workflows/inspect-react.yml` workflow:
 2. Installs its locked dependencies and runs available build/test scripts.
 3. Runs configured type, lint, format, unused-code and dependency-boundary checks.
 4. Starts the target application and waits for HTTP readiness.
-5. Inspects the actual rendered page with Playwright and axe-core.
-6. Uploads evidence even when an earlier stage fails.
+5. Runs manifest-driven Playwright Test against real target routes and user workflows.
+6. Captures responsive screenshots, DOM snapshots, console/network/HTTP failures, traces, and axe-core results.
+7. Compares configured visual baselines; baseline updates are opt-in.
+8. Uploads evidence even when an earlier stage fails.
 
 ## Evidence
 
 `artifacts/` contains install/build/test/quality logs plus:
-- screenshot and DOM text snapshot;
+- screenshots and rendered HTML DOM snapshots;
 - browser console errors and uncaught page exceptions;
 - failed network requests and HTTP responses with status >= 400;
 - Playwright trace;
 - axe accessibility violations, passes and incomplete checks.
 
-This is a diagnostic baseline, not a claim of complete visual correctness. Add application-specific Playwright assertions as the test catalogue grows.
+## Browser test manifest
+
+Add `.agent-workspace/browser-tests.json` to a target repository. Set `frontendServiceId` when the frontend is not the default `web` service; otherwise the inspection workflow resolves the URL from the multi-service runtime state. Version 1 supports explicit `routes` with title/heading/visible assertions, named `viewports`, `authStates` backed by target-local Playwright storage-state files, and declarative `workflows` with navigation, click, fill, check, select, visibility, text, URL and enabled assertions. Routes in Next.js App Router and Pages Router are discovered automatically; dynamic routes are listed as untested until concrete paths are supplied.
+
+Set `visual.enabled` to true and `visual.baselineDir` to a target-local directory to enable `toHaveScreenshot` comparisons. Baselines are never overwritten by default. Set `UPDATE_VISUAL_BASELINES=1` only when intentionally refreshing them; the workflow uploads generated baselines as evidence. Accessibility checks use axe-core and can be configured to fail on violations.
+
+The route-coverage report includes an explicit `evidenceKind`: `real-target-preview`, `real-sample-preview`, `fixture-unit-test`, or `unclassified`. The CI browser-harness workflow starts the real Node sample application, exercises its login and mobile navigation flows, generates baselines once, then runs a second comparison pass. Fixture-only unit tests are labelled separately and are never represented as application preview evidence.

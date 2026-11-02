@@ -46,6 +46,6 @@ Target code is untrusted. The public workflow uses read-only repository permissi
 ## Platform development adapters
 
 - `runner/platform_adapters.py`: shared local-only adapter runner.
-- `@cloudflare/vitest-plugin@1.4.12`, `vitest@5.0.5`, `wrangler@4.156.1`: local Cloudflare Worker tests with bindings.
+- `@cloudflare/vitest-plugin@1.4.12`, `vitest@5.0.5`, `vite@7.3.6`, `wrangler@4.156.1`: local Cloudflare Worker tests with bindings.
 - `vercel@65.9.0`: preview-environment local builds and read-only deployment diagnostics.
 - `supabase@3.0.0`: local Postgres migrations and pgTAP tests only.

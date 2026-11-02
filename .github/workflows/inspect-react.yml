@@ -80,6 +80,8 @@ jobs:
       - name: Resolve target browser URL
         id: browser_url
         if: steps.start.outcome == 'success'
+        env:
+          PROJECT_PATH: ${{ inputs.project_path }}
         run: |
           python - <<'PY'
           import json, os
@@ -93,7 +95,7 @@ jobs:
           service = state.get("services", {}).get(service_id, {})
           base_url = manifest.get("baseUrl") or (f"http://127.0.0.1:{service['port']}" if service else "http://127.0.0.1:4173")
           with open(os.environ["GITHUB_ENV"], "a") as env:
-              env.write(f"TARGET_BASE_URL={base_url}\\n")
+              env.write(f"TARGET_BASE_URL={base_url}\n")
           print(f"Browser target: {base_url}")
           PY
 

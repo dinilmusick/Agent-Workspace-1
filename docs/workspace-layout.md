@@ -18,11 +18,11 @@ runner/
   execute-code.py               # language-aware compute executor
   resolve-compute-request.py    # validates workflow/issue requests
   checkout-public-repository.py # public target checkout helper
-  react-project.py              # React project preparation and checks
+  react-project.py              # React project preparation and checks\n  service-runtime.py            # concurrent local service supervisor\n  test_service_runtime.py       # multi-service lifecycle regression tests
 tools/
   looper/
   react-typescript-fullstack/
-  backend-api-diagnostics/       # local API contract, auth and server-log diagnostics
+  backend-api-diagnostics/       # local API contract, auth and server-log diagnostics\nexamples/\n  services.json                  # multi-service target manifest example\n  fixture-service.py             # test-only HTTP service fixture
   agent-runtimes/
 workspaces/                     # disposable target checkout area
 results/                        # compute output area

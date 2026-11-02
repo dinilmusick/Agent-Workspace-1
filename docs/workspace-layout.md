@@ -21,7 +21,8 @@ runner/
   react-project.py              # React project preparation and checks
 tools/
   looper/
-  react-typescript-fullstack/\n  backend-api-diagnostics/       # local API contract, auth and server-log diagnostics
+  react-typescript-fullstack/
+  backend-api-diagnostics/       # local API contract, auth and server-log diagnostics
   agent-runtimes/
 workspaces/                     # disposable target checkout area
 results/                        # compute output area

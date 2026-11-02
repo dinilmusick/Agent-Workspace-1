@@ -27,6 +27,9 @@ The Task Ledger is the database-backed coordination substrate for multi-agent ex
 
 Use the authenticated Supabase connector as the shared read/write interface. The database is the source of truth for task definitions, claims, progress, results, evidence, and verification state.
 
+## Goal-backed ChatGPT workflow precedence
+For a persistent named goal worked by manually opened ChatGPT conversations, the goal protocol in the v1.3.3 section below supersedes the generic legacy task procedures in this file. Use goal_ledger_create_with_tasks, goal_ledger_claim_task, task_ledger_record_loop_iteration, task_ledger_record_parent_loop_iteration, task_ledger_verify_result and goal_ledger_finalize. Each task, including every parent, must execute its own persisted Loop Generator contract. Each task stores the goal context version it was created against; do not silently change the meaning of in-flight tasks when goal context is revised.
+
 ## Core model
 - tasks is the canonical task record. A task is a formal execution contract, not merely a title and status.
 - Nested tasks are additional rows in tasks, connected by parent_task_id. Do not create a separate table for nested tasks.
@@ -36,7 +39,7 @@ Use the authenticated Supabase connector as the shared read/write interface. The
 - task_hierarchy presents the recursive parent/child tree.
 - active_tasks presents active work and heartbeat freshness.
 
-Every task has a stable UUID and human-readable task_key. Pass the UUID or task_key in handoffs; never rely on row order.
+Every task has a stable UUID and human-readable task_key. Pass the UUID or task_key in handoffs; never rely on row order. Goal-backed tasks also carry goal_id and goal_context_version.
 
 ## Formal task definition
 Create tasks with task_ledger_create_tree. It accepts one JSON object and recursively creates its subtasks as child task rows in one transaction. Each task definition should contain as many of these fields as the task requires:
@@ -77,11 +80,16 @@ Example shape:
     "enabled": true,
     "objective": "Reach all acceptance criteria",
     "input_contract": {"type": "implementation state"},
-    "output_contract": {"type": "test observations"},
-    "cycle": ["apply change", "run checks", "observe", "diagnose", "revise"],
+    "output_contract": {"type": "verified artifact and evidence"},
+    "initial_input": {"state": "unverified"},
+    "transformation": "apply one targeted change",
+    "observation": {"method": "run tests and inspect actual behavior"},
+    "evaluation": {"method": "compare evidence against each acceptance criterion"},
+    "revision_policy": {"on_failure": "diagnose and change approach; do not repeat unchanged failures"},
     "tools": ["editor", "test runner"],
-    "stop_conditions": ["all criteria verified", "blocked by missing permission"],
-    "max_iterations": 8
+    "stop_conditions": ["verified success", "genuine blocker", "cancellation", "budget exhausted"],
+    "max_iterations": 8,
+    "iteration_policy": {"max_iterations": 8}
   },
   "subtasks": [
     {"name": "Independent child task", "objective": "Child outcome", "acceptance_criteria": ["verifiable result"]}

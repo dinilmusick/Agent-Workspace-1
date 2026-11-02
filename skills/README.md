@@ -3,7 +3,7 @@
 `skills/` is the version-controlled mirror of the Supabase Skills Database.
 
 - Each skill has its own `skills/<slug>/SKILL.md` file.
-- `registry.json` indexes the current catalogue and its tool links.
+- `registry.json` indexes the catalogue; `current-versions.json` records the latest published versions for skills updated after the registry snapshot.
 - `tool-bindings.json` mirrors the normalized tool registry and skill-to-tool associations.
 - `Loop Generator` uses `tools/looper/looper.mjs`; coding specialists can route to the shared TypeScript/React toolchain and optional agent runtimes.
 

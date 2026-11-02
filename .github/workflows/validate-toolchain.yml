@@ -2,10 +2,10 @@ name: Validate Workspace Toolchain
 on:
   push:
     branches: [main, "feat/**"]
-    paths: ["tools/react-typescript-fullstack/**", "tools/agent-runtimes/**", "tools/looper/**", "runner/**", ".github/workflows/validate-toolchain.yml"]
+    paths: ["tools/react-typescript-fullstack/**", "tools/agent-runtimes/**", "tools/looper/**", "tools/backend-api-diagnostics/**", "runner/**", ".github/workflows/validate-toolchain.yml"]
   pull_request:
     branches: [main]
-    paths: ["tools/react-typescript-fullstack/**", "tools/agent-runtimes/**", "tools/looper/**", "runner/**"]
+    paths: ["tools/react-typescript-fullstack/**", "tools/agent-runtimes/**", "tools/looper/**", "tools/backend-api-diagnostics/**", "runner/**"]
 permissions:
   contents: read
 jobs:

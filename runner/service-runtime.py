@@ -148,6 +148,7 @@ def supervise(manifest, root, state_dir, startup_timeout):
                     restart = config.get("restart", {})
                     if restart_allowed(config, code) and item["restarts"] < restart.get("max_restarts", 0):
                         item["restarts"] += 1
+                        state["services"][name]["restart_count"] = item["restarts"]
                         time.sleep(restart.get("delay_seconds", 0.2))
                         launch(name, item, state, state_path)
                     else:

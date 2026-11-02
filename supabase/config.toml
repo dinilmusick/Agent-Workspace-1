@@ -1,0 +1,12 @@
+# Isolated local Supabase stack for disposable integration tests only.
+# No linked project reference, credentials, or remote target is configured.
+project_id = "agent-workspace-tests"
+
+[db]
+major_version = 17
+
+[db.migrations]
+enabled = true
+
+[db.seed]
+enabled = false

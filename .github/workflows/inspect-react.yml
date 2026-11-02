@@ -110,6 +110,13 @@ jobs:
           ARTIFACT_DIR: ${{ github.workspace }}/artifacts/browser
         run: node tools/react-typescript-fullstack/scripts/inspect-browser.mjs
 
+      - name: Stop target services
+        id: stop
+        if: always()
+        env:
+          PROJECT_PATH: ${{ inputs.project_path }}
+        run: python runner/react-project.py stop --project-path "$PROJECT_PATH"
+
       - name: Upload build, quality and browser evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
@@ -128,11 +135,13 @@ jobs:
           READY: ${{ steps.ready.outcome }}
           BROWSER: ${{ steps.browser.outcome }}
           API_TESTS: ${{ steps.api.outcome }}
+          STOP: ${{ steps.stop.outcome }}
         run: |
-          printf 'prepare=%s quality=%s start=%s ready=%s api=%s browser=%s\n' "$PREPARE" "$QUALITY" "$START" "$READY" "$API_TESTS" "$BROWSER"
+          printf 'prepare=%s quality=%s start=%s ready=%s api=%s browser=%s stop=%s\n' "$PREPARE" "$QUALITY" "$START" "$READY" "$API_TESTS" "$BROWSER" "$STOP"
           test "$PREPARE" = success &&
           test "$QUALITY" = success &&
           test "$START" = success &&
           test "$READY" = success &&
           test "$BROWSER" = success &&
-          { test "$API_TESTS" = success || test "$API_TESTS" = skipped; }
+          { test "$API_TESTS" = success || test "$API_TESTS" = skipped; } &&
+          test "$STOP" = success

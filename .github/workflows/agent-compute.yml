@@ -13,7 +13,7 @@ on:
         required: true
         default: python
         type: choice
-        options: [python, node, typescript, bash, go, rust, java, ruby, php, csharp, powershell]
+        options: [python, node, typescript, bash, go, rust, java, c, cpp, csharp, ruby, php, perl, r, powershell]
       source_file:
         description: Repository-relative source file
         required: true
@@ -60,6 +60,10 @@ jobs:
           javac -version || true
           ruby --version || true
           php --version || true
+          perl --version || true
+          Rscript --version || true
+          gcc --version || true
+          g++ --version || true
           dotnet --version || true
           pwsh --version || true
           mkdir -p results

@@ -1,1 +1,73 @@
-# Chat-driven Goal and Task Ledger integration\n\nThe user manually opens ChatGPT conversations. The first conversation is the orchestrator; additional conversations are workers. Supabase is the durable ledger and uses no Edge Functions.\n\n## Compute boundary\n\n- ChatGPT conversations: goal planning, task decomposition, reasoning, execution, tool use, and independent verification.\n- GitHub Actions: repository CI, builds, tests, validation, and finite GitHub-hosted execution jobs. It does not create ChatGPT conversations.\n- Supabase: persistent reads/writes for goals, task trees, loops, claims, leases, iterations, evidence, and results.\n- PostgreSQL RPCs: only transactional persistence/coordination, including atomic claims and guarded state transitions.\n- Supabase Edge Functions: not used.\n\n## Orchestrator flow\n\n1. Treat ordinary conversation as ordinary conversation until a concrete goal is agreed.\n2. Create a uniquely named goal with full context, instructions, and goal acceptance criteria. Use a unique orchestrator agent_id for this conversation.\n3. Decompose the goal into independently executable leaf tasks. Every task, including root and intermediate tasks, must have a Loop Generator contract: enabled, objective, input_contract, output_contract, non-empty cycle, evaluation, revision_policy, stop_conditions, and max_iterations between 1 and 100. Every task also needs acceptance criteria and an independent verification plan.\n4. Call goal_ledger_create_with_tasks to persist the goal and entire task tree atomically. It validates loop contracts.\n5. Add dependencies where needed, then call goal_ledger_summary. Report ready leaf tasks, blocked work, progress, and recommended worker-chat count.\n6. Tell the user to open that many new ChatGPT chats and give each the exact instruction: “Claim a task from goal: <goal name>”.\n7. Resume after interruptions with goal_ledger_resume(name). The goal record, not chat history, is canonical.\n\n## Worker flow\n\n1. Call goal_ledger_resume(name) and load the complete goal context, task tree, dependencies, loop state, events, and iterations.\n2. Create a unique opaque session_id for this conversation and use a unique agent_id different from the goal creator.\n3. Call goal_ledger_claim_task(goal_name, agent_id, agent_name, agent_type, capabilities, session_id, lease_seconds). The database atomically claims one eligible leaf task using row locking and skip-locked semantics.\n4. Execute only that task's persisted contract. Renew the lease with task_ledger_heartbeat_claim.\n5. Record every loop iteration with task_ledger_record_loop_iteration, including actual input/output, observation, criterion_results, loop_state, tools_used, evidence, verdict, and next_action. A pass requires every criterion satisfied and non-empty evidence.\n6. Submit the result with task_ledger_submit_result. The database rejects a completed submission unless the latest loop iteration passes every criterion with evidence.\n7. Do not self-verify. The orchestrator or a separate verifier inspects the artifact/evidence and calls task_ledger_verify_result. After all leaf tasks and parent tasks are verified, call goal_ledger_finalize.\n8. Claim another task only when the user explicitly tells the worker to continue.\n\n## Resume and status\n\n- goal_ledger_list(status) discovers goals.\n- goal_ledger_resume(name) returns goal context, summary, tasks, iterations, and events.\n- goal_ledger_summary(goal_id) reports ready/active/blocked/completed/failed task counts and recommended workers.\n- goal_ledger_finalize(name, agent_id, report) only completes the goal when every task is completed and verified.\n\n## Direct connector interface\n\nChatGPT conversations use the user's connected Supabase connector directly for database reads and RPC calls. They do not call /functions/v1/task-ledger and do not need one Supabase Auth user per browser chat. Each conversation supplies a unique agent_id and session_id in the task RPC arguments. The optional Node CLI and GitHub-hosted worker runtime use Supabase Auth + PostgREST/RPC directly and require a registered agent_registry identity; they also do not call Edge Functions. Never place service-role credentials in prompts, task records, or the public repository.\n\n## Verification semantics\n\nA task is not complete because an agent says it is complete. The persisted loop must pass every acceptance criterion with evidence, the result must be independently verified, and the parent/goal can be finalized only after all descendants are verified. A genuine blocker is recorded and escalated; it is never represented as success.\n
+# Hierarchical Chat-Driven Goal and Task Ledger
+
+ChatGPT conversations are the reasoning agents. The user manually opens the orchestrator and worker conversations. Supabase stores durable state and coordinates claims. GitHub Actions provides finite, ephemeral compute.
+
+## Identity and hierarchy
+
+- `goals.name`: descriptive, human-readable goal title shown in every user-facing response.
+- `goals.goal_key`: stable readable identifier generated from the title, such as `refactor-agent-workflow`. Use this key in prompts and handoffs.
+- `goals.id`: internal UUID for relational integrity; never use it as the displayed goal identity.
+- `goals.tags`: searchable classification labels.
+- A goal has its own Loop Generator contract, state and iteration history in `goal_loop_definition`, `goal_loop_state`, `goal_loop_iteration` and `goal_iterations`.
+- Top-level tasks are direct children of the goal (`goal_id`, null `parent_task_id)). Nested tasks are rows in `tasks` linked by `parent_task_id`. Do not create a synthetic root task.
+- Every task at every depth has its own loop contract and iteration history. Task parameters and completion values are persisted separately.
+
+## Orchestrator flow
+
+1. Keep ordinary conversation ordinary until a concrete actionable goal is agreed.
+2. Generate a descriptive title, readable key, tags, complete context, goal acceptance criteria and a goal-level Loop Generator contract.
+3. Decompose into direct top-level tasks. Each task and nested task needs its own loop contract, task-specific parameter contract where applicable, acceptance criteria, output contract and independent verification plan.
+4. Call `goal_ledger_create_hierarchical` with the goal definition and array of top-level task definitions. It creates the goal and task tree atomically.
+5. Add dependencies, then inspect the goal summary and ready leaf-task parallelism. Recommend worker-chat count.
+6. The user manually opens worker chats. Each worker loads the selected goal and claims one task by readable goal key.
+7. The orchestrator records goal-loop iterations as tasks progress. Goal-loop pass requires every task independently verified, goal criteria satisfied and non-empty evidence.
+
+## New-chat unfinished-goal flow
+
+1. Call `goal_ledger_list_unfinished` immediately when asked to continue an unfinished goal.
+2. If one goal is available, load it. If several are available, display each title, readable key, tags and status, then ask which one to resume.
+3. Call `goal_ledger_resume_by_key` to load the full goal, task tree, dependencies, task iterations, goal iterations and events.
+4. Tell the user: **Loaded goal: <title>**. Use the title when asked what goal is loaded. Do not expose the internal UUID as the identity.
+5. Claim one available leaf task with `goal_ledger_claim_task_by_key`, using unique agent and chat-session IDs.
+
+## Worker flow
+
+1. Load the selected goal and all relevant task context.
+2. Atomically claim one eligible leaf task; exclusive claims use row locking and leases.
+3. Execute the persisted task loop and renew its lease.
+4. Record each iteration with actual inputs, outputs, observations, criterion results, loop state, tools and evidence.
+5. Submit result values, including `parameter_values`, through `task_ledger_submit_result`. The database validates required parameter names, types and optional enums before accepting completion.
+6. Do not self-verify. An independent verifier checks the result and evidence.
+7. Do not claim another task unless instructed.
+
+## Completion invariants
+
+```text
+TaskComplete =
+  TaskLoopPassed
+  AND RequiredParametersSatisfied
+  AND ResultSubmitted
+  AND IndependentlyVerified
+
+GoalComplete =
+  GoalLoopPassed
+  AND GoalAcceptanceCriteriaSatisfied
+  AND EveryDescendantTaskIndependentlyVerified
+  AND GoalEvidenceNonEmpty
+```
+
+The database enforces these gates. A worker's assertion that work is complete is not sufficient.
+
+## GitHub compute workspace
+
+`.github/workflows/agent-compute.yml` executes a source file from a selected repository revision on an ephemeral GitHub-hosted Ubuntu runner. Supported runtimes: Python, Node.js, TypeScript, Bash, Go, Rust, Java, Ruby, PHP, C# and PowerShell. It accepts JSON string arguments, enforces a maximum 1,200-second execution timeout, and uploads bounded stdout/stderr/result evidence as a workflow artifact.
+
+The job has read-only repository permission, checkout credentials are not persisted, and no application secrets are passed to the executed process. The runner is finite compute, not a persistent workspace or ChatGPT agent. The source file must exist in the selected repository revision. Do not place credentials in source files. The current GitHub connector may not expose workflow dispatch; use an authorized dispatch capability or the GitHub Actions UI, and never report an execution that was not actually run.
+
+## Compute boundary
+
+- ChatGPT: reasoning, planning, code authoring, tool selection and verification.
+- GitHub Actions: finite code execution, builds, tests and generated artifacts.
+- Supabase: persistence, owner-scoped reads/writes and atomic transactional coordination.
+- PostgreSQL RPC: claims, leases, iteration append, result submission, verification and guarded finalization only.
+- Supabase Edge Functions: not used.

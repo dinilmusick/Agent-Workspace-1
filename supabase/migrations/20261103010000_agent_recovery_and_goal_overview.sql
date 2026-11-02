@@ -25,6 +25,7 @@ set search_path to 'public'
 as $function$
 declare
   candidate_id uuid;
+  previous_status text;
   previous_agent_id text;
   previous_heartbeat timestamptz;
   previous_claim_token uuid;
@@ -35,8 +36,8 @@ begin
     raise exception 'agent identity is required';
   end if;
 
-  select t.id,t.claimed_by_agent_id,t.heartbeat_at,t.claim_token
-    into candidate_id,previous_agent_id,previous_heartbeat,previous_claim_token
+  select t.id,t.status,t.claimed_by_agent_id,t.heartbeat_at,t.claim_token
+    into candidate_id,previous_status,previous_agent_id,previous_heartbeat,previous_claim_token
   from public.tasks t
   where t.status in ('queued','running')
     and t.attempt_count<t.max_attempts
@@ -68,7 +69,7 @@ begin
 
   if candidate_id is null then return; end if;
 
-  if previous_agent_id is not null then
+  if previous_status='running' and previous_agent_id is not null then
     insert into public.task_events(task_id,event_type,agent_id,message,payload)
     values(
       candidate_id,'lease_recovered',agent_id_in,
@@ -78,7 +79,7 @@ begin
         'previous_claim_token',previous_claim_token,
         'previous_heartbeat_at',previous_heartbeat,
         'recovery_reason',case
-          when previous_heartbeat<=now()-interval '60 minutes' then 'heartbeat_timeout'
+          when coalesce(previous_heartbeat,'-infinity'::timestamptz)<=now()-interval '60 minutes' then 'heartbeat_timeout'
           else 'lease_expired'
         end
       )
@@ -167,7 +168,7 @@ begin
 
   if candidate_id is null then return; end if;
 
-  if previous_agent_id is not null then
+  if previous_status='running' and previous_agent_id is not null then
     insert into public.task_events(task_id,event_type,agent_id,message,payload)
     values(
       candidate_id,'lease_recovered',agent_id_in,
@@ -177,7 +178,7 @@ begin
         'previous_claim_token',previous_claim_token,
         'previous_heartbeat_at',previous_heartbeat,
         'recovery_reason',case
-          when previous_heartbeat<=now()-interval '60 minutes' then 'heartbeat_timeout'
+          when coalesce(previous_heartbeat,'-infinity'::timestamptz)<=now()-interval '60 minutes' then 'heartbeat_timeout'
           else 'lease_expired'
         end
       )

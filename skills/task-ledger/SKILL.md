@@ -1,7 +1,7 @@
 ---
 name: "Task Ledger"
 slug: task-ledger
-version: 1.7.2
+version: 1.7.3
 source: Supabase Skills Database
 sourceId: 7
 status: active
@@ -95,7 +95,7 @@ Use `.github/workflows/agent-compute.yml` for finite code execution when a real 
 
 Provide the repository `ref`, source file, runtime, JSON string arguments and timeout (maximum 1,200 seconds). The result is uploaded as an artifact. The workflow uses read-only repository permission, checkout credentials are not persisted, and no application secrets are passed to the executed process. It is finite compute, not a persistent machine or a ChatGPT worker.
 
-Use an authorized workflow-dispatch capability if available. If the connected GitHub tools cannot dispatch a workflow, state that limitation and use the Actions UI or request the required access; never claim execution occurred when it did not. Do not put credentials in source files.
+To invoke compute from a ChatGPT conversation without a workflow-dispatch tool, create a GitHub issue with title prefixed `[agent-compute]` and a JSON body containing `ref`, `runtime`, `source_file`, `arguments` (string array) and `timeout_seconds`. The issue trigger accepts only repository owners, members and collaborators. Use the returned issue number to track the request and inspect its Actions run/artifact. Alternatively use workflow_dispatch from the Actions UI. Never claim execution occurred without a real run. Do not put credentials in source files.
 
 ## Completion invariant
 

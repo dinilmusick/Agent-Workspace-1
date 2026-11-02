@@ -25,8 +25,13 @@ begin
         'objective','Verify full overview output',
         'input_contract',jsonb_build_object('type','input'),
         'output_contract',jsonb_build_object('type','result'),
-        'cycle',jsonb_build_array('inspect','verify'),
+        'transformation','Create a goal fixture, read the overview, and verify every required field.',
+        'observation',jsonb_build_object('required',jsonb_build_array('test_results','runtime_observations','known_gaps')),
         'evaluation',jsonb_build_object('criteria','overview contains full task contract'),
+        'revision_policy',jsonb_build_object('on_failure','Diagnose and retry failed assertions','max_revisions',2),
+        'initial_input',jsonb_build_object('phase','inspect'),
+        'tools',jsonb_build_array('Supabase PostgreSQL','SQL integration test'),
+        'iteration_policy',jsonb_build_object('mode','persistent','heartbeat_required',true,'continue_on_partial_success',true,'record_observation_each_iteration',true),
         'stop_conditions',jsonb_build_array('all fields present'),
         'max_iterations',2
       )

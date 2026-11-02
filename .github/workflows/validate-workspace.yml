@@ -37,3 +37,15 @@ jobs:
         run: |
           python runner/execute.py --task-file examples/python-smoke.json --output results/self-test.json
           python runner/verify.py --result results/self-test.json
+
+      - name: Agent compute runtime self-test
+        run: |
+          python runner/execute-code.py --runtime python --source-file examples/hello.py --timeout-seconds 30 --output results/compute-self-test.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          result = json.loads(Path("results/compute-self-test.json").read_text())
+          assert result["exit_code"] == 0, result
+          assert result["error"] is None, result
+          print("VALID agent compute runtime")
+          PY

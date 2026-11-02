@@ -38,7 +38,7 @@ class ServiceRuntimeTests(unittest.TestCase):
             "--startup-timeout", str(timeout)], capture_output=True, text=True, timeout=timeout + 5)
 
     def test_starts_multiple_services_and_stops_them_with_logs_and_ports(self):
-        self.write_manifest([self.service("api"), self.service("web")])
+        web = self.service("web", {"env": {"SERVICE_NAME": "web", "UPSTREAM_PORT": "${service.api.port}"}})\n        self.write_manifest([self.service("api"), web])
         started = self.run_cli("start")
         self.assertEqual(started.returncode, 0, started.stderr)
         state = json.loads((self.state / "state.json").read_text())
@@ -46,7 +46,7 @@ class ServiceRuntimeTests(unittest.TestCase):
         self.assertNotEqual(state["services"]["api"]["port"], state["services"]["web"]["port"])
         for name, service in state["services"].items():
             with urllib.request.urlopen(f"http://127.0.0.1:{service['port']}/health") as response:
-                self.assertEqual(json.loads(response.read())["service"], name)
+                payload = json.loads(response.read())\n                self.assertEqual(payload["service"], name)\n                if name == "web":\n                    self.assertEqual(int(payload["upstream_port"]), state["services"]["api"]["port"])
             self.assertTrue(Path(service["log"]).is_file())
             self.assertIn("fixture service", Path(service["log"]).read_text(encoding="utf-8"))
         stopped = self.run_cli("stop")

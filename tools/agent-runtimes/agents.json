@@ -11,6 +11,6 @@
     {"id":"openhands","repository":"https://github.com/OpenHands/OpenHands","license":"MIT","install":"official Agent Canvas self-hosting instructions"},
     {"id":"goose","repository":"https://github.com/aaif-goose/goose","license":"Apache-2.0","install":"official CLI installation instructions"},
     {"id":"aider","repository":"https://github.com/Aider-AI/aider","license":"Apache-2.0","install":"pip install aider-chat"},
-    {"id":"cline","repository":"https://github.com/cline/cline","license":"Apache-2.0","install":"official Cline CLI installation instructions"}
+    {"id":"cline","repository":"https://github.com/cline/cline","license":"Apache-2.0","install":"Install the official Cline VS Code extension"}
   ]
 }

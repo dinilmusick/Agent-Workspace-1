@@ -34,7 +34,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: agent-compute-\${{ github.run_id }}
+  group: agent-compute-${{ github.run_id }}
   cancel-in-progress: false
 
 jobs:
@@ -47,7 +47,7 @@ jobs:
       - name: Checkout selected workspace revision without persisted credentials
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
-          ref: \${{ inputs.ref }}
+          ref: ${{ inputs.ref }}
           persist-credentials: false
 
       - name: Record available runtimes
@@ -66,10 +66,10 @@ jobs:
       - name: Execute workspace source
         id: execute
         env:
-          COMPUTE_RUNTIME: \${{ inputs.runtime }}
-          COMPUTE_SOURCE_FILE: \${{ inputs.source_file }}
-          COMPUTE_ARGUMENTS: \${{ inputs.arguments }}
-          COMPUTE_TIMEOUT_SECONDS: \${{ inputs.timeout_seconds }}
+          COMPUTE_RUNTIME: ${{ inputs.runtime }}
+          COMPUTE_SOURCE_FILE: ${{ inputs.source_file }}
+          COMPUTE_ARGUMENTS: ${{ inputs.arguments }}
+          COMPUTE_TIMEOUT_SECONDS: ${{ inputs.timeout_seconds }}
         shell: bash
         run: |
           python runner/execute-code.py \
@@ -83,7 +83,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: agent-compute-\${{ github.run_id }}
+          name: agent-compute-${{ github.run_id }}
           path: results/compute-result.json
           if-no-files-found: warn
           retention-days: 7

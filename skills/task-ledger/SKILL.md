@@ -185,7 +185,11 @@ The user's ChatGPT browser conversations are the interactive agents. The user ma
 - Full prompts and interaction sequence: `docs/chat-agent-workflow.md`.
 
 
-## Direct connector execution\n\nFor a new goal, call goal_ledger_create_with_tasks with the goal context and a fully loop-backed root task definition. For a worker, call goal_ledger_resume(name), then goal_ledger_claim_task(name, unique_agent_id, agent_name, 'worker', capabilities, unique_session_id, lease_seconds). Record every cycle with task_ledger_record_loop_iteration; use verdict='pass' only when criterion_results marks every criterion satisfied and evidence is non-empty. Submit through task_ledger_submit_result. The orchestrator/verifier independently checks the result, finalizes parent tasks, then calls goal_ledger_finalize only when every task is verified.\n\n## Metadata
+## Direct connector execution
+
+For a new goal, call goal_ledger_create_with_tasks with the goal context and a fully loop-backed root task definition. For a worker, call goal_ledger_resume(name), then goal_ledger_claim_task(name, unique_agent_id, agent_name, 'worker', capabilities, unique_session_id, lease_seconds). Record every cycle with task_ledger_record_loop_iteration; use verdict='pass' only when criterion_results marks every criterion satisfied and evidence is non-empty. Submit through task_ledger_submit_result. The orchestrator/verifier independently checks the result, finalizes parent tasks, then calls goal_ledger_finalize only when every task is verified.
+
+## Metadata
 
 ```json
 {}

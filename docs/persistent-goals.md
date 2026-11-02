@@ -20,7 +20,7 @@ All goal operations are PostgreSQL transactions/RPCs, not Edge Function compute:
 - `goal_ledger_update(goal_id_in, changed_by_agent_id_in, ...)`
 - `goal_ledger_summary(goal_id_in)`
 
-The task-tree RPC accepts `goal_id` in the root task definition. Children inherit the same goal ID, and cross-goal parent/child relationships are rejected. Existing task claim logic uses PostgreSQL row locking with `FOR UPDATE SKIP LOCKED`, leases and claim tokens.
+The task-tree RPC accepts `goal_id` in the root task definition. Children inherit the same goal ID, and cross-goal parent/child relationships are rejected. Task claims use PostgreSQL row locking with `FOR UPDATE SKIP LOCKED`, leases and claim tokens. Only leaf tasks are claimable; decomposition-only parent tasks are never assigned to execution workers. Verification has its own atomic claim and expiring verifier lease, so concurrent verifiers cannot process the same result.
 
 ## Orchestrator protocol
 

@@ -1,0 +1,8 @@
+{
+  "name": "agent-workspace-agent-runtimes",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@andromarces/agent-loops": "0.8.0"
+  }
+}

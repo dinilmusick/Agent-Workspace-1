@@ -1,0 +1,539 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "provider": "Supabase",
+    "projectRef": "vcaerawuwffziufvpbvw",
+    "tables": [
+      "public.skills",
+      "public.skill_versions",
+      "public.skill_tool_links",
+      "public.skill_tools"
+    ],
+    "exportedAt": "2026-11-02T11:20:23.789Z"
+  },
+  "count": 29,
+  "skills": [
+    {
+      "id": 1,
+      "name": "tldraw",
+      "path": "skills/tldraw/SKILL.md",
+      "slug": "tldraw",
+      "tools": [],
+      "status": "active",
+      "version": "1.0.0"
+    },
+    {
+      "id": 3,
+      "name": "Prompt Map",
+      "path": "skills/prompt-map/SKILL.md",
+      "slug": "prompt-map",
+      "tools": [
+        {
+          "slug": "tldraw-connector",
+          "type": "mcp",
+          "usage": "Render the canonical graph: one rectangle per node object and one arrow per link object; verify the resulting board.",
+          "required": true
+        }
+      ],
+      "status": "active",
+      "version": "1.2.0"
+    },
+    {
+      "id": 4,
+      "name": "Loop Generator",
+      "path": "skills/loop-generator/SKILL.md",
+      "slug": "loop-generator",
+      "tools": [
+        {
+          "slug": "playwright",
+          "type": "browser",
+          "usage": "Verify rendered browser behavior, console errors and user-visible outcomes when relevant.",
+          "required": false
+        },
+        {
+          "slug": "supabase",
+          "type": "connector",
+          "usage": "Persist goal state, iteration history, evidence and skill metadata when configured.",
+          "required": false
+        },
+        {
+          "slug": "github",
+          "type": "connector",
+          "usage": "Inspect and modify repositories, branches, commits, pull requests and CI workflows when authorized.",
+          "required": false
+        },
+        {
+          "slug": "looper",
+          "type": "cli",
+          "usage": "Initialize loop state, record every iteration verdict and evidence, and enforce bounded continuation/terminal stop decisions.",
+          "required": true
+        }
+      ],
+      "status": "active",
+      "version": "1.0.0"
+    },
+    {
+      "id": 7,
+      "name": "Task Ledger",
+      "path": "skills/task-ledger/SKILL.md",
+      "slug": "task-ledger",
+      "tools": [
+        {
+          "slug": "supabase",
+          "type": "connector",
+          "usage": "Read, create, claim, update, and verify shared task records through the authenticated Supabase connector.",
+          "required": true
+        }
+      ],
+      "status": "active",
+      "version": "1.1.0"
+    },
+    {
+      "id": 8,
+      "name": "Application Security Audit",
+      "path": "skills/security-audit/SKILL.md",
+      "slug": "security-audit",
+      "tools": [],
+      "status": "active",
+      "version": "1.0.0"
+    },
+    {
+      "id": 9,
+      "name": "DevOps, CI/CD and Release Engineering",
+      "path": "skills/devops-ci-release/SKILL.md",
+      "slug": "devops-ci-release",
+      "tools": [],
+      "status": "active",
+      "version": "1.0.0"
+    },
+    {
+      "id": 10,
+      "name": "Browser QA and Runtime Inspection",
+      "path": "skills/browser-qa/SKILL.md",
+      "slug": "browser-qa",
+      "tools": [
+        {
+          "slug": "typescript",
+          "type": "cli",
+          "usage": "Use the registered project-local static analysis and verification tool when applicable.",
+          "required": false
+        },
+        {
+          "slug": "eslint",
+          "type": "cli",
+          "usage": "Use the registered project-local static analysis and verification tool when applicable.",
+          "required": false
+        },
+        {
+          "slug": "prettier",
+          "type": "cli",
+          "usage": "Use the registered project-local static analysis and verification tool when applicable.",
+          "required": false
+        },
+        {
+          "slug": "vitest",
+          "type": "cli",
+          "usage": "Use the registered project-local static analysis and verification tool when applicable.",
+          "required": false
+        },
+        {
+          "slug": "knip",
+          "type": "cli",
+          "usage": "Use the registered project-local static analysis and verification tool when applicable.",
+          "required": false
+        },
+        {
+          "slug": "dependency-cruiser",
+          "type": "cli",
+          "usage": "Use the registered project-local static analysis and verification tool when applicable.",
+          "required": false
+        }
+      ],
+      "status": "active",
+      "version": "1.0.0"
+    },
+    {
+      "id": 11,
+      "name": "React Performance and Composition",
+      "path": "skills/react-performance-composition/SKILL.md",
+      "slug": "react-performance-composition",
+      "tools": [],
+      "status": "active",
+      "version": "1.0.0"
+    },
+    {
+      "id": 12,
+      "name": "Refactoring",
+      "path": "skills/refactoring/SKILL.md",
+      "slug": "refactoring",
+      "tools": [],
+      "status": "active",
+      "version": "1.0.0"
+    },
+    {
+      "id": 13,
+      "name": "Code Review",
+      "path": "skills/code-review/SKILL.md",
+      "slug": "code-review",
+      "tools": [
+        {
+          "slug": "typescript",
+          "type": "cli",
+          "usage": "Use the registered project-local static analysis and verification tool when applicable.",
+          "required": false
+        },
+        {
+          "slug": "eslint",
+          "type": "cli",
+          "usage": "Use the registered project-local static analysis and verification tool when applicable.",
+          "required": false
+        },
+        {
+          "slug": "prettier",
+          "type": "cli",
+          "usage": "Use the registered project-local static analysis and verification tool when applicable.",
+          "required": false
+        },
+        {
+          "slug": "vitest",
+          "type": "cli",
+          "usage": "Use the registered project-local static analysis and verification tool when applicable.",
+          "required": false
+        },
+        {
+          "slug": "knip",
+          "type": "cli",
+          "usage": "Use the registered project-local static analysis and verification tool when applicable.",
+          "required": false
+        },
+        {
+          "slug": "dependency-cruiser",
+          "type": "cli",
+          "usage": "Use the registered project-local static analysis and verification tool when applicable.",
+          "required": false
+        }
+      ],
+      "status": "active",
+      "version": "1.0.0"
+    },
+    {
+      "id": 14,
+      "name": "Codebase Architecture",
+      "path": "skills/codebase-architecture/SKILL.md",
+      "slug": "codebase-architecture",
+      "tools": [
+        {
+          "slug": "typescript",
+          "type": "cli",
+          "usage": "Use the registered project-local static analysis and verification tool when applicable.",
+          "required": false
+        },
+        {
+          "slug": "eslint",
+          "type": "cli",
+          "usage": "Use the registered project-local static analysis and verification tool when applicable.",
+          "required": false
+        },
+        {
+          "slug": "prettier",
+          "type": "cli",
+          "usage": "Use the registered project-local static analysis and verification tool when applicable.",
+          "required": false
+        },
+        {
+          "slug": "vitest",
+          "type": "cli",
+          "usage": "Use the registered project-local static analysis and verification tool when applicable.",
+          "required": false
+        },
+        {
+          "slug": "knip",
+          "type": "cli",
+          "usage": "Use the registered project-local static analysis and verification tool when applicable.",
+          "required": false
+        },
+        {
+          "slug": "dependency-cruiser",
+          "type": "cli",
+          "usage": "Use the registered project-local static analysis and verification tool when applicable.",
+          "required": false
+        }
+      ],
+      "status": "active",
+      "version": "1.0.0"
+    },
+    {
+      "id": 15,
+      "name": "Technical Research and Documentation Discovery",
+      "path": "skills/technical-research/SKILL.md",
+      "slug": "technical-research",
+      "tools": [],
+      "status": "active",
+      "version": "1.0.0"
+    },
+    {
+      "id": 16,
+      "name": "Frontend Engineering",
+      "path": "skills/frontend-engineering/SKILL.md",
+      "slug": "frontend-engineering",
+      "tools": [
+        {
+          "slug": "typescript",
+          "type": "cli",
+          "usage": "Use the registered project-local static analysis and verification tool when applicable.",
+          "required": false
+        },
+        {
+          "slug": "eslint",
+          "type": "cli",
+          "usage": "Use the registered project-local static analysis and verification tool when applicable.",
+          "required": false
+        },
+        {
+          "slug": "prettier",
+          "type": "cli",
+          "usage": "Use the registered project-local static analysis and verification tool when applicable.",
+          "required": false
+        },
+        {
+          "slug": "vitest",
+          "type": "cli",
+          "usage": "Use the registered project-local static analysis and verification tool when applicable.",
+          "required": false
+        },
+        {
+          "slug": "knip",
+          "type": "cli",
+          "usage": "Use the registered project-local static analysis and verification tool when applicable.",
+          "required": false
+        },
+        {
+          "slug": "dependency-cruiser",
+          "type": "cli",
+          "usage": "Use the registered project-local static analysis and verification tool when applicable.",
+          "required": false
+        }
+      ],
+      "status": "active",
+      "version": "1.0.0"
+    },
+    {
+      "id": 17,
+      "name": "Coding Router",
+      "path": "skills/coding-router/SKILL.md",
+      "slug": "coding-router",
+      "tools": [],
+      "status": "active",
+      "version": "1.0.0"
+    },
+    {
+      "id": 18,
+      "name": "Debugging and Root-Cause Analysis",
+      "path": "skills/debugging-root-cause/SKILL.md",
+      "slug": "debugging-root-cause",
+      "tools": [],
+      "status": "active",
+      "version": "1.0.0"
+    },
+    {
+      "id": 19,
+      "name": "Feature Implementation",
+      "path": "skills/feature-implementation/SKILL.md",
+      "slug": "feature-implementation",
+      "tools": [],
+      "status": "active",
+      "version": "1.0.0"
+    },
+    {
+      "id": 20,
+      "name": "Coding Workflow",
+      "path": "skills/coding-workflow/SKILL.md",
+      "slug": "coding-workflow",
+      "tools": [
+        {
+          "slug": "typescript",
+          "type": "cli",
+          "usage": "Use the registered project-local static analysis and verification tool when applicable.",
+          "required": false
+        },
+        {
+          "slug": "eslint",
+          "type": "cli",
+          "usage": "Use the registered project-local static analysis and verification tool when applicable.",
+          "required": false
+        },
+        {
+          "slug": "prettier",
+          "type": "cli",
+          "usage": "Use the registered project-local static analysis and verification tool when applicable.",
+          "required": false
+        },
+        {
+          "slug": "vitest",
+          "type": "cli",
+          "usage": "Use the registered project-local static analysis and verification tool when applicable.",
+          "required": false
+        },
+        {
+          "slug": "knip",
+          "type": "cli",
+          "usage": "Use the registered project-local static analysis and verification tool when applicable.",
+          "required": false
+        },
+        {
+          "slug": "dependency-cruiser",
+          "type": "cli",
+          "usage": "Use the registered project-local static analysis and verification tool when applicable.",
+          "required": false
+        }
+      ],
+      "status": "active",
+      "version": "1.0.0"
+    },
+    {
+      "id": 21,
+      "name": "Code Documentation and Developer Handoff",
+      "path": "skills/documentation-engineering/SKILL.md",
+      "slug": "documentation-engineering",
+      "tools": [],
+      "status": "active",
+      "version": "1.0.0"
+    },
+    {
+      "id": 22,
+      "name": "API Contract and Integration Design",
+      "path": "skills/api-contract-design/SKILL.md",
+      "slug": "api-contract-design",
+      "tools": [],
+      "status": "active",
+      "version": "1.0.0"
+    },
+    {
+      "id": 23,
+      "name": "AI Agent and Tooling Engineering",
+      "path": "skills/agent-systems-engineering/SKILL.md",
+      "slug": "agent-systems-engineering",
+      "tools": [],
+      "status": "active",
+      "version": "1.0.0"
+    },
+    {
+      "id": 24,
+      "name": "Backend and API Engineering",
+      "path": "skills/backend-api-engineering/SKILL.md",
+      "slug": "backend-api-engineering",
+      "tools": [],
+      "status": "active",
+      "version": "1.0.0"
+    },
+    {
+      "id": 25,
+      "name": "Testing Strategy",
+      "path": "skills/testing-strategy/SKILL.md",
+      "slug": "testing-strategy",
+      "tools": [
+        {
+          "slug": "typescript",
+          "type": "cli",
+          "usage": "Use the registered project-local static analysis and verification tool when applicable.",
+          "required": false
+        },
+        {
+          "slug": "eslint",
+          "type": "cli",
+          "usage": "Use the registered project-local static analysis and verification tool when applicable.",
+          "required": false
+        },
+        {
+          "slug": "prettier",
+          "type": "cli",
+          "usage": "Use the registered project-local static analysis and verification tool when applicable.",
+          "required": false
+        },
+        {
+          "slug": "vitest",
+          "type": "cli",
+          "usage": "Use the registered project-local static analysis and verification tool when applicable.",
+          "required": false
+        },
+        {
+          "slug": "knip",
+          "type": "cli",
+          "usage": "Use the registered project-local static analysis and verification tool when applicable.",
+          "required": false
+        },
+        {
+          "slug": "dependency-cruiser",
+          "type": "cli",
+          "usage": "Use the registered project-local static analysis and verification tool when applicable.",
+          "required": false
+        }
+      ],
+      "status": "active",
+      "version": "1.0.0"
+    },
+    {
+      "id": 26,
+      "name": "Cloud Platform and Infrastructure Engineering",
+      "path": "skills/cloud-platform-engineering/SKILL.md",
+      "slug": "cloud-platform-engineering",
+      "tools": [],
+      "status": "active",
+      "version": "1.0.0"
+    },
+    {
+      "id": 27,
+      "name": "Database Engineering",
+      "path": "skills/database-engineering/SKILL.md",
+      "slug": "database-engineering",
+      "tools": [],
+      "status": "active",
+      "version": "1.0.0"
+    },
+    {
+      "id": 28,
+      "name": "Universal Task Router",
+      "path": "skills/universal-task-router/SKILL.md",
+      "slug": "universal-task-router",
+      "tools": [],
+      "status": "active",
+      "version": "1.0.0"
+    },
+    {
+      "id": 29,
+      "name": "Personal Growth Router",
+      "path": "skills/personal-growth-router/SKILL.md",
+      "slug": "personal-growth-router",
+      "tools": [],
+      "status": "active",
+      "version": "1.0.0"
+    },
+    {
+      "id": 30,
+      "name": "Relational Skills",
+      "path": "skills/relational-skills/SKILL.md",
+      "slug": "relational-skills",
+      "tools": [],
+      "status": "active",
+      "version": "1.0.0"
+    },
+    {
+      "id": 31,
+      "name": "Fitness Coaching",
+      "path": "skills/fitness-coaching/SKILL.md",
+      "slug": "fitness-coaching",
+      "tools": [],
+      "status": "active",
+      "version": "1.0.0"
+    },
+    {
+      "id": 32,
+      "name": "Cooking and Culinary Skills",
+      "path": "skills/cooking-culinary-skills/SKILL.md",
+      "slug": "cooking-culinary-skills",
+      "tools": [],
+      "status": "active",
+      "version": "1.0.0"
+    }
+  ]
+}

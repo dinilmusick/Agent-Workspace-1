@@ -76,14 +76,8 @@ jobs:
           path: workspace
           persist-credentials: false
 
-      - name: Verify selected workspace checkout
-        shell: bash
-        run: |
-          pwd
-          test -f workspace/examples/hello.py && echo "FOUND examples/hello.py" || echo "MISSING examples/hello.py"
-          git -C workspace rev-parse HEAD
-          git -C workspace ls-tree -r --name-only HEAD examples/hello.py
-          ls -la workspace/examples || true
+      - name: Set up R runtime
+        uses: r-lib/actions/setup-r@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2
 
       - name: Record available runtimes
         shell: bash
@@ -106,7 +100,6 @@ jobs:
 
       - name: Execute workspace source
         env:
-          GITHUB_WORKSPACE: ${{ github.workspace }}/workspace
           COMPUTE_RUNTIME: ${{ steps.request.outputs.runtime }}
           COMPUTE_SOURCE_FILE: ${{ steps.request.outputs.source_file }}
           COMPUTE_ARGUMENTS: ${{ steps.request.outputs.arguments }}

@@ -36,7 +36,7 @@
         "path": "/api/login",
         "body": { "email": "qa@example.com", "password": { "$env": "QUALITY_TEST_PASSWORD" } }
       },
-      "expect": { "status": 200, "jsonPath": { "token": "quality-sample-session" } }
+      "expect": { "status": 200, "jsonPath": { "token": "test-token" } }
     },
     {
       "name": "private API rejects missing authorization",

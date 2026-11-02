@@ -14,7 +14,13 @@ declare
     'objective','Verify stale worker recovery',
     'input_contract',jsonb_build_object('type','object','required',jsonb_build_array('repository')),
     'output_contract',jsonb_build_object('type','object','required',jsonb_build_array('implementation','tests','evidence')),
+    'transformation','Claim, simulate a stale heartbeat, reclaim and assert persisted evidence.',
+    'observation',jsonb_build_object('required',jsonb_build_array('claim_owner','heartbeat_age','recovery_event')),
     'evaluation',jsonb_build_object('method','Check explicit test evidence','pass_condition','All assertions pass'),
+    'revision_policy',jsonb_build_object('on_failure','Raise an exception with the failed assertion','max_revisions',1),
+    'initial_input',jsonb_build_object('repository','Agent-Workspace-1'),
+    'tools',jsonb_build_array('Supabase PostgreSQL ledger'),
+    'iteration_policy',jsonb_build_object('mode','persistent','heartbeat_required',true,'record_observation_each_iteration',true),
     'stop_conditions',jsonb_build_array('All assertions pass'),
     'max_iterations',3
   );

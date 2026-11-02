@@ -43,7 +43,7 @@ The database rejects completed submissions when required parameters are missing 
 
 ## Compute
 
-Use `.github/workflows/agent-compute.yml` for finite computation on an ephemeral GitHub-hosted runner. It supports Python, Node.js, TypeScript, Bash, Go, Rust, Java, C, C++, C#, Ruby, PHP, Perl, R and PowerShell. It has read-only repository permission, does not persist checkout credentials, receives no application secrets, and returns an artifact. Use an authorized workflow-dispatch capability or the GitHub Actions UI. Do not claim execution without a real workflow run.
+Use `.github/workflows/agent-compute.yml` for finite computation on an ephemeral GitHub-hosted runner. It supports Python, Node.js, TypeScript, Bash, Go, Rust, Java, C, C++, C#, Ruby, PHP, Perl, R and PowerShell. It has read-only repository permission, does not persist checkout credentials, receives no application secrets, and returns an artifact. To invoke from a ChatGPT conversation when workflow_dispatch is unavailable, create a GitHub issue with title `[agent-compute] <goal-key> <runtime>` and a JSON body containing `ref`, `runtime`, `source_file`, `arguments` (string array) and `timeout_seconds`. The issue trigger accepts only repository owners, members and collaborators. Track the issue's Actions run and retrieve its artifact. Do not claim execution without a real completed run.
 
 ## Completion
 

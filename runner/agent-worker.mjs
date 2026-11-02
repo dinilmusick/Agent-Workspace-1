@@ -176,7 +176,7 @@ export async function runWorker({ maxTasks = Infinity, pollMs = 5000 } = {}) {
   const command = parseRuntimeCommand();
   let completed = 0;
   while (completed < maxTasks) {
-    const claimed = await callLedger("task.claim", { lease_seconds: Number(process.env.AGENT_LEASE_SECONDS ?? 900) });
+    const claimed = await callLedger("task.claim", { goal_id: process.env.AGENT_GOAL_ID, lease_seconds: Number(process.env.AGENT_LEASE_SECONDS ?? 900) });
     const task = Array.isArray(claimed) ? claimed[0] : claimed;
     if (!task) { await sleep(pollMs); continue; }
     const result = await executeTask(task, command);

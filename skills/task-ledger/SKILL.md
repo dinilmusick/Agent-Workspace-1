@@ -1,7 +1,7 @@
 ---
 name: "Task Ledger"
 slug: task-ledger
-version: 1.3.0
+version: 1.5.0
 source: Supabase Skills Database
 sourceId: 7
 status: active
@@ -176,16 +176,16 @@ The user's ChatGPT browser conversations are the interactive agents. The user ma
 - Every task definition, including root and intermediate parent tasks, must contain `loop.enabled=true`, `objective`, `input_contract`, `output_contract`, non-empty `cycle`, `evaluation`, non-empty `stop_conditions`, and `max_iterations` from 1 to 100.
 - Use `goal_ledger_list(status)` to discover resumable goals; `goal_ledger_resume(name)` returns the canonical goal, summary, task tree, iterations and events.
 - Use `goal_ledger_claim_task(goal_name, agent_id, agent_name, agent_type, capabilities, session_id, lease_seconds)` to atomically claim one eligible leaf task within the named goal. It uses row locking with skip-locked semantics, dependencies, capabilities and expiring leases.
-- Supply a distinct opaque session_id for each browser conversation. Agent identity may be shared when multiple chats use the same authenticated connector; claim tokens remain unique and are mandatory for claim-bound writes.
+- Supply a distinct opaque session_id for each browser conversation. Worker agent_id must differ from the goal creator's orchestrator agent_id. Claim tokens remain unique and mandatory for claim-bound writes.
 - Use `task_ledger_record_loop_iteration` to persist actual inputs, outputs, observations, criterionResults, loopState, tools and evidence. A pass requires every criterion satisfied and evidence.
 - Leaf task completion is database-guarded: a worker cannot submit completed unless its latest loop iteration passed every criterion with evidence. Do not bypass this guard.
 - Independently verify each worker result. Use `goal_ledger_finalize(name, agent_id, report)` only after all leaf tasks have been verified; it finalizes parent task rows and then the goal.
 - GitHub Actions is for finite CI/repository execution and does not create ChatGPT browser conversations. Supabase PostgreSQL is the shared persistence and atomic coordination layer. The browser-chat protocol does not call Supabase Edge Functions.
-- The deployed `task-ledger` Edge Function is currently retained only as a compatibility gateway for the repository's CLI worker runtime; do not route browser conversation agents through it.
+- Supabase Edge Functions are not used by either the browser-chat protocol or the optional CLI runner. Both paths use direct Supabase connector/Data API + PostgreSQL RPC calls.
 - Full prompts and interaction sequence: `docs/chat-agent-workflow.md`.
 
 
-## Metadata
+## Direct connector execution\n\nFor a new goal, call goal_ledger_create_with_tasks with the goal context and a fully loop-backed root task definition. For a worker, call goal_ledger_resume(name), then goal_ledger_claim_task(name, unique_agent_id, agent_name, 'worker', capabilities, unique_session_id, lease_seconds). Record every cycle with task_ledger_record_loop_iteration; use verdict='pass' only when criterion_results marks every criterion satisfied and evidence is non-empty. Submit through task_ledger_submit_result. The orchestrator/verifier independently checks the result, finalizes parent tasks, then calls goal_ledger_finalize only when every task is verified.\n\n## Metadata
 
 ```json
 {}

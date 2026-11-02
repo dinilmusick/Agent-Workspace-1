@@ -59,7 +59,7 @@ class PlatformAdapterTests(unittest.TestCase):
         (self.root / "vercel.json").write_text('{"version":2}')
         env = {"VERCEL_TOKEN": "test-token", "VERCEL_PREVIEW_URL": "https://preview-my-app.vercel.app"}
         with patch.dict(os.environ, env, clear=True), patch.object(adapters, "run") as command:
-            command.side_effect = ["", "", "Target: Production"]
+            command.side_effect = ["Target: Production"]
             with self.assertRaisesRegex(adapters.AdapterError, "non-preview"):
                 adapters.run_vercel(self.root, self.out)
 

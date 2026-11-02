@@ -52,7 +52,7 @@ async function finalizeVerifiedAncestors(task, verifierReport) {
   let parentId = task.parent_task_id;
   while (parentId) {
     const summary = await callLedger("task.children", { task_id: parentId });
-    if (summary?.all_verified !== true) break;
+    if (summary?.all_verified !== true) return;
     const parentData = await callLedger("task.get", { task_id: parentId });
     await callLedger("task.finalize", {
       task_id: parentId,
@@ -60,6 +60,15 @@ async function finalizeVerifiedAncestors(task, verifierReport) {
       verification_report: { verifier_agent: true, children: summary, source_report: verifierReport },
     });
     parentId = parentData.task?.parent_task_id ?? null;
+  }
+  if (task.goal_id) {
+    const goal = await callLedger("goal.get", { goal_id: task.goal_id });
+    if (goal?.status !== "completed") {
+      await callLedger("goal.finalize", {
+        name: goal.name,
+        verification_report: { verifier_agent: true, source_report: verifierReport },
+      });
+    }
   }
 }
 

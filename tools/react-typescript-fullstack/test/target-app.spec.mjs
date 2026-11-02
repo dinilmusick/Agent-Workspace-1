@@ -60,7 +60,6 @@ for (const flow of browser.manifest.workflows ?? []) {
     });
     const page = await context.newPage();
     const report = trackBrowser(page);
-    await context.tracing.start({ screenshots: true, snapshots: true, sources: true });
     try {
       for (const step of flow.steps ?? []) {
         const locator = step.selector ? locatorFor(page, step.selector) : null;
@@ -81,10 +80,7 @@ for (const flow of browser.manifest.workflows ?? []) {
       }
     } finally {
       await attachBrowserEvidence(page, report, testInfo);
-      const tracePath = testInfo.outputPath("workflow-trace.zip");
-      await context.tracing.stop({ path: tracePath });
       await context.close();
-      await testInfo.attach("workflow-trace", { path: tracePath, contentType: "application/zip" });
     }
     if (browser.manifest.failOnRuntimeErrors !== false) {
       assertRuntimeClean(report, expect, browser.manifest.ignoreRuntimeErrors ?? []);

@@ -7,7 +7,7 @@ These are installable engines, not required dependencies of the core Agent Works
 - **Agent Loops** (`@andromarces/agent-loops` 0.8.0, MIT): orchestrator → worker → reviewer; Node.js 22.18+, Git, and at least one authenticated coding-agent CLI. It supports bounded steps, per-call timeouts, transcripts and resume.
 - **AutoHelix** (`autohelix` 0.1.1, Apache-2.0): verified improvement loop with a fresh Git worktree per iteration, editable-file scope, test/type-check constraints, metrics, persistent notes and iteration/time/cost budgets. Requires Python 3.11+ and an installed/authenticated agent CLI.
 
-Install these only when a task selects one of them. They are not required for Looper's basic input/output state management.
+Install the optional runtimes with `bash tools/agent-runtimes/install.sh`. The installer uses the committed npm lockfile and pinned AutoHelix version. They are not required for Looper's basic input/output state management.
 
 ## Coding-agent backends
 

@@ -26,6 +26,7 @@ as $function$
 declare
   candidate_id uuid;
   previous_status text;
+  previous_status text;
   previous_agent_id text;
   previous_heartbeat timestamptz;
   previous_claim_token uuid;
@@ -139,8 +140,8 @@ begin
     raise exception 'goal not found, not claimable, or access denied';
   end if;
 
-  select t.id,t.claimed_by_agent_id,t.heartbeat_at,t.claim_token
-    into candidate_id,previous_agent_id,previous_heartbeat,previous_claim_token
+  select t.id,t.status,t.claimed_by_agent_id,t.heartbeat_at,t.claim_token
+    into candidate_id,previous_status,previous_agent_id,previous_heartbeat,previous_claim_token
   from public.tasks t
   where t.goal_id=goal_id_in
     and t.status in ('queued','running')

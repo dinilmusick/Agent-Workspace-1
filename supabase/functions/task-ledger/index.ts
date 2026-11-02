@@ -55,7 +55,7 @@ Deno.serve(async (req: Request) => {
       }
       case "task.pending_verification": {
         if (!["verifier", "orchestrator", "supervisor"].includes(identity.agent_type)) return response(403, { error: "verifier_role_required" });
-        const { data: pending, error: pendingError } = await db.from("tasks").select("*").eq("status", "completed").eq("verification_status", "pending").order("result_submitted_at");
+        const { data: pending, error: pendingError } = await db.rpc("task_ledger_pending_verification");
         if (pendingError) throw pendingError;
         result = pending ?? [];
         break;

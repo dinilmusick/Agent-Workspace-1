@@ -67,7 +67,7 @@ export async function runVerifier({ maxTasks = Infinity, pollMs = 5000 } = {}) {
   const command = parseRuntimeCommand();
   let processed = 0;
   while (processed < maxTasks) {
-    const pending = await callLedger("task.pending_verification");
+    const pending = await callLedger("task.claim_verification", { lease_seconds: Number(process.env.AGENT_VERIFIER_LEASE_SECONDS ?? 900) });
     const task = Array.isArray(pending) ? pending[0] : null;
     if (!task) { await sleep(pollMs); continue; }
     try {
@@ -75,6 +75,7 @@ export async function runVerifier({ maxTasks = Infinity, pollMs = 5000 } = {}) {
       const verification = await runVerification(details.task, details.iterations ?? [], command);
       await callLedger("task.verify", {
         task_id: task.id,
+        verification_claim_token: task.verification_claim_token,
         verified: verification.verified,
         verification_report: verification.verification_report,
       });

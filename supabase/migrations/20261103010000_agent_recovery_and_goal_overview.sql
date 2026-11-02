@@ -26,7 +26,6 @@ as $function$
 declare
   candidate_id uuid;
   previous_status text;
-  previous_status text;
   previous_agent_id text;
   previous_heartbeat timestamptz;
   previous_claim_token uuid;
@@ -123,6 +122,7 @@ set search_path to 'public'
 as $function$
 declare
   candidate_id uuid;
+  previous_status text;
   previous_agent_id text;
   previous_heartbeat timestamptz;
   previous_claim_token uuid;
@@ -291,3 +291,131 @@ select jsonb_build_object(
 $function$;
 
 grant execute on function public.goal_ledger_overview(text[]) to anon, authenticated;
+
+-- The ChatGPT worker entry point is goal_ledger_claim_task_by_key -> this function.
+-- Apply the same stale-heartbeat recovery rule here, not only to generic claim RPCs.
+create or replace function public.goal_ledger_claim_task(
+  goal_name_in text,
+  agent_id_in text,
+  agent_name_in text,
+  agent_type_in text default 'worker',
+  capabilities_in text[] default '{}'::text[],
+  session_id_in text default null,
+  lease_seconds_in integer default 900
+)
+returns setof public.tasks
+language plpgsql
+set search_path to 'public'
+as $function$
+declare
+  goal_id_value uuid;
+  creator_id text;
+  candidate_id uuid;
+  previous_status text;
+  previous_agent_id text;
+  previous_heartbeat timestamptz;
+  previous_claim_token uuid;
+  task_out public.tasks;
+  lease_value integer := greatest(30,least(coalesce(lease_seconds_in,900),86400));
+begin
+  if nullif(btrim(goal_name_in),'') is null
+    or nullif(btrim(agent_id_in),'') is null
+    or nullif(btrim(agent_name_in),'') is null
+    or nullif(btrim(session_id_in),'') is null then
+    raise exception 'goal name, agent identity and unique chat session_id are required';
+  end if;
+
+  select id,created_by_agent_id into goal_id_value,creator_id
+  from public.goals
+  where lower(name)=lower(btrim(goal_name_in))
+    and (auth.uid() is null or owner_user_id=auth.uid())
+    and status in ('ready','active');
+
+  if goal_id_value is null then
+    raise exception 'goal not found or access denied: %',goal_name_in;
+  end if;
+  if agent_id_in=creator_id then
+    raise exception 'worker agent_id must differ from the orchestrator agent_id';
+  end if;
+
+  select t.id,t.status,t.claimed_by_agent_id,t.heartbeat_at,t.claim_token
+    into candidate_id,previous_status,previous_agent_id,previous_heartbeat,previous_claim_token
+  from public.tasks t
+  where t.goal_id=goal_id_value
+    and t.status in ('queued','running')
+    and t.attempt_count<t.max_attempts
+    and (
+      t.status='queued'
+      or (t.status='running' and (
+        t.claim_expires_at<now()
+        or coalesce(t.heartbeat_at,'-infinity'::timestamptz)<=now()-interval '60 minutes'
+      ))
+    )
+    and t.required_capabilities<@coalesce(capabilities_in,'{}'::text[])
+    and not exists(select 1 from public.tasks child where child.parent_task_id=t.id)
+    and (t.parent_task_id is null or not exists(
+      select 1 from public.tasks p where p.id=t.parent_task_id
+        and p.status in ('failed','cancelled','abandoned','blocked')
+    ))
+    and not exists(
+      select 1 from public.task_dependencies d
+      join public.tasks dep on dep.id=d.depends_on_task_id
+      where d.task_id=t.id and d.dependency_type='blocking'
+        and (dep.status<>'completed' or dep.verification_status<>'verified')
+    )
+  order by t.priority asc,t.started_at asc
+  for update skip locked
+  limit 1;
+
+  if candidate_id is null then return; end if;
+
+  if previous_status='running' and previous_agent_id is not null then
+    insert into public.task_events(task_id,event_type,agent_id,message,payload)
+    values(
+      candidate_id,'lease_recovered',agent_id_in,
+      'Goal-scoped task reclaimed after lease expiry or 60 minutes without heartbeat.',
+      jsonb_build_object(
+        'previous_agent_id',previous_agent_id,
+        'previous_claim_token',previous_claim_token,
+        'previous_heartbeat_at',previous_heartbeat,
+        'recovery_reason',case
+          when coalesce(previous_heartbeat,'-infinity'::timestamptz)<=now()-interval '60 minutes'
+            then 'heartbeat_timeout'
+          else 'lease_expired'
+        end
+      )
+    );
+  end if;
+
+  update public.tasks
+  set status='running',
+      claimed_by_agent_id=agent_id_in,
+      claimed_by_agent_name=agent_name_in,
+      claimed_session_id=session_id_in,
+      claim_token=gen_random_uuid(),
+      claimed_at=now(),
+      claim_expires_at=now()+make_interval(secs=>lease_value),
+      attempt_count=attempt_count+1,
+      heartbeat_at=now(),
+      updated_at=now(),
+      current_step='Claimed by ChatGPT worker'
+  where id=candidate_id
+  returning * into task_out;
+
+  update public.goals set status='active',updated_at=now()
+  where id=goal_id_value and status='ready';
+
+  insert into public.task_events(task_id,event_type,agent_id,message,payload)
+  values(
+    task_out.id,'claimed',agent_id_in,'Goal-scoped ChatGPT worker claimed task',
+    jsonb_build_object(
+      'goal_id',goal_id_value,
+      'session_id',session_id_in,
+      'lease_expires_at',task_out.claim_expires_at,
+      'attempt_count',task_out.attempt_count
+    )
+  );
+
+  return next task_out;
+end;
+$function$;

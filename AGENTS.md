@@ -37,7 +37,7 @@
 
 - At the start of every orchestration session, and whenever asked what goals remain, call `goal_ledger_overview(null)` and report the complete visible set of planning, ready, active and blocked goals with task counts, running agents, queued work, blockers and verification state. Do not limit discovery to one selected goal.
 - Use `goal_ledger_resume_by_key` to load the selected goal's full persisted context before claiming work. The overview is discovery, not a claim; always use the atomic claim RPC.
-- A running task is eligible for recovery after its lease expires or its heartbeat is at least 60 minutes old. Reassignment must happen through the transactional claim RPC; never overwrite task ownership directly.
+- A running task is eligible for reassignment only when its heartbeat is at least 60 minutes old. Lease expiry alone must never bypass the one-hour inactivity threshold. New claims use a minimum 60-minute lease; reassignment must happen through the transactional claim RPC; never overwrite task ownership directly.
 - Apply stale recovery consistently to the standard goal-key ChatGPT worker path and generic claim entry points. Recovery rotates claim tokens, increments attempts and appends a `lease_recovered` event with prior-worker evidence. Preserve all prior iterations and evidence.
 - Never automatically reclaim tasks in `blocked` state, tasks under blocked/failed/cancelled/abandoned parents, or tasks whose blocking dependencies remain unverified. Respect max attempts.
 - Worker heartbeats must renew leases during active work. A 60-minute stale threshold is crash recovery, not permission to ignore heartbeat duties.

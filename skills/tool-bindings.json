@@ -177,7 +177,13 @@
       "slug": "github",
       "type": "connector",
       "skills": [
-        "loop-generator"
+        "loop-generator",
+        "coding-router",
+        "coding-workflow",
+        "code-review",
+        "debugging-root-cause",
+        "devops-ci-release",
+        "agent-systems-engineering"
       ]
     },
     {

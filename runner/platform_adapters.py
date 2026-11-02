@@ -5,6 +5,7 @@ import json
 import os
 import re
 import shutil
+import stat
 import subprocess
 import sys
 from pathlib import Path
@@ -95,12 +96,19 @@ def run_vercel(project, output):
     results = {"status": "passed", "localBuild": "skipped", "preview": "skipped"}
     if token and link.is_file():
         env = os.environ.copy()
+        preview_env_file = project / ".vercel" / ".env.preview.local"
+        previous_env = preview_env_file.read_bytes() if preview_env_file.is_file() else None
+        previous_mode = stat.S_IMODE(preview_env_file.stat().st_mode) if previous_env is not None else None
         try:
             run(["vercel", "pull", "--yes", "--environment=preview"], project, output / "vercel-pull.log", env)
             run(["vercel", "build"], project, output / "vercel-build.log", env)
             results["localBuild"] = "passed"
         finally:
-            (project / ".vercel" / ".env.preview.local").unlink(missing_ok=True)
+            if previous_env is None:
+                preview_env_file.unlink(missing_ok=True)
+            else:
+                preview_env_file.write_bytes(previous_env)
+                preview_env_file.chmod(previous_mode)
     preview = os.environ.get("VERCEL_PREVIEW_URL")
     if preview:
         preview = validate_preview_url(preview)

@@ -1,7 +1,7 @@
 ---
 name: "Coding Router"
 slug: coding-router
-version: 1.1.0
+version: 1.2.0
 source: Supabase Skills Database
 sourceId: 17
 status: active

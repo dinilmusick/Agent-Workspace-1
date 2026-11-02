@@ -42,6 +42,11 @@ const page = path => {
 };
 
 const server = createServer(async (request, response) => {
+  if (request.method === "GET" && request.url === "/favicon.ico") {
+    response.writeHead(204);
+    response.end();
+    return;
+  }
   if (request.method === "GET" && request.url === "/health") {
     response.writeHead(200, { "content-type": "application/json" });
     response.end(JSON.stringify({ ok: true }));

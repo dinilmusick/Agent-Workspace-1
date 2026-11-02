@@ -1,7 +1,7 @@
 ---
 name: "Task Ledger"
 slug: task-ledger
-version: 1.3.2
+version: 1.3.3
 source: Supabase Skills Database
 sourceId: 7
 status: active
@@ -166,14 +166,14 @@ Use queued for unclaimed work, running for active work, blocked for an external 
 - Existing task_ledger_register, task_ledger_heartbeat, and task_ledger_update remain available for legacy/simple task records. Prefer the structured tree/claim/result workflow for delegated multi-agent work.
 
 
-## Persistent goals and manually opened ChatGPT workers (v1.3.2)
+## Persistent goals and manually opened ChatGPT workers (v1.3.3)
 
 The user's ChatGPT browser conversations are the interactive agents. The user manually opens each conversation; do not design GitHub Actions to spawn or launch ChatGPT chats.
 
 - The orchestrator conversation creates or resumes a uniquely named goal, decomposes it into tasks, and recommends worker-chat count from ready independent leaf tasks.
 - Workers receive a short instruction such as `Claim a task from goal: <name>`; they must retrieve all context from Supabase and never require the original chat history.
 - Use `goal_ledger_create_with_tasks` to create a goal and its complete task tree in one database transaction. It rejects any task missing a valid Loop Generator contract and observable acceptance criteria.
-- Every task definition, including root and intermediate parent tasks, must contain `loop.enabled=true`, `objective`, `input_contract`, `output_contract`, non-empty `cycle`, `evaluation`, non-empty `stop_conditions`, and `max_iterations` from 1 to 100.
+- Every task definition, including root and intermediate parent tasks, must contain `loop.enabled=true`, `objective`, `input_contract`, `output_contract`, `transformation`, `observation`, `evaluation`, `revision_policy`, `initial_input`, `tools`, `iteration_policy`, non-empty `stop_conditions`, and `max_iterations` from 1 to 100.
 - Use `goal_ledger_list(status)` to discover resumable goals; `goal_ledger_resume(name)` returns the canonical goal, summary, task tree, iterations and events.
 - Use `goal_ledger_claim_task(goal_name, agent_id, agent_name, agent_type, capabilities, session_id, lease_seconds)` to atomically claim one eligible leaf task within the named goal. It uses row locking with skip-locked semantics, dependencies, capabilities and expiring leases.
 - Supply a distinct opaque session_id and distinct agent_id label for every browser conversation. These labels identify chat instances; owner-scoped RLS binds all work to the authenticated user's goals. Worker agent_id must differ from the orchestrator agent_id so the orchestrator can verify independently. Claim tokens remain unique and mandatory for claim-bound writes.

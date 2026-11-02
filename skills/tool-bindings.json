@@ -195,6 +195,57 @@
       "skills": [
         "prompt-map"
       ]
+    },
+    {
+      "slug": "codex-cli",
+      "type": "cli",
+      "package": "@openai/codex",
+      "skills": [
+        "coding-router",
+        "agent-systems-engineering",
+        "coding-workflow",
+        "code-review"
+      ]
+    },
+    {
+      "slug": "opencode",
+      "type": "cli",
+      "package": "@opencode/cli",
+      "skills": [
+        "coding-router",
+        "agent-systems-engineering",
+        "coding-workflow",
+        "code-review"
+      ]
+    },
+    {
+      "slug": "gemini-cli",
+      "type": "cli",
+      "package": "@google/gemini-cli",
+      "skills": [
+        "coding-router",
+        "agent-systems-engineering",
+        "coding-workflow"
+      ]
+    },
+    {
+      "slug": "goose",
+      "type": "cli",
+      "repository": "https://github.com/aaif-goose/goose",
+      "skills": [
+        "coding-router",
+        "agent-systems-engineering"
+      ]
+    },
+    {
+      "slug": "aider",
+      "type": "cli",
+      "package": "aider-chat",
+      "skills": [
+        "coding-router",
+        "agent-systems-engineering",
+        "coding-workflow"
+      ]
     }
   ]
 }

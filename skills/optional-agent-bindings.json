@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "optionalTools": [
+    {"slug":"openhands","type":"other","repository":"https://github.com/OpenHands/OpenHands","skills":["coding-router","agent-systems-engineering"]},
+    {"slug":"cline","type":"other","repository":"https://github.com/cline/cline","skills":["coding-router","agent-systems-engineering"]}
+  ]
+}

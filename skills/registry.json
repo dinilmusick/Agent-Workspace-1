@@ -42,7 +42,7 @@
       "id": 4,
       "name": "Loop Generator",
       "slug": "loop-generator",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "status": "active",
       "path": "skills/loop-generator/SKILL.md",
       "tools": [
@@ -76,7 +76,7 @@
       "id": 7,
       "name": "Task Ledger",
       "slug": "task-ledger",
-      "version": "1.6.0",
+      "version": "1.7.0",
       "status": "active",
       "path": "skills/task-ledger/SKILL.md",
       "tools": [
@@ -272,7 +272,7 @@
       "id": 28,
       "name": "Universal Task Router",
       "slug": "universal-task-router",
-      "version": "1.2.0",
+      "version": "1.3.0",
       "status": "active",
       "path": "skills/universal-task-router/SKILL.md",
       "tools": []

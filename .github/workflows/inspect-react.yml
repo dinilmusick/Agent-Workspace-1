@@ -77,13 +77,33 @@ jobs:
           PROJECT_PATH: ${{ inputs.project_path }}
         run: python runner/react-project.py start --project-path "$PROJECT_PATH"
 
+      - name: Resolve target browser URL
+        id: browser_url
+        if: steps.start.outcome == 'success'
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          project = Path("workspaces/target") / os.environ.get("PROJECT_PATH", ".")
+          manifest_path = project / ".agent-workspace" / "browser-tests.json"
+          manifest = json.loads(manifest_path.read_text()) if manifest_path.is_file() else {}
+          state_path = Path("artifacts/services/state.json")
+          state = json.loads(state_path.read_text()) if state_path.is_file() else {}
+          service_id = manifest.get("frontendServiceId", "web")
+          service = state.get("services", {}).get(service_id, {})
+          base_url = manifest.get("baseUrl") or (f"http://127.0.0.1:{service['port']}" if service else "http://127.0.0.1:4173")
+          with open(os.environ["GITHUB_ENV"], "a") as env:
+              env.write(f"TARGET_BASE_URL={base_url}\\n")
+          print(f"Browser target: {base_url}")
+          PY
+
       - name: Wait for application readiness
         id: ready
         continue-on-error: true
         shell: bash
         run: |
           for attempt in $(seq 1 60); do
-            if curl --fail --silent http://127.0.0.1:4173/ >/dev/null; then
+            if curl --fail --silent "$TARGET_BASE_URL" >/dev/null; then
               exit 0
             fi
             sleep 2
@@ -123,7 +143,7 @@ jobs:
         if: steps.ready.outcome == 'success'
         continue-on-error: true
         env:
-          TARGET_BASE_URL: http://127.0.0.1:4173
+          TARGET_BASE_URL: ${{ env.TARGET_BASE_URL }}
           TARGET_ROOT: ${{ github.workspace }}/workspaces/target
           PROJECT_PATH: ${{ inputs.project_path }}
           BROWSER_EVIDENCE_KIND: real-target-preview

@@ -110,7 +110,7 @@ Deno.serve(async (req: Request) => {
       case "task.heartbeat": result = await rpc("task_ledger_heartbeat_claim", { task_id_in: requiredString(payload.task_id, "task_id"), agent_id_in: identity.agent_id, claim_token_in: requiredString(payload.claim_token, "claim_token"), current_step_in: payload.current_step ?? null, lease_seconds_in: payload.lease_seconds ?? 900 }); break;
       case "task.iteration": result = await rpc("task_ledger_record_iteration", { task_id_in: requiredString(payload.task_id, "task_id"), agent_id_in: identity.agent_id, claim_token_in: requiredString(payload.claim_token, "claim_token"), iteration_no_in: payload.iteration_no, input_payload_in: payload.input_payload ?? {}, output_payload_in: payload.output_payload ?? {}, observation_in: payload.observation ?? {}, decision_in: payload.decision ?? null, tools_used_in: payload.tools_used ?? [], evidence_in: payload.evidence ?? [], status_in: payload.status ?? "completed" }); break;
       case "task.submit": result = await rpc("task_ledger_submit_result", { task_id_in: requiredString(payload.task_id, "task_id"), agent_id_in: identity.agent_id, claim_token_in: requiredString(payload.claim_token, "claim_token"), result_in: payload.result ?? {}, result_summary_in: payload.result_summary ?? null, tools_used_in: payload.tools_used ?? [], evidence_in: payload.evidence ?? [], status_in: payload.status ?? "completed" }); break;
-      case "task.verify": if (!["verifier", "orchestrator", "supervisor"].includes(identity.agent_type)) return response(403, { error: "verifier_role_required" }); result = await rpc("task_ledger_verify_result", { task_id_in: requiredString(payload.task_id, "task_id"), verifier_agent_id_in: identity.agent_id, verified_in: payload.verified === true, verification_report_in: payload.verification_report ?? {} }); break;
+      case "task.verify": if (!["verifier", "orchestrator", "supervisor"].includes(identity.agent_type)) return response(403, { error: "verifier_role_required" }); result = await rpc("task_ledger_verify_result_claimed", { task_id_in: requiredString(payload.task_id, "task_id"), verifier_agent_id_in: identity.agent_id, verification_claim_token_in: requiredString(payload.verification_claim_token, "verification_claim_token"), verified_in: payload.verified === true, verification_report_in: payload.verification_report ?? {} }); break;
       case "task.finalize": if (!["verifier", "orchestrator", "supervisor"].includes(identity.agent_type)) return response(403, { error: "finalizer_role_required" }); result = await rpc("task_ledger_finalize_parent", { task_id_in: requiredString(payload.task_id, "task_id"), verifier_agent_id_in: identity.agent_id, outcome_in: requiredString(payload.outcome, "outcome"), verification_report_in: payload.verification_report ?? {} }); break;
       case "task.get": {
         const { data: task, error: taskError } = await db.from("tasks").select("*").eq("id", requiredString(payload.task_id, "task_id")).maybeSingle();
@@ -126,6 +126,11 @@ Deno.serve(async (req: Request) => {
           goalVersion = version ?? null;
         }
         result = { task, iterations: iterations ?? [], goal, goal_version: goalVersion };
+        break;
+      }
+      case "task.claim_verification": {
+        if (!["verifier", "orchestrator", "supervisor"].includes(identity.agent_type)) return response(403, { error: "verifier_role_required" });
+        result = await rpc("task_ledger_claim_verification", { verifier_agent_id_in: identity.agent_id, lease_seconds_in: payload.lease_seconds ?? 900 });
         break;
       }
       case "task.pending_verification": {

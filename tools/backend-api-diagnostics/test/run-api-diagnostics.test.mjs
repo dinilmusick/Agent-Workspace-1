@@ -4,7 +4,7 @@ import { createServer } from "node:http";
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
-import { spawnSync } from "node:child_process";
+import { spawn } from "node:child_process";
 
 const runner = resolve("tools/backend-api-diagnostics/scripts/run-api-diagnostics.mjs");
 
@@ -42,9 +42,16 @@ async function run(dir, baseUrl, requests, logs) {
   const manifest = join(dir, "manifest.json");
   const output = join(dir, "out");
   await writeFile(manifest, JSON.stringify({ version: 1, baseUrl, requests }));
-  const result = spawnSync(process.execPath, [runner, "--manifest", manifest, "--output", output],
-    { encoding: "utf8", env: { ...process.env, SERVER_LOG_PATH: logs ?? "" } });
-  return { ...result, output };
+  return new Promise((resolve, reject) => {
+    const child = spawn(process.execPath, [runner, "--manifest", manifest, "--output", output],
+      { env: { ...process.env, SERVER_LOG_PATH: logs ?? "" } });
+    let stdout = "";
+    let stderr = "";
+    child.stdout.setEncoding("utf8").on("data", chunk => { stdout += chunk; });
+    child.stderr.setEncoding("utf8").on("data", chunk => { stderr += chunk; });
+    child.on("error", reject);
+    child.on("close", status => resolve({ status, stdout, stderr, output }));
+  });
 }
 
 test("validates endpoints, auth outcomes and correlates structured server exceptions", async t => {

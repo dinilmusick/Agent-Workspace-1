@@ -1,0 +1,42 @@
+name: Test Looper
+on:
+  push:
+    branches: [main, feat/reusable-execution-environment]
+    paths:
+      - "tools/looper/**"
+      - ".github/workflows/test-looper.yml"
+  pull_request:
+    paths:
+      - "tools/looper/**"
+      - ".github/workflows/test-looper.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  looper-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Initialize bounded loop
+        run: node tools/looper/looper.mjs init tools/looper/fixtures/contract.json /tmp/loop-state.json
+      - name: Record incomplete pass (must continue)
+        run: |
+          printf '%s\n' '{"verdict":"pass","satisfiedCriteria":["build"],"summary":"Browser criterion not yet verified","evidence":[]}' > /tmp/iteration-1.json
+          node tools/looper/looper.mjs record /tmp/loop-state.json /tmp/iteration-1.json
+          node -e "const s=require('/tmp/loop-state.json'); if(s.status!=='continue'||s.iteration!==1) process.exit(1)"
+      - name: Record verified pass (must finish)
+        run: |
+          printf '%s\n' '{"verdict":"pass","satisfiedCriteria":["build","browser"],"summary":"All required checks verified","evidence":[{"type":"test","passed":true}]}' > /tmp/iteration-2.json
+          node tools/looper/looper.mjs record /tmp/loop-state.json /tmp/iteration-2.json
+          node -e "const s=require('/tmp/loop-state.json'); if(s.status!=='completed'||s.iteration!==2) process.exit(1)"
+      - name: Verify iteration budget stop
+        run: |
+          node tools/looper/looper.mjs init tools/looper/fixtures/contract.json /tmp/budget-state.json
+          for i in 1 2 3; do
+            printf '%s\n' '{"verdict":"continue","summary":"bounded test"}' > /tmp/continue.json
+            node tools/looper/looper.mjs record /tmp/budget-state.json /tmp/continue.json
+          done
+          node -e "const s=require('/tmp/budget-state.json'); if(s.status!=='max_iterations') process.exit(1)"

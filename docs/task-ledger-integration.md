@@ -35,7 +35,7 @@ Set these environment variables in the agent runtime (never in a public reposito
 - `SUPABASE_ANON_KEY`: publishable/anon key.
 - `SUPABASE_AGENT_JWT`: access token for the dedicated registered agent user.
 
-The service-role key is never needed by or exposed to agents.
+The service-role key is never needed by or exposed to agents. For a long-running worker, also configure `SUPABASE_AGENT_REFRESH_TOKEN`, or seed `SUPABASE_AGENT_SESSION_FILE` with `{ "access_token": "...", "refresh_token": "..." }`. The worker refreshes expired access tokens and persists rotated session tokens to that file with owner-only permissions. Keep the session file outside the repository and back it up securely.
 
 ## Run an agent worker
 

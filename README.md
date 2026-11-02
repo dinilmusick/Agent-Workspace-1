@@ -34,7 +34,7 @@ The runner is ephemeral, has read-only repository permissions, does not persist 
 
 - [Looper](tools/looper/README.md): bounded loop-state controller for agent iterations.
 - [Backend/API diagnostics](tools/backend-api-diagnostics/README.md): real local endpoint checks, contracts, auth/failure scenarios and correlated server-log artifacts.
-- [Multi-service runtime](docs/multi-service-runtime.md): concurrent app services, health checks, ports, restart policies, logs and teardown.
+- [Multi-service runtime](docs/multi-service-runtime.md): concurrent app services, health checks, ports, restart policies, logs and teardown.\n- [Platform adapters](skills/platform-adapters/SKILL.md): local Cloudflare Worker tests, Vercel preview diagnostics and local Supabase migrations/pgTAP.
 - [Tools catalogue](tools/catalog/README.md): curated coding, testing and browser tools.
 - [Skills catalogue](skills/catalog.json): versioned skill snapshot backed by the Skills Database.
 

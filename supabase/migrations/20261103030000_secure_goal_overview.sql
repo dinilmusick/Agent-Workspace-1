@@ -129,3 +129,9 @@ select jsonb_build_object(
   ),'[]'::jsonb)
 );
 $function$;
+
+-- This is an internal agent-ledger RPC, not a public API. The workspace has no
+-- owner-scoped Auth tenancy yet, so only trusted service-role/database callers
+-- may read the full cross-goal overview.
+revoke all on function public.goal_ledger_overview(text[]) from public, anon, authenticated;
+grant execute on function public.goal_ledger_overview(text[]) to service_role;

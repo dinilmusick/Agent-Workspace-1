@@ -140,8 +140,10 @@ def run_supabase(project, output):
         raise AdapterError("Supabase CLI v3 is required for the local-only adapter")
     tests = project / "supabase" / "tests"
     test_files = list(tests.glob("*.sql")) + list(tests.glob("*.pg")) if tests.is_dir() else []
+    start_attempted = False
     started = False
     try:
+        start_attempted = True
         run(["supabase", "start", "--exclude", SUPABASE_EXCLUDES], project, output / "supabase-start.log", env)
         started = True
         run(["supabase", "db", "reset"], project, output / "supabase-migrations.log", env)
@@ -150,8 +152,12 @@ def run_supabase(project, output):
         return {"status": "passed", "target": "local-postgres-only", "migrations": "applied",
             "databaseTests": "passed" if test_files else "skipped (no supabase/tests/*.sql or *.pg)"}
     finally:
-        if started:
-            run(["supabase", "stop"], project, output / "supabase-stop.log", env)
+        if start_attempted:
+            try:
+                run(["supabase", "stop"], project, output / "supabase-stop.log", env)
+            except AdapterError:
+                if started:
+                    raise
 
 def run_provider(provider, project, output):
     output.mkdir(parents=True, exist_ok=True)

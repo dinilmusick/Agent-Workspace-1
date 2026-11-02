@@ -42,7 +42,7 @@
       "id": 4,
       "name": "Loop Generator",
       "slug": "loop-generator",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "status": "active",
       "path": "skills/loop-generator/SKILL.md",
       "tools": [

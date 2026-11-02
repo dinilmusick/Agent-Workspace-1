@@ -110,3 +110,14 @@ A multi-task goal is itself a Loop Generator loop, persisted in `goal_loop_defin
 Create goals with `goal_ledger_create_hierarchical`, including a title, tags, a goal-level loop contract and an array of top-level task definitions. Require task-specific parameter contracts where a task needs custom inputs or outputs. Use `goal_ledger_record_loop_iteration` for goal cycles.
 
 When an agent needs actual code execution for a computation, use the repository's GitHub Actions Agent Compute Workspace workflow where an authorized workflow-dispatch capability is available. It runs source files on an ephemeral, read-only, secret-free runner and returns an artifact. If the connected GitHub tools cannot dispatch workflows, state that limitation; do not claim code ran.
+
+
+## Canonical hierarchical goal protocol (supersedes earlier goal-flow examples)
+
+For new persistent goals, use `goal_ledger_create_hierarchical`, not the legacy `goal_ledger_create_with_tasks`. Use the goal title as the user-facing identity, the generated `goal_key` as the readable reference, and tags for discovery. Keep the UUID internal.
+
+A goal is a Loop Generator loop in its own right. Persist its contract/state/iterations separately from the task loops. Create top-level tasks directly under the goal; never make a synthetic root task. Every task at every depth has its own Loop Generator contract and acceptance criteria. Goal completion requires a passing goal iteration with evidence and independent verification of every descendant task.
+
+When asked to continue an unfinished goal in a new conversation, first call `goal_ledger_list_unfinished`. Auto-select only when exactly one unfinished goal exists; otherwise show title, key, tags and status and ask the user to choose. Resume with `goal_ledger_resume_by_key`, then immediately tell the user **Loaded goal: <title>**. Claim a task only after the goal is selected and loaded.
+
+Use task `parameter_contract` to express required custom inputs and outputs; submit fulfilled values in `result_in.parameter_values`. Use the GitHub Actions Agent Compute Workspace for finite code execution only when authorized workflow dispatch is available; it has no application secrets and does not create ChatGPT conversations.

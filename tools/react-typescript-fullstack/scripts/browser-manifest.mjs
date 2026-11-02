@@ -62,7 +62,7 @@ export async function loadBrowserManifest() {
   };
   await mkdir(artifactsDir, { recursive: true });
   await writeFile(join(artifactsDir, "route-coverage.json"), JSON.stringify({
-    evidenceKind: process.env.BROWSER_EVIDENCE_KIND ?? "real-target-preview",
+    evidenceKind: process.env.BROWSER_EVIDENCE_KIND ?? "unclassified",
     manifest: configured ? relative(repositoryRoot, manifestPath) : null,
     routeDiscovery: configured ? "manifest" : "framework-source",
     discoveredCount: discovered.length,

@@ -2,6 +2,7 @@ import json
 import subprocess
 import sys
 import tempfile
+import time
 import unittest
 import urllib.request
 from pathlib import Path
@@ -80,6 +81,16 @@ class ServiceRuntimeTests(unittest.TestCase):
         timed_out = self.run_cli("start", timeout=1)
         self.assertEqual(timed_out.returncode, 1)
         self.assertEqual(json.loads((self.state / "state.json").read_text())["status"], "failed")
+
+    def test_unexpected_post_start_exit_is_reported(self):
+        config = self.service("short-lived", {"command": [sys.executable, str(FIXTURE), "--exit-after", "0.8"]})
+        self.write_manifest([config])
+        started = self.run_cli("start")
+        self.assertEqual(started.returncode, 0, started.stderr)
+        time.sleep(1.5)
+        status = self.run_cli("status")
+        self.assertEqual(status.returncode, 0)
+        self.assertEqual(json.loads(status.stdout)["status"], "failed")
 
 if __name__ == "__main__":
     unittest.main()

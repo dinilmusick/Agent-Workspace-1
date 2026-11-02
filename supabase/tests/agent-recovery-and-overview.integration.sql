@@ -6,6 +6,7 @@ declare
   goal_key_value text;
   goal_id_value uuid;
   first_claim public.tasks;
+  early_claim public.tasks;
   recovered public.tasks;
   overview jsonb;
   goal_row jsonb;
@@ -64,6 +65,21 @@ begin
   );
   if first_claim.id is null or first_claim.task_name<>'Recovery test leaf' then
     raise exception 'Initial worker did not claim the expected leaf task';
+  end if;
+
+  update public.tasks
+  set heartbeat_at=now()-interval '59 minutes',
+      claim_expires_at=now()-interval '1 minute',
+      current_step='Simulated worker with expired lease but recent heartbeat'
+  where id=first_claim.id;
+
+  select * into early_claim
+  from public.goal_ledger_claim_task_by_key(
+    goal_key_value,'recovery-worker-early','Early Recovery Worker','worker',
+    array['recovery-test']::text[],'recovery-session-early',900
+  );
+  if early_claim.id is not null then
+    raise exception 'Expired lease incorrectly allowed reassignment before 60 minutes';
   end if;
 
   update public.tasks

@@ -68,7 +68,7 @@ jobs:
         continue-on-error: true
         env:
           PROJECT_PATH: ${{ inputs.project_path }}
-        run: node tools/react-typescript-fullstack/scripts/quality-check.mjs
+        run: node tools/react-typescript-fullstack/scripts/quality-check-flat.mjs
 
       - name: Start target application
         id: start

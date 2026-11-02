@@ -28,8 +28,12 @@ export async function loadBrowserManifest() {
   const configured = Array.isArray(manifest.routes);
   const routes = configured ? manifest.routes : discovered.filter(route => !route.dynamic);
   const testedRoutes = routes.length ? routes : [{ name: "home", path: "/", source: "default-root" }];
-  const untestedRoutes = discovered.filter(route => route.dynamic).map(route => ({
-    ...route, reason: "Dynamic route requires a concrete path in browser-tests.json"
+  const testedPaths = new Set(testedRoutes.map(route => route.path));
+  const untestedRoutes = discovered.filter(route => route.dynamic || !testedPaths.has(route.path)).map(route => ({
+    ...route,
+    reason: route.dynamic
+      ? "Dynamic route requires a concrete path in browser-tests.json"
+      : "Route is not included in browser-tests.json"
   }));
   const viewports = manifest.viewports ?? [
     { name: "desktop", width: 1440, height: 1000 },

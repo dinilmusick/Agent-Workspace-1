@@ -2,7 +2,7 @@
 
 ## One-hour stale-worker recovery
 
-A running task is reclaimable when its lease has expired or its last heartbeat is at least 60 minutes old. The condition is evaluated inside the same transaction that locks and claims the task with `FOR UPDATE SKIP LOCKED`; competing agents cannot both take ownership.
+The recovery criterion is heartbeat age only: a running task becomes reclaimable when its last heartbeat is at least 60 minutes old. An expired lease alone does not permit reassignment before the 60-minute threshold. New worker leases have a minimum duration of 60 minutes, and active workers must still heartbeat regularly. The condition is evaluated inside the same transaction that locks and claims the task with `FOR UPDATE SKIP LOCKED`; competing agents cannot both take ownership.
 
 All supported claim entry points must apply the same rule, including `goal_ledger_claim_task_by_key` (the standard ChatGPT worker path), `goal_ledger_claim_task`, `task_ledger_claim_next` and `task_ledger_claim_goal_next`.
 

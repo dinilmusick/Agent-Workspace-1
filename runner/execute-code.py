@@ -56,8 +56,19 @@ def execute(runtime, source, arguments, timeout, temp_dir, environment):
         return run_command(["go", "run", str(source), *arguments], timeout, environment, ROOT)
     if runtime == "ruby":
         return run_command(["ruby", str(source), *arguments], timeout, environment, ROOT)
+    if runtime == "perl":
+        return run_command(["perl", str(source), *arguments], timeout, environment, ROOT)
+    if runtime == "r":
+        return run_command(["Rscript", str(source), *arguments], timeout, environment, ROOT)
     if runtime == "php":
         return run_command(["php", str(source), *arguments], timeout, environment, ROOT)
+    if runtime in ("c", "cpp"):
+        compiler = "gcc" if runtime == "c" else "g++"
+        binary = Path(temp_dir) / "agent-program"
+        compiled = run_command([compiler, str(source), "-o", str(binary)], timeout, environment, ROOT)
+        if compiled.returncode:
+            return compiled
+        return run_command([str(binary), *arguments], timeout, environment, ROOT)
     if runtime == "rust":
         binary = Path(temp_dir) / "agent-program"
         compiled = run_command(["rustc", str(source), "-o", str(binary)], timeout, environment, ROOT)

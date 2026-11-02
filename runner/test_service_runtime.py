@@ -54,9 +54,13 @@ class ServiceRuntimeTests(unittest.TestCase):
                     self.assertEqual(int(payload["upstream_port"]), state["services"]["api"]["port"])
             self.assertTrue(Path(service["log"]).is_file())
             self.assertIn("fixture service", Path(service["log"]).read_text(encoding="utf-8"))
+        ports = [service["port"] for service in state["services"].values()]
         stopped = self.run_cli("stop")
         self.assertEqual(stopped.returncode, 0, stopped.stderr)
         self.assertEqual(json.loads((self.state / "state.json").read_text())["status"], "stopped")
+        for port in ports:
+            with self.assertRaises(urllib.error.URLError):
+                urllib.request.urlopen(f"http://127.0.0.1:{port}/health", timeout=0.2)
 
     def test_restarts_failed_service_with_bounded_policy(self):
         marker = self.root / "started-once"

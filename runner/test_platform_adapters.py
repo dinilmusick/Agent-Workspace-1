@@ -75,7 +75,7 @@ class PlatformAdapterTests(unittest.TestCase):
         self.assertEqual(result["target"], "local-postgres-only")
         self.assertEqual(commands[0], ["supabase", "--version"])
         self.assertEqual(commands[1][0:2], ["supabase", "start"])
-        self.assertIn("edge-runtime", commands[1][3])
+        self.assertIn("edge-runtime", commands[1][3])\n        self.assertIn("analytics", commands[1][3])
         self.assertEqual(commands[2], ["supabase", "db", "reset"])
         self.assertEqual(commands[3], ["supabase", "test", "db"])
         self.assertEqual(commands[4], ["supabase", "stop"])

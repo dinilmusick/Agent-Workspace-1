@@ -25,12 +25,15 @@
 - Do not place credentials, private source or user secrets in this public repository.
 
 ## Supabase Task Ledger
-- The authenticated integration is deployed as Supabase Edge Function `task-ledger`.
-- Use `runner/task-ledger.mjs` for authenticated API calls; configure `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and a dedicated agent's `SUPABASE_AGENT_JWT`.
-- Each agent must have a Supabase Auth user and an enabled `public.agent_registry` row. The service-role key must never be placed in an agent runtime.
-- Orchestrators create task trees; workers claim tasks using leases; every claim-bound write requires the returned claim token; verifier workers inspect pending results and iteration evidence, independently accept/reject results, and finalize ancestors only after all children are verified.
-- Worker entrypoints: `runner/agent-worker.mjs` and `runner/verifier-worker.mjs`; both require a dedicated registered Supabase Auth identity and a runtime adapter contract.
-- Follow `docs/task-ledger-integration.md` for provisioning and command examples.
+- The canonical interactive workflow is separate ChatGPT browser conversations coordinated through Supabase PostgreSQL.
+- Use owner-scoped PostgreSQL RPCs through the connected Supabase tools; do not route browser-chat work through Edge Functions.
+- The user manually starts worker chats. GitHub Actions does not spawn ChatGPT conversations.
+- Each conversation has a distinct agent_id and session_id. Workers claim one eligible leaf task from the named goal using goal_ledger_claim_task.
+- Every task, including parent/root tasks, has a Loop Generator contract. Leaf iterations use task_ledger_record_loop_iteration; parent iterations use task_ledger_record_parent_loop_iteration.
+- Leaf completion requires a passing latest loop iteration with evidence. Parent completion requires every child verified and the parent's own loop passed.
+- Use goal_ledger_finalize only after every leaf is verified and every parent loop passes.
+- See docs/task-ledger-integration.md and docs/chat-agent-workflow.md.
+- The task-ledger Edge Function remains a legacy CLI adapter only; it is not used by the browser-chat protocol and has not yet been deleted from the Supabase project.
 
 ## ChatGPT conversation workers and persistent goals
 - Browser conversations are the workers. The user manually opens each chat; GitHub Actions never launches ChatGPT chats.

@@ -81,6 +81,17 @@ begin
     verifier.id,'smoke-orchestrator',verifier.verification_claim_token,true,'{"independent":true}'
   );
 
+  perform public.task_ledger_record_parent_loop_iteration(
+    root_id,'smoke-orchestrator',1,
+    '{"task_tree":"Smoke leaf"}','{"verified":true}',
+    '{"child_task":"Smoke leaf","verification":"independent pass"}',
+    '[{"criterion":"All child tasks verified","status":"satisfied"}]',
+    '{"phase":"complete","iteration":1}',
+    '["Supabase PostgreSQL","Task ledger"]',
+    '[{"type":"verification","result":"passed","task_key":"Smoke leaf"}]',
+    'pass','All child tasks independently verified; parent loop passed'
+  );
+
   final_goal := public.goal_ledger_finalize(goal_name,'smoke-orchestrator','{"verified":true}');
   if final_goal.status<>'completed' then raise exception 'Goal did not finalize'; end if;
   resumed := public.goal_ledger_resume(goal_name);

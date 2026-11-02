@@ -3,6 +3,7 @@
 import json
 import os
 import sys
+import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
@@ -14,7 +15,8 @@ if len(sys.argv) > 1 and sys.argv[1] == "--fail-once":
 
 class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
-        payload = json.dumps({"service": os.environ.get("SERVICE_NAME"), "ok": True, "upstream_port": os.environ.get("UPSTREAM_PORT")}).encode()
+        payload = json.dumps({"service": os.environ.get("SERVICE_NAME"), "ok": True,
+            "upstream_port": os.environ.get("UPSTREAM_PORT")}).encode()
         self.send_response(200 if self.path == "/health" else 404)
         self.send_header("content-type", "application/json")
         self.end_headers()
@@ -25,4 +27,7 @@ class Handler(BaseHTTPRequestHandler):
 
 port = int(os.environ["PORT"])
 print(f"fixture service {os.environ.get('SERVICE_NAME')} listening on {port}", flush=True)
-server = ThreadingHTTPServer(("127.0.0.1", port), Handler)\nif len(sys.argv) > 1 and sys.argv[1] == "--exit-after":\n    threading.Timer(float(sys.argv[2]), server.shutdown).start()\nserver.serve_forever()
+server = ThreadingHTTPServer(("127.0.0.1", port), Handler)
+if len(sys.argv) > 1 and sys.argv[1] == "--exit-after":
+    threading.Timer(float(sys.argv[2]), server.shutdown).start()
+server.serve_forever()

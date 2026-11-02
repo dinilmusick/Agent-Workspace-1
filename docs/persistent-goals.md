@@ -1,53 +1,62 @@
 # Persistent Goal and Task Ledger
 
-Supabase PostgreSQL is the canonical persistent ledger. GitHub is the source for versioned implementation and the execution host for automated jobs; GitHub is not the task database. No Supabase Edge Function is required for database persistence or atomic task claiming. The existing authenticated `task-ledger` Edge Function remains a compatibility gateway until direct authenticated RPC clients are provisioned and verified.
+Supabase PostgreSQL is the canonical persistent ledger. GitHub is the canonical source for implementation, CI and optional finite compute; it is not the task database. Browser ChatGPT conversations use the connected Supabase database tools directly. No Supabase Edge Function is part of their claim/execute/verify path.
 
 ## Goal model
 
-- `public.goals`: stable UUID, globally case-insensitive unique name, description, full JSON context, instructions, acceptance criteria, status and context version.
-- `public.goal_versions`: immutable snapshots each time the goal's substantive context changes.
-- `public.goal_events`: append-only lifecycle and orchestration events.
-- `public.tasks.goal_id`: associates every task and recursively-created child task with its goal.
+- `public.goals`: stable UUID, case-insensitive unique name, complete context, instructions, acceptance criteria, lifecycle status and context version.
+- `public.goal_versions`: immutable context snapshots.
+- `public.goal_events`: append-only lifecycle history.
+- `public.tasks.goal_id`: links every root, parent and child task to its goal.
+- `public.task_dependencies`: blocking/advisory dependency edges.
+- `public.task_iterations`: append-only execution observations, criteria results, loop state and evidence.
+- `public.task_events`: append-only task lifecycle history.
 
 Goal statuses: planning, ready, active, blocked, completed, cancelled, archived.
 
-## Database operations
+## Orchestrator operations
 
-All goal operations are PostgreSQL transactions/RPCs, not Edge Function compute:
+- `goal_ledger_create_with_tasks(...)`: atomically creates a goal and validated loop-backed task tree.
+- `goal_ledger_list(status)`: discovers goals to resume.
+- `goal_ledger_resume(name)`: returns goal, progress summary, all tasks and iterations, dependency edges, version snapshots, latest version and events.
+- `goal_ledger_summary(goal_id)`: returns leaf-task progress and recommended worker count.
+- `goal_ledger_update(...)`: updates goal context/status and versions substantive changes.
+- `goal_ledger_finalize(name, agent_id, report)`: finalizes parent rows bottom-up and completes the goal only after all tasks are independently verified.
 
-- `goal_ledger_create(name_in, description_in, context_in, instructions_in, acceptance_criteria_in, created_by_agent_id_in, owner_user_id_in, metadata_in)`
-- `goal_ledger_get(goal_id_in, name_in)`
-- `goal_ledger_update(goal_id_in, changed_by_agent_id_in, ...)`
-- `goal_ledger_summary(goal_id_in)`
+Every task, including root/intermediate parents, must contain a valid Loop Generator contract: enabled, objective, input/output contracts, non-empty cycle, evaluation, non-empty stop conditions and bounded max_iterations (1–100), plus observable acceptance criteria and a verification plan.
 
-The task-tree RPC accepts `goal_id` in the root task definition. Children inherit the same goal ID, and cross-goal parent/child relationships are rejected. Task claims use PostgreSQL row locking with `FOR UPDATE SKIP LOCKED`, leases and claim tokens. Only leaf tasks are claimable; decomposition-only parent tasks are never assigned to execution workers. Verification has its own atomic claim and expiring verifier lease, so concurrent verifiers cannot process the same result.
+## Worker operations
 
-## Orchestrator protocol
+- `goal_ledger_claim_task(goal_name, agent_id, agent_name, agent_type, capabilities, session_id, lease_seconds)`: atomically claims one eligible leaf task using `FOR UPDATE SKIP LOCKED`. It records a unique session ID, claim token and lease.
+- `task_ledger_heartbeat_claim(...)`: renews the lease. A stale worker must stop writing when its token is rejected.
+- `task_ledger_record_loop_iteration(...)`: records actual input/output, observations, criterion results, loop state, tools and evidence.
+- `task_ledger_submit_result(...)`: submits the result. A completed leaf task is rejected unless the latest loop iteration passed every criterion with evidence.
+- `task_ledger_claim_verification(...)` and `task_ledger_verify_result_claimed(...)`: atomically lease and verify pending results. A worker cannot verify its own result.
+- `goal_ledger_finalize(...)`: completes parents and goal only after all leaf work is verified.
 
-1. Resolve an existing goal by UUID or case-insensitive unique name before creating a new one.
-2. For a new goal, persist the complete problem context, constraints, instructions and acceptance criteria.
-3. Decompose the goal into a root task and independently executable subtasks. Include `goal_id` on the root definition; children inherit it.
-4. Persist blocking dependencies before marking the goal ready.
-5. Query `goal_ledger_summary` and recommend workers based on ready, dependency-unblocked tasks.
-6. On resume, retrieve the goal, latest version, task tree, events, iterations and evidence. Continue from ledger state, not chat history.
-7. Re-plan only when evidence or changed requirements justify it. Version every substantive context update.
+## Conversation protocol
 
-## Worker protocol
+The orchestrator chat creates or resumes the goal, decomposes it, persists context and dependencies, and reports ready leaf count plus recommended worker chats. Each manually opened worker chat is given only:
 
-1. Authenticate as a registered agent.
-2. Atomically claim one eligible task. A claim is exclusive until lease expiry and carries a claim token.
-3. Retrieve the task, its goal context and required skill definitions.
-4. Execute only the claimed task; heartbeat with the claim token.
-5. Persist iterations, result and evidence.
-6. Submit for independent verification. Do not self-verify or finalize the parent.
-7. Claim another eligible task until none is ready.
+```text
+Claim and complete one task from goal: <GOAL NAME>.
+Load all context from the Supabase Goal and Task Ledger. Do not ask me to restate the goal. Execute the task's persisted Loop Generator contract, record each iteration and evidence, and submit for independent verification. Do not claim another task unless I tell you to continue.
+```
 
-A task's self-contained execution context should include goal ID/version, task definition, relevant constraints, required skills, inputs, acceptance criteria and output contract. Store references to large artifacts rather than copying large binaries into JSONB.
+A replacement orchestrator uses:
 
-## Security and compute boundary
+```text
+Resume goal: <GOAL NAME>.
+Load its canonical context, latest version, task tree, dependencies, loop states, iterations, evidence and verification status from Supabase. Reconcile current state, report progress and recommend worker chats based on ready independent leaf tasks.
+```
 
-- Keep RLS enabled. Goal, version and event tables are not directly readable/writable by anon or authenticated roles; privileged access is limited to the authenticated server boundary.
-- Never place a service-role key in GitHub source, artifacts, model prompts or public workflows.
-- Supabase PostgreSQL performs durable storage and short atomic transactions only. No LLM inference, code execution, task planning loops or worker polling in Supabase Edge Functions.
-- GitHub Actions may run automated workers and verifiers. ChatGPT connector sessions can act as interactive orchestrators/workers through an authenticated database interface.
-- The existing Edge Function is still deployed as a legacy gateway. Do not remove it until direct authenticated RPC access is implemented and tested end-to-end.
+Full interaction contract: [ChatGPT goal/worker protocol](chat-agent-workflow.md).
+
+## Compute and security boundary
+
+- Supabase PostgreSQL stores state and performs short atomic transactions only.
+- No LLM inference, repository builds, code execution, planning loops or continuous polling run in Supabase Edge Functions.
+- Browser ChatGPT conversations use Supabase connector operations directly; the deployed `task-ledger` Edge Function remains only as a legacy gateway for the repository CLI worker.
+- GitHub Actions may run finite CI, tests, repository workers and verifiers. It never launches ChatGPT browser conversations.
+- RLS is enabled. Authenticated API access is owner-scoped; goal versions and goal/task events and iterations are append-only for authenticated clients.
+- Never put service-role keys or agent credentials in source, prompts, task context, results or artifacts.

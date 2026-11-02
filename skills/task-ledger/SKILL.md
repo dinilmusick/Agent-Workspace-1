@@ -1,7 +1,7 @@
 ---
 name: "Task Ledger"
 slug: task-ledger
-version: 1.7.0
+version: 1.7.1
 source: Supabase Skills Database
 sourceId: 7
 status: active

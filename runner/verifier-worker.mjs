@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 import { spawn } from "node:child_process";
 import { setTimeout as sleep } from "node:timers/promises";
+import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { callLedger, parseRuntimeCommand, runtimeEnvironment } from "./agent-worker.mjs";
 
 const MAX_OUTPUT = 1_000_000;
@@ -87,7 +89,7 @@ export async function runVerifier({ maxTasks = Infinity, pollMs = 5000 } = {}) {
   return processed;
 }
 
-if (process.argv[1] && new URL(import.meta.url).href === new URL(process.argv[1], "file:").href) {
+if (process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1])) {
   const maxTasks = process.argv.includes("--once") ? 1 : Number(process.env.AGENT_MAX_TASKS ?? 0) || Infinity;
   const pollMs = Number(process.env.AGENT_POLL_MS ?? 5000);
   runVerifier({ maxTasks, pollMs }).then(count => {

@@ -1,0 +1,8 @@
+{
+  "goal": "Validate Looper state transitions",
+  "successCriteria": [
+    { "id": "build", "description": "Build verification passes" },
+    { "id": "browser", "description": "Browser verification passes" }
+  ],
+  "maxIterations": 3
+}

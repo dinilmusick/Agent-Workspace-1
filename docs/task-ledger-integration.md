@@ -24,7 +24,7 @@ Each conversation generates its own `agent_id` label and opaque `session_id`:
 2. Discover existing goals with `select * from public.goal_ledger_list('active');` or omit the status filter to list all.
 3. Resume with `select public.goal_ledger_resume('<exact goal name>');`. The result includes goal context, versions, task tree, dependencies, iterations, events and progress summary.
 4. Create a goal and its entire task tree atomically with `public.goal_ledger_create_with_tasks(...)`.
-5. Every task, including root/intermediate parents, must define loop.enabled=true, objective, input_contract, output_contract, non-empty cycle, evaluation, non-empty stop_conditions, max_iterations from 1 to 100, and non-empty acceptance_criteria.
+5. Every task, including root/intermediate parents, must define loop.enabled=true, objective, input_contract, output_contract, non-empty cycle, evaluation, non-empty stop_conditions, max_iterations from 1 to 100, and non-empty acceptance_criteria (Loop Generator successCriteria).
 6. Use `public.goal_ledger_summary(goal_id)` to report ready leaf tasks and recommended worker chats.
 7. Tell the user how many worker chats to open and give them the worker instruction below.
 

@@ -159,6 +159,7 @@ def supervise(manifest, root, state_dir, startup_timeout):
                         time.sleep(restart.get("delay_seconds", 0.2))
                         launch(name, item, state, state_path)
                     else:
+                        state["services"][name]["status"] = "failed"
                         raise RuntimeError(f"{name} exited during startup with code {code}")
                 if healthy(item):
                     state["services"][name]["status"] = "ready"
@@ -193,6 +194,7 @@ def supervise(manifest, root, state_dir, startup_timeout):
                         entry["restart_count"] = item["restarts"]
                         item["failures"] = 0
                     else:
+                        entry["status"] = "failed"
                         raise RuntimeError(f"{name} exited unexpectedly with code {code}")
                 elif now >= item["next_check"]:
                     item["next_check"] = now + interval
@@ -202,6 +204,7 @@ def supervise(manifest, root, state_dir, startup_timeout):
                     else:
                         item["failures"] += 1
                         entry["health"] = "unhealthy"
+                        entry["status"] = "unhealthy"
                         if item["failures"] >= config.get("healthcheck", {}).get("failure_threshold", 3):
                             restart = config.get("restart", {})
                             if restart_allowed(config, 1) and item["restarts"] < restart.get("max_restarts", 0):
@@ -218,6 +221,9 @@ def supervise(manifest, root, state_dir, startup_timeout):
     except Exception as error:
         state["status"] = "failed"
         state["error"] = str(error)
+        for entry in state["services"].values():
+            if entry["status"] in ("starting", "unhealthy"):
+                entry["status"] = "failed"
     finally:
         for item in runtime.values():
             stop_process(item["process"], item["config"].get("shutdown_grace_seconds", 5))

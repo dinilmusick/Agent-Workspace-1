@@ -34,6 +34,55 @@ Deno.serve(async (req: Request) => {
         if (se) throw se; if (ve) throw ve; const byId = new Map((versions ?? []).map((v) => [v.id, v]));
         result = (skills ?? []).filter((s) => byId.has(s.current_version_id)).map((s) => ({ ...s, current_version: byId.get(s.current_version_id) })); break;
       }
+      case "goal.create": {
+        if (!["orchestrator", "supervisor"].includes(identity.agent_type)) return response(403, { error: "orchestrator_role_required" });
+        const goal = await rpc("goal_ledger_create", {
+          name_in: requiredString(payload.name, "name"),
+          description_in: payload.description ?? "",
+          context_in: payload.context ?? {},
+          instructions_in: payload.instructions ?? "",
+          acceptance_criteria_in: payload.acceptance_criteria ?? [],
+          created_by_agent_id_in: identity.agent_id,
+          owner_user_id_in: authData.user.id,
+          metadata_in: payload.metadata ?? {},
+        });
+        result = goal;
+        break;
+      }
+      case "goal.get":
+      case "goal.resume": {
+        const goal = await rpc("goal_ledger_get", { goal_id_in: payload.goal_id ?? null, name_in: payload.name ?? null });
+        if (action === "goal.resume") {
+          await db.from("goal_events").insert({ goal_id: goal.id, event_type: "resumed", agent_id: identity.agent_id, message: "Goal resumed by orchestrator" });
+        }
+        const [{ data: tasks, error: taskError }, { data: versions, error: versionError }, { data: events, error: eventError }, summary] = await Promise.all([
+          db.from("tasks").select("*").eq("goal_id", goal.id).order("started_at"),
+          db.from("goal_versions").select("*").eq("goal_id", goal.id).order("version", { ascending: false }).limit(10),
+          db.from("goal_events").select("*").eq("goal_id", goal.id).order("occurred_at", { ascending: false }).limit(100),
+          rpc("goal_ledger_summary", { goal_id_in: goal.id }),
+        ]);
+        if (taskError) throw taskError; if (versionError) throw versionError; if (eventError) throw eventError;
+        result = { goal, summary, tasks: tasks ?? [], versions: versions ?? [], events: events ?? [] };
+        break;
+      }
+      case "goal.update": {
+        if (!["orchestrator", "supervisor"].includes(identity.agent_type)) return response(403, { error: "orchestrator_role_required" });
+        result = await rpc("goal_ledger_update", {
+          goal_id_in: requiredString(payload.goal_id, "goal_id"),
+          changed_by_agent_id_in: identity.agent_id,
+          description_in: payload.description ?? null,
+          context_in: payload.context ?? null,
+          instructions_in: payload.instructions ?? null,
+          acceptance_criteria_in: payload.acceptance_criteria ?? null,
+          status_in: payload.status ?? null,
+          metadata_patch_in: payload.metadata ?? {},
+          change_reason_in: payload.change_reason ?? null,
+        });
+        break;
+      }
+      case "goal.summary":
+        result = await rpc("goal_ledger_summary", { goal_id_in: requiredString(payload.goal_id, "goal_id") });
+        break;
       case "task.create":
         if (!["orchestrator", "supervisor"].includes(identity.agent_type)) return response(403, { error: "orchestrator_role_required" });
         result = await rpc("task_ledger_create_tree", { agent_id_in: identity.agent_id, agent_name_in: identity.agent_name, task_definition_in: payload.task_definition, parent_task_id_in: payload.parent_task_id ?? null, session_id_in: payload.session_id ?? null, agent_type_in: identity.agent_type });

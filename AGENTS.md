@@ -25,12 +25,23 @@
 - Do not place credentials, private source or user secrets in this public repository.
 
 ## Supabase Task Ledger
-- The authenticated integration is deployed as Supabase Edge Function `task-ledger`.
-- Use `runner/task-ledger.mjs` for authenticated API calls; configure `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and a dedicated agent's `SUPABASE_AGENT_JWT`.
-- Each agent must have a Supabase Auth user and an enabled `public.agent_registry` row. The service-role key must never be placed in an agent runtime.
+- Supabase Edge Functions are not used. Browser-chat agents use the connected Supabase PostgreSQL tools directly; the optional CLI runner uses Auth + PostgREST + RPC directly.
+- Use runner/task-ledger.mjs for optional CLI/runtime API calls; configure SUPABASE_URL, SUPABASE_ANON_KEY, and a dedicated agent's SUPABASE_AGENT_JWT.
+- Manually opened ChatGPT chats do not need separate Supabase Auth users; each supplies a unique agent_id and session_id. The optional CLI/runtime path requires an Auth user and enabled public.agent_registry row. Never expose the service-role key.
 - Orchestrators create task trees; workers claim tasks using leases; every claim-bound write requires the returned claim token; verifier workers inspect pending results and iteration evidence, independently accept/reject results, and finalize ancestors only after all children are verified.
 - Worker entrypoints: `runner/agent-worker.mjs` and `runner/verifier-worker.mjs`; both require a dedicated registered Supabase Auth identity and a runtime adapter contract.
 - Follow `docs/task-ledger-integration.md` for provisioning and command examples.
+
+## ChatGPT conversation workers and persistent goals
+- Browser conversations are the workers. The user manually opens each chat; GitHub Actions never launches ChatGPT chats.
+- Orchestrator chats create/resume uniquely named goals, decompose work and recommend worker-chat count from ready independent leaf tasks.
+- Worker chats claim one task from the named goal with `goal_ledger_claim_task`; load all context from Supabase, never from another chat's history.
+- Every task in a newly created goal tree must have a complete Loop Generator contract. Use `goal_ledger_create_with_tasks`; incomplete loop contracts are rejected.
+- Persist each loop iteration through `task_ledger_record_loop_iteration`. Leaf tasks cannot be submitted as completed unless the latest iteration passes every acceptance criterion with evidence.
+- Use `goal_ledger_resume` to recover the complete goal, task tree, iterations and events. Use `goal_ledger_summary` for ready work and worker recommendations.
+- Supabase PostgreSQL is persistence and atomic coordination. The ChatGPT browser protocol uses the connected Supabase tools directly; do not route it through Supabase Edge Functions.
+- GitHub Actions remains for CI and finite repository jobs, not ChatGPT conversation creation or always-on orchestration.
+- See `docs/chat-agent-workflow.md` for exact orchestrator and worker prompts.
 
 ## Looper
 Use:

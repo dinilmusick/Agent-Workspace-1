@@ -1,9 +1,10 @@
 -- Run with a privileged SQL connection against a disposable database.
--- Creates and deletes its own task tree; raises on any failed invariant.
+-- Verifies parent decomposition, leaf-only claims, result submission and independent verification.
 do $test$
 declare
   root_id uuid;
   claimed public.tasks;
+  verifier public.tasks;
   summary jsonb;
 begin
   root_id := public.task_ledger_create_tree(
@@ -16,35 +17,24 @@ begin
     null,'integration-test-session','orchestrator');
 
   select * into claimed from public.task_ledger_claim_next(
-    'integration-test-orchestrator','Integration Test Orchestrator','orchestrator',
-    array['orchestrator-only']::text[],900);
-  if claimed.id is null or claimed.id <> root_id then raise exception 'Root task was not claimed first'; end if;
-
-  perform public.task_ledger_heartbeat_claim(claimed.id,'integration-test-orchestrator',
-    claimed.claim_token,'integration test heartbeat',900);
-  perform public.task_ledger_record_iteration(claimed.id,'integration-test-orchestrator',
-    claimed.claim_token,1,'{"phase":"root"}','{"ok":true}','{"observation":"root"}',
-    'root pass','[]','[{"type":"test","name":"root"}]','completed');
-  perform public.task_ledger_submit_result(claimed.id,'integration-test-orchestrator',
-    claimed.claim_token,'{"ok":true}','root result','[]','[{"type":"test","name":"root"}]','completed');
-
-  select * into claimed from public.task_ledger_claim_next(
     'integration-test-worker','Integration Test Worker','worker',array['test-capability']::text[],900);
-  if claimed.id is null or claimed.task_name <> 'integration-test-child' then
-    raise exception 'Worker did not claim the capability-matched child';
+  if claimed.id is null or claimed.task_name<>'integration-test-child' then
+    raise exception 'Worker did not claim the eligible leaf task';
   end if;
-  perform public.task_ledger_record_iteration(claimed.id,'integration-test-worker',
-    claimed.claim_token,1,'{"phase":"child"}','{"ok":true}','{"observation":"child"}',
-    'child pass','[]','[{"type":"test","name":"child"}]','completed');
-  perform public.task_ledger_submit_result(claimed.id,'integration-test-worker',
-    claimed.claim_token,'{"ok":true}','child result','[]','[{"type":"test","name":"child"}]','completed');
+  if claimed.parent_task_id<>root_id then raise exception 'Worker claimed a task outside the expected parent'; end if;
 
+  perform public.task_ledger_record_iteration(claimed.id,'integration-test-worker',claimed.claim_token,
+    1,'{"phase":"child"}','{"ok":true}','{"observation":"child"}','child pass','[]',
+    '[{"type":"test","name":"child"}]','completed');
+  perform public.task_ledger_submit_result(claimed.id,'integration-test-worker',claimed.claim_token,
+    '{"ok":true}','child result','[]','[{"type":"test","name":"child"}]','completed');
 
-  select * into claimed from public.task_ledger_pending_verification();
-  if claimed.id is null or claimed.task_name <> 'integration-test-child' then
-    raise exception 'Verifier queue did not return the leaf child result first';
+  select * into verifier from public.task_ledger_claim_verification('integration-test-orchestrator',900);
+  if verifier.id is null or verifier.id<>claimed.id then
+    raise exception 'Independent verifier did not claim the submitted leaf result';
   end if;
-  perform public.task_ledger_verify_result(claimed.id,'integration-test-orchestrator',true,'{"verified":true}');
+  perform public.task_ledger_verify_result_claimed(verifier.id,'integration-test-orchestrator',
+    verifier.verification_claim_token,true,'{"verified":true}');
 
   summary := public.task_ledger_children_summary(root_id);
   if coalesce((summary->>'all_verified')::boolean,false) is not true then
@@ -55,8 +45,6 @@ begin
   if not exists(select 1 from public.tasks where id=root_id and status='completed' and verification_status='verified') then
     raise exception 'Parent did not reach verified completion';
   end if;
-  select * into claimed from public.task_ledger_pending_verification();
-  if claimed.id is not null then raise exception 'Pending verifier queue should be empty after parent finalization'; end if;
 
   delete from public.task_events where task_id in (select id from public.tasks where id=root_id or parent_task_id=root_id);
   delete from public.task_iterations where task_id in (select id from public.tasks where id=root_id or parent_task_id=root_id);

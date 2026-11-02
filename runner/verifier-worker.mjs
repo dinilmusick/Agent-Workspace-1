@@ -52,7 +52,7 @@ async function finalizeVerifiedAncestors(task, verifierReport) {
   let parentId = task.parent_task_id;
   while (parentId) {
     const summary = await callLedger("task.children", { task_id: parentId });
-    if (summary?.all_verified !== true) break;
+    if (summary?.all_verified !== true) return;
     const parentData = await callLedger("task.get", { task_id: parentId });
     await callLedger("task.finalize", {
       task_id: parentId,
@@ -61,13 +61,22 @@ async function finalizeVerifiedAncestors(task, verifierReport) {
     });
     parentId = parentData.task?.parent_task_id ?? null;
   }
+  if (task.goal_id) {
+    const goal = await callLedger("goal.get", { goal_id: task.goal_id });
+    if (goal?.status !== "completed") {
+      await callLedger("goal.finalize", {
+        name: goal.name,
+        verification_report: { verifier_agent: true, source_report: verifierReport },
+      });
+    }
+  }
 }
 
 export async function runVerifier({ maxTasks = Infinity, pollMs = 5000 } = {}) {
   const command = parseRuntimeCommand();
   let processed = 0;
   while (processed < maxTasks) {
-    const pending = await callLedger("task.pending_verification");
+    const pending = await callLedger("task.claim_verification", { lease_seconds: Number(process.env.AGENT_VERIFIER_LEASE_SECONDS ?? 900) });
     const task = Array.isArray(pending) ? pending[0] : null;
     if (!task) { await sleep(pollMs); continue; }
     try {
@@ -75,6 +84,7 @@ export async function runVerifier({ maxTasks = Infinity, pollMs = 5000 } = {}) {
       const verification = await runVerification(details.task, details.iterations ?? [], command);
       await callLedger("task.verify", {
         task_id: task.id,
+        verification_claim_token: task.verification_claim_token,
         verified: verification.verified,
         verification_report: verification.verification_report,
       });

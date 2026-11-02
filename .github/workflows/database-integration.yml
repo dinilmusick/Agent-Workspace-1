@@ -1,0 +1,115 @@
+name: Disposable Supabase Database Integration
+
+on:
+  push:
+    branches: ["feat/**"]
+    paths:
+      - "supabase/**"
+      - ".github/workflows/database-integration.yml"
+  pull_request:
+    branches: [main, "feat/agent-recovery-goal-overview"]
+    paths:
+      - "supabase/**"
+      - ".github/workflows/database-integration.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: supabase-db-integration-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  database:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Checkout without persisted credentials
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: Install pinned Supabase CLI
+        uses: supabase/setup-cli@v3.2.0
+        with:
+          version: 3.0.0
+
+      - name: Prove this run cannot target a linked project
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f supabase/config.toml
+          if [ -e supabase/.temp/project-ref ]; then
+            echo "::error::A linked Supabase project reference is forbidden in CI."
+            exit 1
+          fi
+          if [ -n "${SUPABASE_ACCESS_TOKEN:-}" ] || [ -n "${SUPABASE_DB_URL:-}" ]; then
+            echo "::error::Remote Supabase credentials/URLs must not be present in this job."
+            exit 1
+          fi
+          supabase --version
+          mkdir -p results/database
+
+      - name: Start isolated local Supabase stack
+        env:
+          SUPABASE_TELEMETRY_DISABLED: "1"
+        run: supabase start --exclude studio,imgproxy,realtime,storage-api,functions,analytics,vector,supavisor
+
+      - name: Recreate database from migrations
+        shell: bash
+        run: |
+          set -euo pipefail
+          env -u SUPABASE_ACCESS_TOKEN -u SUPABASE_DB_URL supabase db reset
+
+      - name: Run SQL, RLS, RPC and trigger integration tests
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:54322/postgres
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          tests=(supabase/tests/*.integration.sql)
+          if [ "${#tests[@]}" -eq 0 ]; then
+            echo "::error::No SQL integration tests were found."
+            exit 1
+          fi
+          for test_file in "${tests[@]}"; do
+            echo "::group::${test_file}"
+            psql "$DATABASE_URL" -X -v ON_ERROR_STOP=1 -f "$test_file"
+            echo "::endgroup::"
+          done
+
+      - name: Detect public schema drift
+        shell: bash
+        run: |
+          set -euo pipefail
+          env -u SUPABASE_ACCESS_TOKEN -u SUPABASE_DB_URL supabase db diff --schema public > results/database/schema-diff.sql
+          if [ -s results/database/schema-diff.sql ] &&
+             ! grep -qi "No schema changes found" results/database/schema-diff.sql; then
+            cat results/database/schema-diff.sql
+            echo "::error::Local public schema differs from the committed migration chain."
+            exit 1
+          fi
+          echo "No public schema drift detected."
+
+      - name: Generate local database TypeScript types
+        shell: bash
+        run: |
+          set -euo pipefail
+          env -u SUPABASE_ACCESS_TOKEN -u SUPABASE_DB_URL supabase gen types --lang typescript --local --schema public > results/database/database.types.ts
+          test -s results/database/database.types.ts
+          grep -q "export type Database" results/database/database.types.ts
+
+      - name: Upload database verification evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: supabase-database-evidence-${{ github.run_id }}
+          path: results/database/
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Stop and destroy local stack
+        if: always()
+        run: supabase stop --no-backup

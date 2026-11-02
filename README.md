@@ -20,7 +20,7 @@ A manifest declares an argv array (never a shell string):
 - Artifact upload and independent result-contract validation.
 - Separate repository validation that never executes task manifests.
 
-See [architecture](docs/architecture.md), [security](docs/security.md), [task contract](docs/task-contract.md), and [Supabase Task Ledger integration](docs/task-ledger-integration.md).\n\n## Agent tools and skills\n- [Looper](tools/looper/README.md): bounded loop-state controller for agent iterations.\n- [Tools catalogue](tools/catalog/README.md): curated AI coding, linting, testing and browser tools.\n- [Skills catalogue](skills/catalog.json): versioned snapshot of all 29 skills backed up from the Skills Database, including linked tool references.\n- [Loop Generator skill](skills/loop-generator/SKILL.md): uses Looper to persist iteration inputs, outputs and stop decisions.
+See [architecture](docs/architecture.md), [security](docs/security.md), [task contract](docs/task-contract.md), [Supabase Task Ledger integration](docs/task-ledger-integration.md), and [ChatGPT goal/worker protocol](docs/chat-agent-workflow.md).\n\n## Agent tools and skills\n- [Looper](tools/looper/README.md): bounded loop-state controller for agent iterations.\n- [Tools catalogue](tools/catalog/README.md): curated AI coding, linting, testing and browser tools.\n- [Skills catalogue](skills/catalog.json): versioned snapshot of all 29 skills backed up from the Skills Database, including linked tool references.\n- [Loop Generator skill](skills/loop-generator/SKILL.md): uses Looper to persist iteration inputs, outputs and stop decisions.
 
 ## Local
 ```bash

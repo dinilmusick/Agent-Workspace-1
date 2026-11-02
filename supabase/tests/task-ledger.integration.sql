@@ -9,6 +9,7 @@ begin
   root_id := public.task_ledger_create_tree(
     'integration-test-orchestrator','Integration Test Orchestrator',
     jsonb_build_object('name','integration-test-root','tags',jsonb_build_array('integration-test'),
+      'required_capabilities',jsonb_build_array('orchestrator-only'),
       'subtasks',jsonb_build_array(jsonb_build_object('name','integration-test-child',
         'tags',jsonb_build_array('integration-test'),
         'required_capabilities',jsonb_build_array('test-capability')))),
@@ -16,7 +17,7 @@ begin
 
   select * into claimed from public.task_ledger_claim_next(
     'integration-test-orchestrator','Integration Test Orchestrator','orchestrator',
-    array['test-capability']::text[],900);
+    array['orchestrator-only']::text[],900);
   if claimed.id is null or claimed.id <> root_id then raise exception 'Root task was not claimed first'; end if;
 
   perform public.task_ledger_heartbeat_claim(claimed.id,'integration-test-orchestrator',

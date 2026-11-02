@@ -127,6 +127,14 @@ jobs:
           ARTIFACT_DIR: ${{ github.workspace }}/artifacts/browser
         run: node tools/react-typescript-fullstack/scripts/inspect-browser.mjs
 
+      - name: Verify target service health after inspection
+        id: service_health
+        if: steps.start.outcome == 'success'
+        continue-on-error: true
+        env:
+          PROJECT_PATH: ${{ inputs.project_path }}
+        run: python runner/react-project.py status --project-path "$PROJECT_PATH"
+
       - name: Stop target services
         id: stop
         if: always()
@@ -153,12 +161,14 @@ jobs:
           BROWSER: ${{ steps.browser.outcome }}
           API_TESTS: ${{ steps.api.outcome }}
           STOP: ${{ steps.stop.outcome }}
+          SERVICE_HEALTH: ${{ steps.service_health.outcome }}
         run: |
-          printf 'prepare=%s quality=%s start=%s ready=%s api=%s browser=%s stop=%s\n' "$PREPARE" "$QUALITY" "$START" "$READY" "$API_TESTS" "$BROWSER" "$STOP"
+          printf 'prepare=%s quality=%s start=%s ready=%s api=%s browser=%s service_health=%s stop=%s\n' "$PREPARE" "$QUALITY" "$START" "$READY" "$API_TESTS" "$BROWSER" "$SERVICE_HEALTH" "$STOP"
           test "$PREPARE" = success &&
           test "$QUALITY" = success &&
           test "$START" = success &&
           test "$READY" = success &&
           test "$BROWSER" = success &&
+          { test "$SERVICE_HEALTH" = success || test "$SERVICE_HEALTH" = skipped; } &&
           { test "$API_TESTS" = success || test "$API_TESTS" = skipped; } &&
           test "$STOP" = success

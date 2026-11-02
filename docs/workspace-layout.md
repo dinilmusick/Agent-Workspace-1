@@ -25,10 +25,10 @@ tools/
   looper/
   react-typescript-fullstack/
   backend-api-diagnostics/       # local API contract, auth and server-log diagnostics
+  agent-runtimes/
 examples/
   services.json                  # multi-service target manifest example
   fixture-service.py             # test-only HTTP service fixture
-  agent-runtimes/
 workspaces/                     # disposable target checkout area
 results/                        # compute output area
 ```

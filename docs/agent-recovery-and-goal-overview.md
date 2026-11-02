@@ -18,6 +18,8 @@ Call `goal_ledger_overview(null)` at the start of an orchestration session and w
 
 Use the overview to explain all running and outstanding goals before selecting work. Then load the chosen goal with `goal_ledger_resume_by_key`, inspect its full context and task tree, and claim exactly one eligible leaf task. Never infer availability from the overview alone: use the atomic claim RPC.
 
+The overview RPC is an internal agent-ledger operation and is executable only by trusted service-role/database callers. It is deliberately not exposed to anonymous or ordinary authenticated API roles because this workspace does not yet have owner-scoped multi-tenant Auth isolation.
+
 The overview follows the workspace owner visibility boundary. The current connected project is single-owner and has no Supabase Auth users; this is not multi-tenant isolation.
 
 ## Verification

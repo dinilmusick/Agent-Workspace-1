@@ -30,7 +30,7 @@ describe("coverage thresholds", () => {
 describe("quality manifest", () => {
   it("loads the sample manifest and confines report paths", async () => {
     const root = resolve("examples/quality-sample");
-    const config = await loadQualityManifest({ targetRoot: root });
+    const config = await loadQualityManifest({ targetRoot: root, manifestPath: ".agent-workspace/quality-gates.json" });
     expect(config.manifest.version).toBe(1);
     expect(config.lighthouseUrls).toEqual(["/", "/about", "/login"]);
     expect(config.coverageSummaryPath.startsWith(root)).toBe(true);
@@ -46,7 +46,7 @@ describe("quality manifest", () => {
       security: {},
       lighthouse: { enabled: false }
     }));
-    const config = await loadQualityManifest({ targetRoot: root });
+    const config = await loadQualityManifest({ targetRoot: root, manifestPath: ".agent-workspace/quality-gates.json" });
     expect(config.manifest.security.npmAuditLevel ?? "high").toBe("high");
     expect(config.lighthouseUrls).toEqual([]);
   });
@@ -62,14 +62,14 @@ describe("quality manifest", () => {
       security: {},
       lighthouse: { enabled: false }
     }));
-    await expect(loadQualityManifest({ targetRoot: root })).rejects.toThrow("coverage.thresholds.lines");
+    await expect(loadQualityManifest({ targetRoot: root, manifestPath: ".agent-workspace/quality-gates.json" })).rejects.toThrow("coverage.thresholds.lines");
     await writeFile(path, JSON.stringify({
       version: 1,
       coverage: { summaryFile: "../../outside.json", thresholds },
       security: {},
       lighthouse: { enabled: false }
     }));
-    await expect(loadQualityManifest({ targetRoot: root })).rejects.toThrow("escapes quality target root");
+    await expect(loadQualityManifest({ targetRoot: root, manifestPath: ".agent-workspace/quality-gates.json" })).rejects.toThrow("escapes quality target root");
   });
 });
 

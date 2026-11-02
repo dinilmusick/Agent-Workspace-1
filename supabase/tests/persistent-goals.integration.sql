@@ -42,7 +42,7 @@ begin
   select * into claimed from public.goal_ledger_claim_task(
     goal_name,'smoke-worker','Smoke Worker','worker',array[]::text[],'session-smoke',900
   );
-  if claimed.id is null or claimed.task_name<>'Smoke leaf' or claimed.claimed_session_id<>'session-smoke' then
+  if claimed.id is null or claimed.task_name<>'Smoke leaf' or claimed.claimed_session_id<>'session-smoke' or claimed.goal_context_version<>1 then
     raise exception 'Goal worker did not claim expected leaf task';
   end if;
 
@@ -71,6 +71,8 @@ begin
   if final_goal.status<>'completed' then raise exception 'Goal did not finalize'; end if;
   resumed := public.goal_ledger_resume(goal_name);
   if resumed->'summary'->'tasks'->>'completed'<>'1' then raise exception 'Resume summary incorrect: %',resumed; end if;
+  if jsonb_array_length(resumed->'versions')<>1 or resumed->'latest_version'->>'version'<>'1' then raise exception 'Resume omitted goal version history: %',resumed; end if;
+  if jsonb_typeof(resumed->'dependencies')<>'array' then raise exception 'Resume omitted dependency graph'; end if;
   raise notice 'PASS: goal creation, task tree, exclusive session claim, loop evidence, result submission, verifier lease, finalization and resume';
 end;
 $test$;

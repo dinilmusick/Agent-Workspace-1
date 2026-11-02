@@ -2,6 +2,9 @@ import { randomUUID } from "node:crypto";
 import { createServer } from "node:http";
 import { authorize, resolvePage, validateCredentials } from "./app.mjs";
 
+const port = Number(process.env.PORT ?? 4173);
+const host = process.env.HOST ?? "127.0.0.1";
+
 async function readJson(request) {
   let body = "";
   for await (const chunk of request) body += chunk;
@@ -13,12 +16,15 @@ function send(response, status, body, contentType = "application/json; charset=u
   response.end(contentType.startsWith("application/json") ? JSON.stringify(body) : body);
 }
 
-function renderPage(page) {
+function renderPage(page, path) {
+  const canonical = new URL(path, "http://127.0.0.1:" + port).toString();
   return [
     "<!doctype html>",
     '<html lang="en"><head><meta charset="utf-8">',
     '<meta name="viewport" content="width=device-width, initial-scale=1">',
     '<meta name="description" content="A secure sample application for automated quality gate validation.">',
+    '<meta name="theme-color" content="#ffffff">',
+    '<link rel="canonical" href="' + canonical + '">',
     "<title>" + page.title + "</title>",
     "<style>body{font-family:system-ui,sans-serif;max-width:52rem;margin:3rem auto;padding:0 1rem;color:#172033}nav{display:flex;gap:1rem;margin-bottom:2rem}a{color:#164e9b}main{border:1px solid #d8deea;border-radius:.5rem;padding:1.5rem}h1{line-height:1.2}footer{margin-top:2rem;color:#526078}</style>",
     "</head><body><header><a href=\"/\">Quality Sample</a>",
@@ -41,6 +47,13 @@ const server = createServer(async (request, response) => {
     if (request.method === "GET" && url.pathname === "/health") {
       status = 200;
       send(response, status, { status: "ok" });
+    } else if (request.method === "GET" && url.pathname === "/robots.txt") {
+      status = 200;
+      send(response, status, "User-agent: *\nAllow: /\n", "text/plain; charset=utf-8");
+    } else if (request.method === "GET" && url.pathname === "/favicon.ico") {
+      status = 204;
+      response.writeHead(status);
+      response.end();
     } else if (request.method === "POST" && url.pathname === "/api/login") {
       const credentials = await readJson(request);
       if (!validateCredentials(credentials, process.env.QUALITY_TEST_EMAIL, process.env.QUALITY_TEST_PASSWORD)) {
@@ -57,7 +70,7 @@ const server = createServer(async (request, response) => {
     } else if (request.method === "GET") {
       const page = resolvePage(url.pathname, token, process.env.QUALITY_SESSION_TOKEN);
       status = page.status;
-      send(response, status, renderPage(page), "text/html; charset=utf-8");
+      send(response, status, renderPage(page, url.pathname), "text/html; charset=utf-8");
     } else {
       status = 404;
       send(response, status, { error: "not_found" });
@@ -78,6 +91,4 @@ const server = createServer(async (request, response) => {
   }
 });
 
-const port = Number(process.env.PORT ?? 4173);
-const host = process.env.HOST ?? "127.0.0.1";
 server.listen(port, host, () => process.stdout.write("Quality sample listening on http://" + host + ":" + port + "\n"));

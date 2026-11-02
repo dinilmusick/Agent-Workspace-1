@@ -23,7 +23,8 @@
     { "name": "mobile", "width": 390, "height": 844 }
   ],
   "authStates": {
-    "anonymous": { "storageState": null }
+    "anonymous": { "storageState": null },
+    "authenticated": { "storageState": ".agent-workspace/authenticated.json" }
   },
   "workflows": [
     {
@@ -38,6 +39,26 @@
         { "action": "click", "selector": "#dashboard-link" },
         { "action": "expectUrl", "value": "/dashboard" },
         { "action": "expectText", "selector": "#dashboard-title", "value": "Dashboard" }
+      ]
+    },
+    {
+      "name": "authenticated dashboard",
+      "authState": "authenticated",
+      "steps": [
+        { "action": "navigate", "path": "/dashboard" },
+        { "action": "expectText", "selector": "#dashboard-title", "value": "Dashboard" }
+      ]
+    },
+    {
+      "name": "reject invalid credentials",
+      "authState": "anonymous",
+      "steps": [
+        { "action": "navigate", "path": "/login" },
+        { "action": "fill", "selector": "#email", "value": "qa@example.com" },
+        { "action": "fill", "selector": "#password", "value": "wrong-password" },
+        { "action": "click", "selector": "#login-form button[type=submit]" },
+        { "action": "expectText", "selector": "#login-status", "value": "Sign in failed" },
+        { "action": "expectHidden", "selector": "#dashboard-link" }
       ]
     },
     {

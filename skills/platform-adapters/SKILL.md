@@ -28,7 +28,7 @@ Route platform-specific development checks through one local-only adapter contra
 
 - Require Supabase CLI v3.
 - Start a local Postgres-only stack by excluding Auth, Realtime, Storage, Studio, Edge Runtime, Analytics, Vector and other non-database services.
-- Run `supabase db reset` to apply local migrations and `supabase test db` for local pgTAP tests when present.
+- Run `supabase db reset --yes` to recreate the disposable local database and apply migrations, then `supabase test db --yes` for local pgTAP tests when present. `--yes` is permitted only because the adapter has stripped remote credentials and uses the local target.
 - Always stop the local stack after the run, including when migration/tests fail.
 - Strip Supabase access tokens, project refs and database passwords from the adapter process environment. No `supabase link`, remote DB, `--linked`, `--remote`, Edge Function or deployment command is permitted.
 

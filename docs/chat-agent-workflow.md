@@ -8,7 +8,7 @@ The user manually opens ChatGPT browser conversations. No GitHub workflow create
 - **Worker chat:** the user says `Claim a task from goal: <exact goal name>`. The worker loads persisted context, atomically claims one eligible leaf task, executes its loop, submits evidence, then claims another only when asked to continue.
 - **Supabase PostgreSQL:** canonical persistence, atomic claims, leases, task loops, versions, events and evidence.
 - **GitHub:** canonical source code, PRs, CI and optional disposable execution. GitHub Actions does not spawn browser chats.
-- **Supabase Edge Functions:** not used by this browser-chat protocol. The existing `task-ledger` Edge Function remains a legacy API for the repository CLI runner until that separate adapter is migrated.
+- **Supabase Edge Functions:** not used. Both browser chats and the optional CLI runner use direct Supabase connector/Auth + PostgREST/RPC access.
 
 ## Orchestrator protocol
 

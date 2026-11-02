@@ -104,7 +104,9 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: security-quality-reports
-          path: artifacts/security/
+          path: |
+            artifacts/security/
+            artifacts/codeql/
           if-no-files-found: warn
           retention-days: 14
 
@@ -152,7 +154,9 @@ jobs:
           QUALITY_GATES_MANIFEST: workspaces/target/.agent-workspace/quality-gates.json
 
       - name: Audit target application dependencies
-        run: npm audit --prefix workspaces/target --audit-level=high --json > artifacts/quality/target-npm-audit.json
+        run: |
+          mkdir -p artifacts/quality
+          npm audit --prefix workspaces/target --audit-level=high --json > artifacts/quality/target-npm-audit.json
 
       - name: Prepare target application
         run: python runner/react-project.py prepare --project-path .

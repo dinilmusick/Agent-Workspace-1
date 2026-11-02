@@ -17,8 +17,8 @@ Set `API_BASE_URL` to a local base URL or provide `baseUrl` in the manifest. The
 Copy [the example manifest](examples/api-tests.json) to `.agent-workspace/api-tests.json` in the target repository.
 
 - `version`: currently `1`.
-- `baseUrl`: optional local server URL; overridden by `API_BASE_URL`.
-- `timeoutMs`: default request timeout.
+- `baseUrl`: optional local server URL; overridden by `API_BASE_URL`. When omitted in multi-service inspection, the workflow derives the URL from `serviceId` and its assigned port.
+- `serviceId`: optional service ID used to select the backend port and its structured log (defaults to `api`).\n- `timeoutMs`: default request timeout.
 - `requests`: ordered scenarios with `id`, `method`, relative `path`, `headers`, optional `body`, `timeoutMs` and `expect`.
 - `expect.status`: expected status or list of acceptable statuses.
 - `expect.headers`: response header equality checks.

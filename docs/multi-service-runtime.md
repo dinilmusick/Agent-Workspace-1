@@ -66,7 +66,7 @@ react-project.py stop
 SIGTERM process groups -> grace period -> SIGKILL if required
 ```
 
-The workflow always invokes `react-project.py stop` after inspection, then uploads the per-service logs and state with the other artifacts.
+The workflow checks supervisor health after browser/API inspection, always invokes `react-project.py stop`, then uploads the per-service logs and final state with the other artifacts. A failed or exited service makes the inspection fail even if the frontend remains reachable.
 
 ## Local commands
 

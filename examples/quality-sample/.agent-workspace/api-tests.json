@@ -1,0 +1,66 @@
+{
+  "version": 1,
+  "baseUrl": "http://127.0.0.1:4173",
+  "timeoutMs": 5000,
+  "requests": [
+    {
+      "id": "health",
+      "method": "GET",
+      "path": "/health",
+      "expect": {
+        "status": 200,
+        "jsonSchema": {
+          "type": "object",
+          "required": ["status"],
+          "properties": { "status": { "type": "string", "enum": ["ok"] } }
+        }
+      }
+    },
+    {
+      "id": "login-invalid",
+      "method": "POST",
+      "path": "/api/login",
+      "body": { "email": "qa@example.com", "password": "invalid" },
+      "expect": { "status": 401, "jsonPath": { "error": "invalid_credentials" } }
+    },
+    {
+      "id": "login-valid",
+      "method": "POST",
+      "path": "/api/login",
+      "body": { "email": "qa@example.com", "password": { "$env": "QUALITY_TEST_PASSWORD" } },
+      "expect": { "status": 200, "jsonPath": { "token": "test-token" } }
+    },
+    {
+      "id": "private-anonymous",
+      "method": "GET",
+      "path": "/api/private",
+      "expect": { "status": 401, "jsonPath": { "error": "unauthenticated" } }
+    },
+    {
+      "id": "private-forbidden",
+      "method": "GET",
+      "path": "/api/private",
+      "headers": { "authorization": "Bearer invalid-session" },
+      "expect": { "status": 403, "jsonPath": { "error": "forbidden" } }
+    },
+    {
+      "id": "private-authenticated",
+      "method": "GET",
+      "path": "/api/private",
+      "headers": { "authorization": { "$env": "QUALITY_VALID_AUTHORIZATION" } },
+      "expect": { "status": 200, "jsonPath": { "data": "private" } }
+    },
+    {
+      "id": "dashboard-anonymous",
+      "method": "GET",
+      "path": "/dashboard",
+      "expect": { "status": 401 }
+    },
+    {
+      "id": "missing-route",
+      "method": "GET",
+      "path": "/missing",
+      "expect": { "status": 404 }
+    }
+  ]
+}

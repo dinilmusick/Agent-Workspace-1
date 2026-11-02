@@ -28,7 +28,8 @@
 - The authenticated integration is deployed as Supabase Edge Function `task-ledger`.
 - Use `runner/task-ledger.mjs` for authenticated API calls; configure `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and a dedicated agent's `SUPABASE_AGENT_JWT`.
 - Each agent must have a Supabase Auth user and an enabled `public.agent_registry` row. The service-role key must never be placed in an agent runtime.
-- Orchestrators create task trees; workers claim tasks using leases; every claim-bound write requires the returned claim token; verifiers independently accept/reject results; parent finalization requires all children to be verified.
+- Orchestrators create task trees; workers claim tasks using leases; every claim-bound write requires the returned claim token; verifier workers inspect pending results and iteration evidence, independently accept/reject results, and finalize ancestors only after all children are verified.
+- Worker entrypoints: `runner/agent-worker.mjs` and `runner/verifier-worker.mjs`; both require a dedicated registered Supabase Auth identity and a runtime adapter contract.
 - Follow `docs/task-ledger-integration.md` for provisioning and command examples.
 
 ## Looper

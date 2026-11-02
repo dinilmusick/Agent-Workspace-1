@@ -147,3 +147,8 @@ Whenever a new chat starts an orchestration session or the user asks what goals 
 After answering, compare the requested objective and existing task tree. If a specific missing work item would materially advance an active goal, propose exactly one well-scoped task and ask: **“Should I add this as a task?”** Show its title, parent goal key, purpose, acceptance criteria, dependencies and a proposed readable slug. Do not create anything until the user explicitly confirms. If confirmed, create it with the canonical task-tree RPC, including a complete task loop, acceptance criteria and verification plan, then report the exact database-returned `task_key`. Never invent or reserve an ID before insertion. If no meaningful gap exists, do not suggest an artificial task.
 
 New task keys use `task-<descriptive-kebab-case>-<8-hex-suffix>`, generated atomically by the database from the task name. Existing historical keys are not rewritten. UUIDs are internal only.
+
+
+### Resolve the readable task key after insertion
+
+`task_ledger_create_tree` returns an internal UUID, not the public task key. Immediately query `SELECT task_key FROM public.tasks WHERE id = <returned UUID>` through the trusted Supabase SQL connector. Show only that database-generated key; keep UUIDs internal. For hierarchical goal creation, inspect returned task objects or query their IDs for `task_key`. Never derive the key from the title yourself.

@@ -21,9 +21,9 @@ try {
   console.error(String(error));
   process.exit(2);
 }
-const base = process.env.SUPABASE_URL?.replace(/\/$/, "");
-const apiKey = process.env.SUPABASE_ANON_KEY;
-const jwt = process.env.SUPABASE_AGENT_JWT;
+const base = (process.env.SUPABASE_URL ?? process.env.AGENT_TASK_LEDGER_URL)?.replace(/\/$/, "");
+const apiKey = process.env.SUPABASE_ANON_KEY ?? process.env.AGENT_TASK_LEDGER_ANON_KEY;
+const jwt = process.env.SUPABASE_AGENT_JWT ?? process.env.AGENT_TASK_LEDGER_JWT;
 if (!base || !apiKey || !jwt) {
   console.error("Set SUPABASE_URL, SUPABASE_ANON_KEY and SUPABASE_AGENT_JWT.");
   process.exit(2);

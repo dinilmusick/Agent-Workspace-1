@@ -1,7 +1,7 @@
 ---
 name: "Universal Task Router"
 slug: universal-task-router
-version: 1.3.5
+version: 1.3.8
 source: Supabase Skills Database
 sourceId: 28
 status: active
@@ -52,6 +52,14 @@ Treat skill routing as a graph with arbitrary practical nesting depth:
 
 For an agreed actionable goal requiring persistent progress, multiple tasks or independent ChatGPT conversations, load Task Ledger and Loop Generator.
 
+### Universal goal overview
+- At the beginning of every orchestration session, and whenever the user asks what goals remain, call `goal_ledger_overview(null)`.
+- Present every visible planning, ready, active and blocked goal, not only the first unfinished goal. Include readable key, status, task counts, running workers, queued tasks, blockers, stale-heartbeat flags and verification state.
+- Explain dependencies and why apparently queued work may not yet be claimable.
+- A running task is reclaimable only after 60 minutes without a heartbeat. Lease expiry alone cannot bypass this threshold; claims are reassigned atomically.
+- Use `goal_ledger_resume_by_key` to load complete context for the selected goal. The overview is discovery, not ownership; never infer a claim from it.
+- Use the atomic goal-key claim RPC only after resume. Never directly update task ownership.
+
 ### Goal identity
 - `goals.name` is the descriptive title shown to the user.
 - `goals.goal_key` is the stable readable identifier generated from the title.
@@ -80,6 +88,10 @@ When asked to continue, finish or resume an unfinished goal:
 - Record goal-level cycles with `goal_ledger_record_loop_iteration`.
 - A goal loop may pass only after all descendant tasks are independently verified, all goal acceptance criteria are satisfied and non-empty evidence is recorded.
 - Finalize through `goal_ledger_finalize_by_key`. The database is canonical; recover from Supabase rather than chat history.
+
+
+### Proactive but consent-based task proposals
+After the global overview, compare the user's current request with the persisted task tree. If one concrete missing work item is clearly relevant, propose one task and ask the user **“Should I add this as a task?”** Include title, parent goal key, scope, observable acceptance criteria, dependencies and proposed readable slug. Do not insert it until explicit confirmation. On confirmation, call the canonical task-tree creation RPC with its complete loop and verification contract, then report the exact returned task key. Never invent/reserve a key in advance. Do not manufacture tasks when the existing tree already covers the work.
 
 ## 7. Task parameters
 

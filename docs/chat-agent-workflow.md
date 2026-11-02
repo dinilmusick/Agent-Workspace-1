@@ -56,3 +56,10 @@ GoalComplete =
 ```
 
 Supabase stores state and performs atomic database coordination. GitHub Actions performs finite compute. ChatGPT conversations remain the manually launched reasoning agents. Supabase Edge Functions are not used.
+
+
+## New conversation: global goals and proposed tasks
+
+A new agent must query `goal_ledger_overview(null)` before answering what goals need completion. Show every visible unfinished goal and its task status, running agent/heartbeat, blockers, dependencies and verification. The overview is global; never assume the previous chat's selected goal is the only goal.
+
+When a clear missing work item is discovered, the agent proposes it rather than inserting it silently. It asks **“Should I add this as a task?”** and presents the target goal, title, scope, acceptance criteria, dependencies and proposed readable ID. Only after user confirmation does it call the task-tree creation RPC. The database returns the canonical `task_key`; the agent repeats that exact key. New IDs follow `task-<descriptive-kebab-case>-<8-hex-suffix>`. Existing IDs are preserved.

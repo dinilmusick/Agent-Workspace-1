@@ -25,7 +25,7 @@ const base = (process.env.SUPABASE_URL ?? process.env.AGENT_TASK_LEDGER_URL)?.re
 const apiKey = process.env.SUPABASE_ANON_KEY ?? process.env.AGENT_TASK_LEDGER_ANON_KEY;
 const jwt = process.env.SUPABASE_AGENT_JWT ?? process.env.AGENT_TASK_LEDGER_JWT;
 if (!base || !apiKey || !jwt) {
-  console.error("Set SUPABASE_URL, SUPABASE_ANON_KEY and SUPABASE_AGENT_JWT.");
+  console.error("Set SUPABASE_URL, SUPABASE_ANON_KEY and SUPABASE_AGENT_JWT, or the AGENT_TASK_LEDGER_* runtime aliases.");
   process.exit(2);
 }
 try {

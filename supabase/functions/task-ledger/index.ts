@@ -44,6 +44,22 @@ Deno.serve(async (req: Request) => {
       case "task.submit": result = await rpc("task_ledger_submit_result", { task_id_in: requiredString(payload.task_id, "task_id"), agent_id_in: identity.agent_id, claim_token_in: requiredString(payload.claim_token, "claim_token"), result_in: payload.result ?? {}, result_summary_in: payload.result_summary ?? null, tools_used_in: payload.tools_used ?? [], evidence_in: payload.evidence ?? [], status_in: payload.status ?? "completed" }); break;
       case "task.verify": if (!["verifier", "orchestrator", "supervisor"].includes(identity.agent_type)) return response(403, { error: "verifier_role_required" }); result = await rpc("task_ledger_verify_result", { task_id_in: requiredString(payload.task_id, "task_id"), verifier_agent_id_in: identity.agent_id, verified_in: payload.verified === true, verification_report_in: payload.verification_report ?? {} }); break;
       case "task.finalize": if (!["verifier", "orchestrator", "supervisor"].includes(identity.agent_type)) return response(403, { error: "finalizer_role_required" }); result = await rpc("task_ledger_finalize_parent", { task_id_in: requiredString(payload.task_id, "task_id"), verifier_agent_id_in: identity.agent_id, outcome_in: requiredString(payload.outcome, "outcome"), verification_report_in: payload.verification_report ?? {} }); break;
+      case "task.get": {
+        const { data: task, error: taskError } = await db.from("tasks").select("*").eq("id", requiredString(payload.task_id, "task_id")).maybeSingle();
+        if (taskError) throw taskError;
+        if (!task) return response(404, { error: "task_not_found" });
+        const { data: iterations, error: iterationError } = await db.from("task_iterations").select("*").eq("task_id", task.id).order("iteration_no");
+        if (iterationError) throw iterationError;
+        result = { task, iterations: iterations ?? [] };
+        break;
+      }
+      case "task.pending_verification": {
+        if (!["verifier", "orchestrator", "supervisor"].includes(identity.agent_type)) return response(403, { error: "verifier_role_required" });
+        const { data: pending, error: pendingError } = await db.from("tasks").select("*").eq("status", "completed").eq("verification_status", "pending").order("result_submitted_at");
+        if (pendingError) throw pendingError;
+        result = pending ?? [];
+        break;
+      }
       case "task.children": result = await rpc("task_ledger_children_summary", { parent_task_id_in: requiredString(payload.task_id, "task_id") }); break;
       case "task.dependency": result = await rpc("task_ledger_add_dependency", { task_id_in: requiredString(payload.task_id, "task_id"), depends_on_task_id_in: requiredString(payload.depends_on_task_id, "depends_on_task_id"), created_by_agent_id_in: identity.agent_id, dependency_type_in: payload.dependency_type ?? "blocking" }); break;
       case "task.update": result = await rpc("task_ledger_update", { task_id_in: requiredString(payload.task_id, "task_id"), agent_id_in: identity.agent_id, status_in: payload.status ?? null, current_step_in: payload.current_step ?? null, context_summary_in: payload.context_summary ?? null, blocker_in: payload.blocker ?? null, outcome_in: payload.outcome ?? null, tags_in: payload.tags ?? null, message_in: payload.message ?? null, metadata_patch_in: payload.metadata_patch ?? {} }); break;

@@ -48,7 +48,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install Cloudflare Workers test runtime
-        run: npm install --prefix examples/platforms/cloudflare --no-audit --no-fund --package-lock=false
+        run: npm install --prefix examples/platforms/cloudflare --no-audit --no-fund
 
       - name: Run Cloudflare Worker tests in local workerd runtime
         run: python runner/platform_adapters.py cloudflare --project-path examples/platforms/cloudflare --output-dir artifacts/platforms

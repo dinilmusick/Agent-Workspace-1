@@ -37,7 +37,7 @@ begin
     'child pass','[]','[{"type":"test","name":"child"}]','completed');
   perform public.task_ledger_submit_result(claimed.id,'integration-test-worker',
     claimed.claim_token,'{"ok":true}','child result','[]','[{"type":"test","name":"child"}]','completed');
-  perform public.task_ledger_verify_result(claimed.id,'integration-test-orchestrator',true,'{"verified":true}');
+
 
   select * into claimed from public.task_ledger_pending_verification();
   if claimed.id is null or claimed.task_name <> 'integration-test-child' then

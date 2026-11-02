@@ -1,7 +1,7 @@
 ---
 name: "Universal Task Router"
 slug: universal-task-router
-version: 1.3.3
+version: 1.3.4
 source: Supabase Skills Database
 sourceId: 28
 status: active
@@ -89,7 +89,7 @@ Use task `parameters` for task-specific configuration, `parameter_contract.requi
 
 When an agent needs an actual computation, program, parser, simulation, test or generated artifact, use `.github/workflows/agent-compute.yml` where an authorized workflow-dispatch capability is available. Supported runtimes: Python, Node.js, TypeScript, Bash, Go, Rust, Java, C, C++, C#, Ruby, PHP, Perl, R and PowerShell.
 
-The workflow runs on an ephemeral GitHub-hosted runner with read-only repository permission, no persisted checkout credentials, no application secrets and a bounded execution timeout. It returns an artifact. It is finite compute, not a persistent machine and does not spawn ChatGPT conversations. If the connected GitHub tools cannot dispatch workflows, state the limitation and use an authorized Actions UI/API path; never claim execution without a real run.
+The workflow runs on an ephemeral GitHub-hosted runner with read-only repository permission, no persisted checkout credentials, no application secrets and a bounded execution timeout. It returns an artifact. It is finite compute, not a persistent machine and does not spawn ChatGPT conversations. If the connected GitHub tools cannot dispatch workflows, create a GitHub issue titled `[agent-compute] <goal-key> <runtime>` with a JSON body containing `ref`, `runtime`, `source_file`, `arguments` and `timeout_seconds`. The issue-triggered workflow accepts only owners, members and collaborators. Track the Actions run and artifact. Never claim execution without a real run.
 
 ## 9. Execution handoff and output
 

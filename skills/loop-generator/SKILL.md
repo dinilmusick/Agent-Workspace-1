@@ -2,7 +2,7 @@
 name: "Loop Generator"
 slug: loop-generator
 supabaseSkillId: 4
-version: 1.1.0
+version: 1.2.0
 status: active
 tools:
   - looper
@@ -80,3 +80,18 @@ Respect scope, authorization, budgets, deadlines, rate limits and platform polic
 
 ## Completion and handoff
 Declare completion only when every required criterion has supporting evidence. Report changes, checks, actual results and limitations. Persist enough state for another agent to resume; never persist secrets. If blocked, state the exact blocker, evidence and one required user action. Continue independent work where possible.
+
+## Hierarchical loops: goal loop and task loops
+
+A multi-task goal has two distinct loop layers:
+
+- **Goal loop**: owns the overall objective, goal-level acceptance criteria, iteration budget and decision about which child tasks/dependencies need progress next. Persist its contract and state on the goal, and each cycle in `goal_iterations`.
+- **Task loop**: owns one task's objective, parameters, inputs/outputs, acceptance criteria, execution, observations, revision policy and evidence. Persist its contract/state on the task, and each cycle in `task_iterations`.
+
+The goal loop is not a synthetic parent task. Top-level tasks are direct children of the goal. A task may itself contain nested child tasks; every task at every depth retains its own loop.
+
+Use the same complete contract for both levels. In the Supabase schema the contract fields are snake_case: `enabled`, `objective`, `input_contract`, `output_contract`, `transformation`, `observation`, `evaluation`, `revision_policy`, `stop_conditions`, `initial_input`, `tools`, `iteration_policy`, and `max_iterations`.
+
+A goal iteration evaluates the current state of all child task loops and selects the next action. It may pass only when every descendant task is completed and independently verified, all goal acceptance criteria are satisfied, and the goal iteration includes non-empty evidence. A task loop may pass only against its own criteria and evidence; task submission and independent verification are separate gates.
+
+Keep both loop histories independently resumable. Never infer that the goal loop passed merely because all tasks submitted results, and never infer that a task passed merely because the goal loop advanced.

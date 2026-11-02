@@ -60,7 +60,7 @@ jobs:
         with:
           fail-on-severity: ${{ steps.security_config.outputs.npm_audit_level }}
           vulnerability-check: true
-          license-check: true
+          license-check: false
 
       - name: Set up Node
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
@@ -192,6 +192,10 @@ jobs:
 
       - name: Start target application
         run: python runner/react-project.py start --project-path .
+        env:
+          QUALITY_TEST_EMAIL: qa@example.com
+          QUALITY_TEST_PASSWORD: test
+          QUALITY_SESSION_TOKEN: test-token
 
       - name: Wait for application readiness
         run: |

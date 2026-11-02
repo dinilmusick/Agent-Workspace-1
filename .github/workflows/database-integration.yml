@@ -54,7 +54,7 @@ jobs:
       - name: Start isolated local Supabase stack
         env:
           SUPABASE_TELEMETRY_DISABLED: "1"
-        run: supabase start
+        run: supabase start --exclude studio,imgproxy,realtime,storage-api,functions,analytics,vector,supavisor
 
       - name: Recreate database from migrations
         shell: bash

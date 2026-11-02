@@ -84,7 +84,12 @@ def main():
     parser.add_argument("--project-path", default=".")
     parser.add_argument("--startup-timeout", type=float, default=60)
     args = parser.parse_args()
-    path = project_dir(args.project_path)
+    if args.action in ("stop", "status"):
+        path = (TARGET / args.project_path).resolve()
+        if path != TARGET and TARGET not in path.parents:
+            raise SystemExit("project path must remain inside workspaces/target")
+    else:
+        path = project_dir(args.project_path)
     manifest = path / ".agent-workspace" / "services.json"
     if args.action == "prepare":
         manager = package_manager(path)

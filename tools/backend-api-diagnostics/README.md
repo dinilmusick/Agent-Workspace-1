@@ -18,7 +18,8 @@ Copy [the example manifest](examples/api-tests.json) to `.agent-workspace/api-te
 
 - `version`: currently `1`.
 - `baseUrl`: optional local server URL; overridden by `API_BASE_URL`. When omitted in multi-service inspection, the workflow derives the URL from `serviceId` and its assigned port.
-- `serviceId`: optional service ID used to select the backend port and its structured log (defaults to `api`).\n- `timeoutMs`: default request timeout.
+- `serviceId`: optional service ID used to select the backend port and its structured log (defaults to `api`).
+- `timeoutMs`: default request timeout.
 - `requests`: ordered scenarios with `id`, `method`, relative `path`, `headers`, optional `body`, `timeoutMs` and `expect`.
 - `expect.status`: expected status or list of acceptable statuses.
 - `expect.headers`: response header equality checks.
@@ -39,6 +40,6 @@ Authorization, cookie, token, secret, password and API-key fields are redacted r
 
 ## CI integration
 
-`inspect-react.yml` runs the API suite only when the target repository contains `.agent-workspace/api-tests.json`, after the local app is ready. The runner consumes `artifacts/build/dev-server.log` for correlation and writes into `artifacts/api`; the existing inspection artifact upload retains both API and browser evidence. API failures fail the inspection job.
+`inspect-react.yml` runs the API suite only when the target repository contains `.agent-workspace/api-tests.json`, after the local app is ready. The runner consumes the selected service log from `artifacts/services/state.json` for correlation (or `artifacts/build/dev-server.log` for the single-process fallback) and writes into `artifacts/api`; the existing inspection artifact upload retains both API and browser evidence. API failures fail the inspection job.
 
 The toolchain CI runs the built-in Node regression suite against a local HTTP server. This verifies runner behavior; it does not claim to validate any particular target application's API contract.

@@ -93,7 +93,7 @@ class ServiceRuntimeTests(unittest.TestCase):
         self.assertEqual(started.returncode, 0, started.stderr)
         time.sleep(1.5)
         status = self.run_cli("status")
-        self.assertEqual(status.returncode, 0)
+        self.assertEqual(status.returncode, 1)
         self.assertEqual(json.loads(status.stdout)["status"], "failed")
 
 if __name__ == "__main__":

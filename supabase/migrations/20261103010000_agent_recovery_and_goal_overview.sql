@@ -26,7 +26,6 @@ as $function$
 declare
   candidate_id uuid;
   previous_status text;
-  previous_status text;
   previous_agent_id text;
   previous_heartbeat timestamptz;
   previous_claim_token uuid;
@@ -123,6 +122,7 @@ set search_path to 'public'
 as $function$
 declare
   candidate_id uuid;
+  previous_status text;
   previous_agent_id text;
   previous_heartbeat timestamptz;
   previous_claim_token uuid;

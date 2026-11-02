@@ -50,9 +50,15 @@ begin
   end if;
   if claimed.parent_task_id<>root_id then raise exception 'Worker claimed a task outside the expected parent'; end if;
 
-  perform public.task_ledger_record_iteration(claimed.id,'integration-test-worker',claimed.claim_token,
-    1,'{"phase":"child"}','{"ok":true}','{"observation":"child"}','child pass','[]',
-    '[{"type":"test","name":"child"}]','completed');
+  perform public.task_ledger_record_loop_iteration(
+    claimed.id,'integration-test-worker',claimed.claim_token,1,
+    '{"phase":"child"}','{"ok":true}','{"observation":"child"}',
+    '[{"criterion":"child test passes","status":"satisfied"}]',
+    '{"phase":"complete","iteration":1}',
+    '["Supabase PostgreSQL","SQL integration test"]',
+    '[{"type":"test","name":"child","result":"passed"}]',
+    'pass','Child test passed'
+  );
   perform public.task_ledger_submit_result(claimed.id,'integration-test-worker',claimed.claim_token,
     '{"ok":true}','child result','[]','[{"type":"test","name":"child"}]','completed');
 

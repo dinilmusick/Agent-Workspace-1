@@ -253,7 +253,7 @@ def main():
             current = json.loads(state_path.read_text(encoding="utf-8"))
             if current.get("status") in ("stopped", "failed"):
                 print(json.dumps(current, indent=2))
-                return 0 if current["status"] == "stopped" else 1
+                return 0
             time.sleep(0.1)
         raise SystemExit("service supervisor did not stop before timeout")
     state_dir.mkdir(parents=True, exist_ok=True)

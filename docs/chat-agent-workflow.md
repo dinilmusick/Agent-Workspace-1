@@ -43,7 +43,7 @@ The database rejects completed submissions when required parameters are missing 
 
 ## Compute
 
-Use `.github/workflows/agent-compute.yml` for finite computation on an ephemeral GitHub-hosted runner. It supports Python, Node.js, TypeScript, Bash, Go, Rust, Java, Ruby, PHP, C# and PowerShell. It has read-only repository permission, does not persist checkout credentials, receives no application secrets, and returns an artifact. Use an authorized workflow-dispatch capability or the GitHub Actions UI. Do not claim execution without a real workflow run.
+Use `.github/workflows/agent-compute.yml` for finite computation on an ephemeral GitHub-hosted runner. It supports Python, Node.js, TypeScript, Bash, Go, Rust, Java, C, C++, C#, Ruby, PHP, Perl, R and PowerShell. It has read-only repository permission, does not persist checkout credentials, receives no application secrets, and returns an artifact. Use an authorized workflow-dispatch capability or the GitHub Actions UI. Do not claim execution without a real workflow run.
 
 ## Completion
 

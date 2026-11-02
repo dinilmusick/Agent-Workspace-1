@@ -1,17 +1,15 @@
 import json
-import os
-import signal
 import subprocess
 import sys
 import tempfile
-import time
 import unittest
 import urllib.request
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-RUNTIME = ROOT / "service-runtime.py"
-FIXTURE = ROOT.parent / "examples" / "fixture-service.py"
+WORKSPACE = Path(__file__).resolve().parents[1]
+RUNNER = Path(__file__).resolve().parent
+RUNTIME = RUNNER / "service-runtime.py"
+FIXTURE = WORKSPACE / "examples" / "fixture-service.py"
 
 class ServiceRuntimeTests(unittest.TestCase):
     def setUp(self):
@@ -49,7 +47,8 @@ class ServiceRuntimeTests(unittest.TestCase):
         for name, service in state["services"].items():
             with urllib.request.urlopen(f"http://127.0.0.1:{service['port']}/health") as response:
                 self.assertEqual(json.loads(response.read())["service"], name)
-            self.assertTrue(Path(service["log"]).is_file())\n            self.assertIn("fixture service", Path(service["log"]).read_text(encoding="utf-8"))
+            self.assertTrue(Path(service["log"]).is_file())
+            self.assertIn("fixture service", Path(service["log"]).read_text(encoding="utf-8"))
         stopped = self.run_cli("stop")
         self.assertEqual(stopped.returncode, 0, stopped.stderr)
         self.assertEqual(json.loads((self.state / "state.json").read_text())["status"], "stopped")
@@ -76,7 +75,7 @@ class ServiceRuntimeTests(unittest.TestCase):
         self.write_manifest([never_ready])
         timed_out = self.run_cli("start", timeout=1)
         self.assertEqual(timed_out.returncode, 1)
-        self.assertIn("failed", (self.state / "state.json").read_text())
+        self.assertEqual(json.loads((self.state / "state.json").read_text())["status"], "failed")
 
 if __name__ == "__main__":
     unittest.main()

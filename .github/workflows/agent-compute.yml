@@ -1,0 +1,122 @@
+name: Agent Compute Workspace
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Branch, tag or commit containing the workspace source
+        required: true
+        default: main
+        type: string
+      runtime:
+        description: Language/runtime to execute
+        required: true
+        default: python
+        type: choice
+        options: [python, node, typescript, bash, go, rust, java, c, cpp, csharp, ruby, php, perl, r, powershell]
+      source_file:
+        description: Repository-relative source file
+        required: true
+        default: examples/hello.py
+        type: string
+      arguments:
+        description: JSON array of string arguments
+        required: false
+        default: '[]'
+        type: string
+      timeout_seconds:
+        description: Execution timeout (1-1200 seconds)
+        required: true
+        default: '300'
+        type: string
+  issues:
+    types: [opened]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: agent-compute-${{ github.run_id }}
+  cancel-in-progress: false
+
+jobs:
+  execute:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'issues' &&
+       github.event.action == 'opened' &&
+       startsWith(github.event.issue.title, '[agent-compute]') &&
+       contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.issue.author_association))
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout trusted workflow tools without credentials
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          path: control
+          persist-credentials: false
+
+      - name: Resolve and validate compute request
+        id: request
+        env:
+          INPUT_REF: ${{ inputs.ref }}
+          INPUT_RUNTIME: ${{ inputs.runtime }}
+          INPUT_SOURCE_FILE: ${{ inputs.source_file }}
+          INPUT_ARGUMENTS: ${{ inputs.arguments }}
+          INPUT_TIMEOUT_SECONDS: ${{ inputs.timeout_seconds }}
+        run: python control/runner/resolve-compute-request.py
+
+      - name: Checkout requested workspace revision without persisted credentials
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ steps.request.outputs.ref }}
+          path: workspace
+          persist-credentials: false
+
+      - name: Record available runtimes
+        shell: bash
+        run: |
+          cd workspace
+          python --version
+          node --version
+          go version || true
+          rustc --version || true
+          javac -version || true
+          gcc --version || true
+          g++ --version || true
+          ruby --version || true
+          php --version || true
+          perl --version || true
+          Rscript --version || true
+          dotnet --version || true
+          pwsh --version || true
+          mkdir -p results
+
+      - name: Execute workspace source
+        env:
+          GITHUB_WORKSPACE: ${{ github.workspace }}/workspace
+          COMPUTE_RUNTIME: ${{ steps.request.outputs.runtime }}
+          COMPUTE_SOURCE_FILE: ${{ steps.request.outputs.source_file }}
+          COMPUTE_ARGUMENTS: ${{ steps.request.outputs.arguments }}
+          COMPUTE_TIMEOUT_SECONDS: ${{ steps.request.outputs.timeout_seconds }}
+        shell: bash
+        run: |
+          cd workspace
+          python runner/execute-code.py \
+            --runtime "$COMPUTE_RUNTIME" \
+            --source-file "$COMPUTE_SOURCE_FILE" \
+            --arguments "$COMPUTE_ARGUMENTS" \
+            --timeout-seconds "$COMPUTE_TIMEOUT_SECONDS" \
+            --output results/compute-result.json
+
+      - name: Upload execution output and evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: agent-compute-${{ github.run_id }}
+          path: workspace/results/
+          if-no-files-found: warn
+          retention-days: 7

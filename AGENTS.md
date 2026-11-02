@@ -34,14 +34,29 @@
 
 ## ChatGPT conversation workers and persistent goals
 - Browser conversations are the workers. The user manually opens each chat; GitHub Actions never launches ChatGPT chats.
-- Orchestrator chats create/resume uniquely named goals, decompose work and recommend worker-chat count from ready independent leaf tasks.
-- Worker chats claim one task from the named goal with `goal_ledger_claim_task`; load all context from Supabase, never from another chat's history.
-- Every task in a newly created goal tree must have a complete Loop Generator contract. Use `goal_ledger_create_with_tasks`; incomplete loop contracts are rejected.
-- Persist each loop iteration through `task_ledger_record_loop_iteration`. Leaf tasks cannot be submitted as completed unless the latest iteration passes every acceptance criterion with evidence.
-- Use `goal_ledger_resume` to recover the complete goal, task tree, iterations and events. Use `goal_ledger_summary` for ready work and worker recommendations.
+- Goal `name` is the descriptive title; `goal_key` is the readable stable identifier; UUID is internal only. Goals also have searchable tags.
+- A goal is its own persisted Loop Generator loop (`goal_loop_definition`, `goal_loop_state`, `goal_iterations`). Every task, including nested parents, is a separate loop (`loop_definition`, `task_iterations`).
+- Top-level tasks are direct children of the goal. Do not create a synthetic root task.
+- Create new goals with `goal_ledger_create_hierarchical`, including a goal loop, tags and an array of top-level task definitions. Each task requires its own loop, acceptance criteria and optional `parameter_contract`.
+- When a new chat is asked to continue an unfinished goal, call `goal_ledger_list_unfinished` first. If exactly one exists, resume it; if several exist, show titles/keys/tags/status and ask which to continue. Load with `goal_ledger_resume_by_key` and tell the user `Loaded goal: <title>` before claiming a task.
+- Worker chats claim one task by readable key with `goal_ledger_claim_task_by_key`; load all context from Supabase, never from another chat's history.
+- Persist goal iterations with `goal_ledger_record_loop_iteration` and task iterations with `task_ledger_record_loop_iteration`. A goal cannot pass until all descendants are independently verified and goal criteria have evidence.
+- Task `parameter_contract.required` and `properties` define required values, types and enums. Workers return values through `result_in.parameter_values`; database validation blocks incomplete task completion.
+- Use `goal_ledger_resume_by_key` to recover complete state and `goal_ledger_list_unfinished` to discover resumable goals.
 - Supabase PostgreSQL is persistence and atomic coordination. The ChatGPT browser protocol uses the connected Supabase tools directly; do not route it through Supabase Edge Functions.
 - GitHub Actions remains for CI and finite repository jobs, not ChatGPT conversation creation or always-on orchestration.
 - See `docs/chat-agent-workflow.md` for exact orchestrator and worker prompts.
+
+## Workspace identity
+- The current Supabase project has no Auth users. Browser chats use unique agent/session IDs within a single-owner project-scoped workspace when `auth.uid()` is null.
+- A separate chat may verify/finalize, but its agent ID must differ from task workers. The database rejects self-verification and worker-driven goal finalization.
+- This is not multi-tenant isolation. Before sharing the project with multiple owners, provision Supabase Auth users and owner-scoped JWT/RLS boundaries.
+
+## GitHub compute workspace
+- Use `.github/workflows/agent-compute.yml` for finite arbitrary code execution when an actual computation is required.
+- Supported runtimes: Python, Node.js, TypeScript, Bash, Go, Rust, Java, C, C++, C#, Ruby, PHP, Perl, R and PowerShell.
+- Source must be in the selected repository revision. The ephemeral GitHub-hosted runner has read-only repository permissions, checkout credentials are not persisted, and no application secrets are passed to executed code. Execution is bounded to 1,200 seconds and returns an artifact.
+- Do not treat GitHub Actions as a persistent machine or as a mechanism to spawn ChatGPT chats. To invoke from a ChatGPT conversation when workflow_dispatch is unavailable, create a GitHub issue with title `[agent-compute] <goal-key> <runtime>` and a JSON body containing `ref`, `runtime`, `source_file`, `arguments` (string array) and `timeout_seconds`. The issue trigger accepts only repository owners, members and collaborators. Track the issue's Actions run and retrieve its artifact. Do not claim execution without a real completed run.
 
 ## Looper
 Use:

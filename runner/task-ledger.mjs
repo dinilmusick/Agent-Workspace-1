@@ -84,36 +84,66 @@ try {
     }
     case "goal.create":
       if (!["orchestrator", "supervisor"].includes(agent.agent_type)) throw new Error("Orchestrator role required.");
-      result = await rpc("goal_ledger_create_with_tasks", {
-        name_in: p.name,
+      result = await rpc("goal_ledger_create_hierarchical", {
+        title_in: p.title ?? p.name,
         description_in: p.description ?? "",
         context_in: p.context ?? {},
         instructions_in: p.instructions ?? "",
         acceptance_criteria_in: p.acceptance_criteria ?? [],
+        tags_in: p.tags ?? [],
+        goal_loop_definition_in: p.goal_loop_definition,
+        task_definitions_in: p.tasks,
         created_by_agent_id_in: agent.agent_id,
-        task_definition_in: p.task_definition,
         owner_user_id_in: user.id,
         metadata_in: p.metadata ?? {},
       });
       break;
     case "goal.get":
-      result = await rpc("goal_ledger_get", { goal_id_in: p.goal_id ?? null, name_in: p.name ?? null });
+      result = p.goal_key
+        ? await rpc("goal_ledger_get_by_key", { goal_key_in: p.goal_key })
+        : await rpc("goal_ledger_get", { goal_id_in: p.goal_id ?? null, name_in: p.name ?? null });
       break;
     case "goal.resume":
-      result = await rpc("goal_ledger_resume", { name_in: p.name });
+      result = p.goal_key
+        ? await rpc("goal_ledger_resume_by_key", { goal_key_in: p.goal_key })
+        : await rpc("goal_ledger_resume", { name_in: p.name });
       break;
     case "goal.summary":
       result = await rpc("goal_ledger_summary", { goal_id_in: p.goal_id });
       break;
     case "goal.list":
-      result = await rpc("goal_ledger_list", { status_in: p.status ?? null });
+      result = p.unfinished === true
+        ? await rpc("goal_ledger_list_unfinished", { tags_in: p.tags ?? null })
+        : await rpc("goal_ledger_list_filtered", { status_in: p.status ?? null, tags_in: p.tags ?? null });
+      break;
+    case "goal.iteration":
+      result = await rpc("goal_ledger_record_loop_iteration", {
+        goal_id_in: p.goal_id,
+        agent_id_in: agent.agent_id,
+        iteration_no_in: p.iteration_no,
+        input_payload_in: p.input_payload ?? {},
+        output_payload_in: p.output_payload ?? {},
+        observation_in: p.observation ?? {},
+        criterion_results_in: p.criterion_results ?? [],
+        loop_state_in: p.loop_state ?? {},
+        tools_used_in: p.tools_used ?? [],
+        evidence_in: p.evidence ?? [],
+        verdict_in: p.verdict ?? "continue",
+        next_action_in: p.next_action ?? null,
+      });
       break;
     case "goal.finalize":
-      result = await rpc("goal_ledger_finalize", {
-        goal_name_in: p.name,
-        finalized_by_agent_id_in: agent.agent_id,
-        verification_report_in: p.verification_report ?? {},
-      });
+      result = p.goal_key
+        ? await rpc("goal_ledger_finalize_by_key", {
+          goal_key_in: p.goal_key,
+          finalized_by_agent_id_in: agent.agent_id,
+          verification_report_in: p.verification_report ?? {},
+        })
+        : await rpc("goal_ledger_finalize", {
+          goal_name_in: p.name,
+          finalized_by_agent_id_in: agent.agent_id,
+          verification_report_in: p.verification_report ?? {},
+        });
       break;
     case "goal.update":
       result = await rpc("goal_ledger_update", {
@@ -140,7 +170,17 @@ try {
       });
       break;
     case "task.claim":
-      result = p.goal_name
+      result = p.goal_key
+        ? await rpc("goal_ledger_claim_task_by_key", {
+          goal_key_in: p.goal_key,
+          agent_id_in: agent.agent_id,
+          agent_name_in: agent.agent_name,
+          agent_type_in: agent.agent_type,
+          capabilities_in: agent.capabilities ?? [],
+          session_id_in: p.session_id ?? process.env.AGENT_SESSION_ID ?? randomUUID(),
+          lease_seconds_in: p.lease_seconds ?? 900,
+        })
+        : p.goal_name
         ? await rpc("goal_ledger_claim_task", {
           goal_name_in: p.goal_name,
           agent_id_in: agent.agent_id,

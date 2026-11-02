@@ -87,7 +87,7 @@ def main():
     manifest = path / ".agent-workspace" / "services.json"
     if args.action == "prepare":
         manager = package_manager(path)
-        package = __import__("json").loads((path / "package.json").read_text(encoding="utf-8"))
+        package = json.loads((path / "package.json").read_text(encoding="utf-8"))
         scripts = package.get("scripts", {})
         if manager[0] == "npm":
             install = manager + (["ci", "--no-audit", "--no-fund"] if (path / "package-lock.json").exists() or (path / "npm-shrinkwrap.json").exists() else ["install", "--no-audit", "--no-fund"])

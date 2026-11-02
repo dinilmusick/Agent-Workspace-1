@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "inspect": "node scripts/inspect.mjs",
-    "quality": "node scripts/quality-check.mjs"
+    "quality": "node scripts/quality-check-flat.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.14.0",

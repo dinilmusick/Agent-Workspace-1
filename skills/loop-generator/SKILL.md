@@ -2,7 +2,7 @@
 name: "Loop Generator"
 slug: loop-generator
 supabaseSkillId: 4
-version: 1.2.0
+version: 1.2.1
 status: active
 tools:
   - looper

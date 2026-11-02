@@ -84,7 +84,14 @@
           "slug": "supabase",
           "type": "connector",
           "required": true,
-          "usage": "Read, create, claim, update, and verify shared task records through the authenticated Supabase connector."
+          "usage": "Create/resume named goals, atomically claim goal-scoped tasks, persist leaf and parent loops, record evidence, and independently verify results through owner-scoped Supabase PostgreSQL RPCs."
+        }
+      ],
+      "dependencies": [
+        {
+          "slug": "loop-generator",
+          "required": true,
+          "version_constraint": ">=1.1.0"
         }
       ]
     },

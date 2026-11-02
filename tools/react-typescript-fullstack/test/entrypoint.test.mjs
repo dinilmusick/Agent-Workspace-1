@@ -1,8 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { access, readFile } from "node:fs/promises";
+import { spawnSync } from "node:child_process";
 
-const root = new URL("../../../..", import.meta.url);
 const packagePath = new URL("../package.json", import.meta.url);
 const canonicalInspector = new URL("../scripts/inspect-browser.mjs", import.meta.url);
 const legacyInspector = new URL("../scripts/inspect.mjs", import.meta.url);
@@ -14,8 +14,7 @@ test("React toolchain inspect command resolves to the canonical browser inspecto
   await assert.rejects(access(legacyInspector), { code: "ENOENT" });
 });
 
-test("canonical inspector remains syntax-valid JavaScript", async () => {
-  const { spawnSync } = await import("node:child_process");
+test("canonical inspector remains syntax-valid JavaScript", () => {
   const result = spawnSync(process.execPath, ["--check", canonicalInspector.pathname], {
     encoding: "utf8",
   });

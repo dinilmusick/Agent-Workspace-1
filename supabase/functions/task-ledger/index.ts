@@ -85,9 +85,28 @@ Deno.serve(async (req: Request) => {
         break;
       case "task.create":
         if (!["orchestrator", "supervisor"].includes(identity.agent_type)) return response(403, { error: "orchestrator_role_required" });
-        result = await rpc("task_ledger_create_tree", { agent_id_in: identity.agent_id, agent_name_in: identity.agent_name, task_definition_in: payload.task_definition, parent_task_id_in: payload.parent_task_id ?? null, session_id_in: payload.session_id ?? null, agent_type_in: identity.agent_type });
+        const definition = { ...(payload.task_definition ?? {}) };
+        if (payload.goal_id) definition.goal_id = payload.goal_id;
+        result = await rpc("task_ledger_create_tree", { agent_id_in: identity.agent_id, agent_name_in: identity.agent_name, task_definition_in: definition, parent_task_id_in: payload.parent_task_id ?? null, session_id_in: payload.session_id ?? null, agent_type_in: identity.agent_type });
+        if (definition.goal_id) {
+          const { error: goalEventError } = await db.from("goal_events").insert({ goal_id: definition.goal_id, event_type: "task_tree_created", agent_id: identity.agent_id, message: "Task tree created for goal", payload: { root_task_id: result } });
+          if (goalEventError) throw goalEventError;
+        }
         break;
-      case "task.claim": result = await rpc("task_ledger_claim_next", { agent_id_in: identity.agent_id, agent_name_in: identity.agent_name, agent_type_in: identity.agent_type, capabilities_in: identity.capabilities ?? [], lease_seconds_in: payload.lease_seconds ?? 900 }); break;
+      case "task.claim": {
+        const claimed = await rpc("task_ledger_claim_next", { agent_id_in: identity.agent_id, agent_name_in: identity.agent_name, agent_type_in: identity.agent_type, capabilities_in: identity.capabilities ?? [], lease_seconds_in: payload.lease_seconds ?? 900 });
+        const task = Array.isArray(claimed) ? claimed[0] : claimed;
+        if (!task) { result = null; break; }
+        if (task.goal_id) {
+          const goal = await rpc("goal_ledger_get", { goal_id_in: task.goal_id, name_in: null });
+          const { data: latestVersion, error: versionError } = await db.from("goal_versions").select("version,snapshot").eq("goal_id", task.goal_id).order("version", { ascending: false }).limit(1).maybeSingle();
+          if (versionError) throw versionError;
+          task.goal = goal;
+          task.goal_version = latestVersion ?? null;
+        }
+        result = task;
+        break;
+      }
       case "task.heartbeat": result = await rpc("task_ledger_heartbeat_claim", { task_id_in: requiredString(payload.task_id, "task_id"), agent_id_in: identity.agent_id, claim_token_in: requiredString(payload.claim_token, "claim_token"), current_step_in: payload.current_step ?? null, lease_seconds_in: payload.lease_seconds ?? 900 }); break;
       case "task.iteration": result = await rpc("task_ledger_record_iteration", { task_id_in: requiredString(payload.task_id, "task_id"), agent_id_in: identity.agent_id, claim_token_in: requiredString(payload.claim_token, "claim_token"), iteration_no_in: payload.iteration_no, input_payload_in: payload.input_payload ?? {}, output_payload_in: payload.output_payload ?? {}, observation_in: payload.observation ?? {}, decision_in: payload.decision ?? null, tools_used_in: payload.tools_used ?? [], evidence_in: payload.evidence ?? [], status_in: payload.status ?? "completed" }); break;
       case "task.submit": result = await rpc("task_ledger_submit_result", { task_id_in: requiredString(payload.task_id, "task_id"), agent_id_in: identity.agent_id, claim_token_in: requiredString(payload.claim_token, "claim_token"), result_in: payload.result ?? {}, result_summary_in: payload.result_summary ?? null, tools_used_in: payload.tools_used ?? [], evidence_in: payload.evidence ?? [], status_in: payload.status ?? "completed" }); break;
@@ -99,7 +118,14 @@ Deno.serve(async (req: Request) => {
         if (!task) return response(404, { error: "task_not_found" });
         const { data: iterations, error: iterationError } = await db.from("task_iterations").select("*").eq("task_id", task.id).order("iteration_no");
         if (iterationError) throw iterationError;
-        result = { task, iterations: iterations ?? [] };
+        let goal = null, goalVersion = null;
+        if (task.goal_id) {
+          goal = await rpc("goal_ledger_get", { goal_id_in: task.goal_id, name_in: null });
+          const { data: version, error: versionError } = await db.from("goal_versions").select("version,snapshot").eq("goal_id", task.goal_id).order("version", { ascending: false }).limit(1).maybeSingle();
+          if (versionError) throw versionError;
+          goalVersion = version ?? null;
+        }
+        result = { task, iterations: iterations ?? [], goal, goal_version: goalVersion };
         break;
       }
       case "task.pending_verification": {

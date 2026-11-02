@@ -594,7 +594,7 @@
         {
           "slug": "cloudflare-workers",
           "type": "cli",
-          "usage": "Execute Worker tests in local workerd/Miniflare with Wrangler bindings.",
+          "usage": "Execute Worker tests in local workerd/Miniflare with Wrangler bindings, Vitest and Vite peer dependencies.",
           "required": false
         },
         {

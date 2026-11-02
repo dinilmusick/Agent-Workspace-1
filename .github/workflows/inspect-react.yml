@@ -97,9 +97,26 @@ jobs:
         if: steps.ready.outcome == 'success' && hashFiles('workspaces/target/.agent-workspace/api-tests.json') != ''
         continue-on-error: true
         env:
-          API_BASE_URL: http://127.0.0.1:4173
-          SERVER_LOG_PATH: artifacts/build/dev-server.log
-        run: node tools/backend-api-diagnostics/scripts/run-api-diagnostics.mjs --manifest workspaces/target/.agent-workspace/api-tests.json --output artifacts/api
+          API_TEST_MANIFEST: workspaces/target/.agent-workspace/api-tests.json
+          SERVICE_STATE_PATH: artifacts/services/state.json
+          DEFAULT_SERVER_LOG: artifacts/build/dev-server.log
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          manifest = json.loads(Path(os.environ["API_TEST_MANIFEST"]).read_text())
+          service_id = manifest.get("serviceId", "api")
+          state_path = Path(os.environ["SERVICE_STATE_PATH"])
+          state = json.loads(state_path.read_text()) if state_path.is_file() else {}
+          service = state.get("services", {}).get(service_id, {})
+          port = service.get("port", 4173)
+          base_url = manifest.get("baseUrl") or f"http://127.0.0.1:{port}"
+          log_path = service.get("log") or os.environ["DEFAULT_SERVER_LOG"]
+          with open(os.environ["GITHUB_ENV"], "a") as env:
+              env.write(f"API_BASE_URL={base_url}\\n")
+              env.write(f"SERVER_LOG_PATH={log_path}\\n")
+          PY
+          node tools/backend-api-diagnostics/scripts/run-api-diagnostics.mjs --manifest "$API_TEST_MANIFEST" --output artifacts/api
 
       - name: Inspect rendered application and accessibility
         id: browser

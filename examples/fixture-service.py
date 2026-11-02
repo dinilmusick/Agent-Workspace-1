@@ -14,7 +14,7 @@ if len(sys.argv) > 1 and sys.argv[1] == "--fail-once":
 
 class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
-        payload = json.dumps({"service": os.environ.get("SERVICE_NAME"), "ok": True}).encode()
+        payload = json.dumps({"service": os.environ.get("SERVICE_NAME"), "ok": True, "upstream_port": os.environ.get("UPSTREAM_PORT")}).encode()
         self.send_response(200 if self.path == "/health" else 404)
         self.send_header("content-type", "application/json")
         self.end_headers()

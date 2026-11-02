@@ -1,7 +1,7 @@
 ---
 name: "Task Ledger"
 slug: task-ledger
-version: 1.7.4
+version: 1.7.5
 source: Supabase Skills Database
 sourceId: 7
 status: active
@@ -46,6 +46,10 @@ Each task definition may contain:
 
 A parameter contract uses `required` for mandatory keys and `properties` for expected JSON types and optional `enum` values. Workers submit fulfilled values in `result_in.parameter_values`. The database rejects a completed result when required values or type/enum constraints are unmet.
 
+## Universal goal discovery
+
+At the beginning of every orchestration session, and whenever asked what goals remain, call `goal_ledger_overview(null)`. Report every visible planning, ready, active and blocked goal with its readable key, task counts, running agents, queued tasks, blockers, stale-heartbeat flags and verification state. Explain dependency constraints: queued does not necessarily mean claimable. Use `goal_ledger_resume_by_key` to load the selected goal before claiming. The overview is read-only discovery; never infer or modify task ownership from it.
+
 ## Goal discovery and resume in a new chat
 
 When asked to continue, finish or resume an unfinished goal:
@@ -75,6 +79,14 @@ A goal loop may pass only when:
 - the passing goal iteration contains non-empty evidence.
 
 A task loop may pass only against that task's own criteria and evidence. Task submission and independent verification remain separate gates. Do not infer goal completion from task submissions.
+
+## Stale-worker recovery
+
+A running task is eligible for reassignment when its claim lease expires or its last heartbeat is at least 60 minutes old. The standard goal-key claim path and generic claim RPCs enforce this inside the atomic `FOR UPDATE SKIP LOCKED` claim transaction. Do not manually rewrite task ownership.
+
+A recovery rotates the claim token, increments the attempt count, assigns the new worker/session and appends a `lease_recovered` event with the previous agent, claim token, heartbeat timestamp and recovery reason. Existing task iterations, events, evidence and commit references remain intact.
+
+Never automatically reclaim a task whose status is `blocked`, a task under a blocked/failed/cancelled/abandoned parent, or a task with unresolved blocking dependencies. Respect max attempts. Workers must continue heartbeating well inside their lease interval; 60 minutes is crash recovery, not a normal heartbeat schedule.
 
 ## Worker protocol
 

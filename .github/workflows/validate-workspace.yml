@@ -38,16 +38,8 @@ jobs:
           python runner/execute.py --task-file examples/python-smoke.json --output results/self-test.json
           python runner/verify.py --result results/self-test.json
 
-
-      - name: Validate compute request routing
+      - name: Agent compute runtime self-test
         run: |
-          workflow_output="$(mktemp)"
-          GITHUB_EVENT_NAME=workflow_dispatch \
-          GITHUB_OUTPUT="$workflow_output" \
-          INPUT_REF=main INPUT_RUNTIME=python INPUT_SOURCE_FILE=examples/hello.py \
-          INPUT_ARGUMENTS='["--smoke"]' INPUT_TIMEOUT_SECONDS=30 \
-          python runner/resolve-compute-request.py
-          grep -q '^runtime=python        run: |
           python runner/execute-code.py --runtime python --source-file examples/hello.py --timeout-seconds 30 --output results/compute-self-test.json
           python - <<'PY'
           import json
@@ -57,7 +49,12 @@ jobs:
           assert result["error"] is None, result
           print("VALID agent compute runtime")
           PY
- "$workflow_output"
+
+      - name: Validate compute request routing
+        run: |
+          workflow_output="$(mktemp)"
+          GITHUB_EVENT_NAME=workflow_dispatch GITHUB_OUTPUT="$workflow_output" INPUT_REF=main INPUT_RUNTIME=python INPUT_SOURCE_FILE=examples/hello.py INPUT_ARGUMENTS='["--smoke"]' INPUT_TIMEOUT_SECONDS=30 python runner/resolve-compute-request.py
+          grep -Fq "runtime=python" "$workflow_output"
           issue_event="$(mktemp)"
           issue_output="$(mktemp)"
           python - "$issue_event" <<'PY'
@@ -71,28 +68,5 @@ jobs:
           }}
           Path(sys.argv[1]).write_text(json.dumps(event))
           PY
-          GITHUB_EVENT_NAME=issues GITHUB_EVENT_PATH="$issue_event" \
-          GITHUB_OUTPUT="$issue_output" python runner/resolve-compute-request.py
-          grep -q '^runtime=node        run: |
-          python runner/execute-code.py --runtime python --source-file examples/hello.py --timeout-seconds 30 --output results/compute-self-test.json
-          python - <<'PY'
-          import json
-          from pathlib import Path
-          result = json.loads(Path("results/compute-self-test.json").read_text())
-          assert result["exit_code"] == 0, result
-          assert result["error"] is None, result
-          print("VALID agent compute runtime")
-          PY
- "$issue_output"
-
-      - name: Agent compute runtime self-test
-        run: |
-          python runner/execute-code.py --runtime python --source-file examples/hello.py --timeout-seconds 30 --output results/compute-self-test.json
-          python - <<'PY'
-          import json
-          from pathlib import Path
-          result = json.loads(Path("results/compute-self-test.json").read_text())
-          assert result["exit_code"] == 0, result
-          assert result["error"] is None, result
-          print("VALID agent compute runtime")
-          PY
+          GITHUB_EVENT_NAME=issues GITHUB_EVENT_PATH="$issue_event" GITHUB_OUTPUT="$issue_output" python runner/resolve-compute-request.py
+          grep -Fq "runtime=node" "$issue_output"

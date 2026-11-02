@@ -55,12 +55,13 @@ jobs:
         run: |
           python --version
           node --version
-          go version
-          rustc --version
-          javac -version
-          ruby --version
-          php --version
-          dotnet --version
+          go version || true
+          rustc --version || true
+          javac -version || true
+          ruby --version || true
+          php --version || true
+          dotnet --version || true
+          pwsh --version || true
           mkdir -p results
 
       - name: Execute workspace source

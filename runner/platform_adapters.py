@@ -78,6 +78,7 @@ def http_preview(url, output):
         raise AdapterError(f"Vercel preview request failed: {error.reason}") from error
     report = {"url": url, "status": response.status,
         "headers": {key: value for key, value in response.headers.items() if key.lower() not in ("set-cookie", "authorization")}}
+    response.close()
     (output / "vercel-preview-http.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     if not 200 <= response.status < 400:
         raise AdapterError(f"Vercel preview returned HTTP {response.status}")

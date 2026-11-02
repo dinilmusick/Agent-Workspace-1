@@ -1,0 +1,78 @@
+name: Execute Task
+
+on:
+  workflow_dispatch:
+    inputs:
+      task_file:
+        description: Repository-relative JSON task manifest
+        required: true
+        default: examples/python-smoke.json
+        type: string
+      runner:
+        description: GitHub-hosted runner image
+        required: true
+        default: ubuntu-latest
+        type: choice
+        options:
+          - ubuntu-latest
+          - windows-latest
+          - macos-latest
+
+permissions:
+  contents: read
+
+concurrency:
+  group: agent-task-${{ github.run_id }}
+  cancel-in-progress: false
+
+jobs:
+  execute:
+    name: Execute declared task
+    runs-on: ${{ inputs.runner }}
+    timeout-minutes: 35
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout workspace
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Record runner environment
+        shell: bash
+        run: |
+          python --version || true
+          node --version || true
+          git --version || true
+          mkdir -p results
+
+      - name: Execute task manifest
+        id: execute
+        shell: bash
+        run: |
+          python runner/execute.py --task-file "${{ inputs.task_file }}" --output results/execution.json
+        continue-on-error: true
+
+      - name: Verify result contract
+        if: always()
+        shell: bash
+        run: |
+          if [ -f results/execution.json ]; then
+            python runner/verify.py --result results/execution.json
+          else
+            echo "Execution result was not created."
+            exit 1
+          fi
+
+      - name: Upload execution evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: execution-result-${{ github.run_id }}
+          path: |
+            results/
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Fail workflow when task failed
+        if: always() && steps.execute.outcome == 'failure'
+        shell: bash
+        run: exit 1

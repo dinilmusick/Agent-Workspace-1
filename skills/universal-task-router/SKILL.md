@@ -1,7 +1,7 @@
 ---
 name: "Universal Task Router"
 slug: universal-task-router
-version: 1.1.0
+version: 1.2.0
 source: Supabase Skills Database
 sourceId: 28
 status: active
@@ -18,13 +18,12 @@ Top-level classifier that separates conversation from actionable goals, decides 
 ## Instructions
 
 
+
+
 # Universal Task Router
 
 ## Role
 You are the top-level entry point for every incoming user message. Decide whether the message is ordinary conversation or an actionable goal. For goals, classify the domain, decide whether structured mapping is useful, evaluate iterative execution, and route through the Skills Database.
-
-## Registry resolution
-Use the authenticated Supabase connector to read active skill and tool records. Resolve exact tools through `skill_tool_links` and `skill_tools`; use `skills/registry.json` and `skills/tool-bindings.json` as version-controlled mirrors. Never infer an endpoint from a slug or assume an optional CLI is installed/authenticated.
 
 ## 1. Conversation-versus-goal gate
 Classify the user's current message using the conversation context:
@@ -78,12 +77,19 @@ For routed tasks, record:
 Keep ordinary responses concise. Do not expose internal routing mechanics unless the user asks.
 
 
-## Metadata
+## Registry and tool resolution
+Use the authenticated Supabase connector to read the active skills, skill_versions, skill_dependencies, skill_triggers, skill_capabilities and skill_tool_links records. Resolve exact tool definitions from skill_tools. The version-controlled mirror is skills/registry.json plus skills/tool-bindings.json. Never infer a tool endpoint from a slug or assume an optional CLI is installed or authenticated.
+## Persistent multi-chat goal workflow
 
-```json
-{
-  "role": "top_level_router",
-  "version": "1.0.0",
-  "routing_model": "recursive_skill_graph"
-}
-```
+When the user agrees on an actionable goal that requires multiple tasks, persistent progress, or work across independently opened ChatGPT conversations:
+
+1. Resolve and load **Task Ledger** for this invocation, even if its registry dependency is marked recommended. It is the canonical store for the goal, task tree, ownership, progress, evidence, and verification.
+2. Resolve and load **Loop Generator**. Invoke its actual contract-generation procedure for every task in the persisted task tree, including the root and intermediate parent tasks. Do not merely write an ad hoc loop-shaped JSON object.
+3. Create a uniquely named goal with complete context, instructions, acceptance criteria, and a fully loop-backed task tree. Persist the complete tree atomically through `goal_ledger_create_with_tasks`.
+4. Recommend worker-chat count from ready, independent leaf-task parallelism. The user manually opens those ChatGPT conversations; never attempt to spawn browser chats through GitHub Actions.
+5. A worker conversation loads `goal_ledger_resume(name)`, then claims exactly one eligible leaf task using `goal_ledger_claim_task` with a unique agent ID and session ID. It executes the persisted loop, records every iteration and evidence, and submits the result.
+6. The orchestrator or a separate verifier independently checks each result. Finalize parent tasks and the goal only after every descendant task is verified.
+7. On resume, treat Supabase goal/task records as canonical. Reconstruct the work from the ledger rather than depending on the original conversation history.
+
+Ordinary conversation and bounded one-step requests must not create goals or load the Task Ledger unnecessarily. This workflow uses direct Supabase connector/PostgREST and transactional PostgreSQL RPCs; never call Supabase Edge Functions.
+

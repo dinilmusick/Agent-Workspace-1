@@ -16,8 +16,8 @@ export function trackBrowser(page) {
 }
 
 export async function attachBrowserEvidence(page, report, testInfo) {
-  const dom = await page.locator("body").innerText().catch(error => "DOM snapshot unavailable: " + error.message);
-  await testInfo.attach("dom-snapshot", { body: dom, contentType: "text/plain" });
+  const dom = await page.locator("html").evaluate(element => element.outerHTML).catch(error => "DOM snapshot unavailable: " + error.message);
+  await testInfo.attach("dom-snapshot.html", { body: dom, contentType: "text/html" });
   await testInfo.attach("browser-diagnostics", {
     body: JSON.stringify(report, null, 2), contentType: "application/json"
   });

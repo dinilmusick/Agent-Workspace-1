@@ -1,7 +1,7 @@
 ---
 name: "Task Ledger"
 slug: task-ledger
-version: 1.3.3
+version: 1.3.4
 source: Supabase Skills Database
 sourceId: 7
 status: active
@@ -28,7 +28,7 @@ The Task Ledger is the database-backed coordination substrate for multi-agent ex
 Use the authenticated Supabase connector as the shared read/write interface. The database is the source of truth for task definitions, claims, progress, results, evidence, and verification state.
 
 ## Goal-backed ChatGPT workflow precedence
-For a persistent named goal worked by manually opened ChatGPT conversations, the goal protocol in the v1.3.3 section below supersedes the generic legacy task procedures in this file. Use goal_ledger_create_with_tasks, goal_ledger_claim_task, task_ledger_record_loop_iteration, task_ledger_record_parent_loop_iteration, task_ledger_verify_result and goal_ledger_finalize. Each task, including every parent, must execute its own persisted Loop Generator contract. Each task stores the goal context version it was created against; do not silently change the meaning of in-flight tasks when goal context is revised.
+For a persistent named goal worked by manually opened ChatGPT conversations, the goal protocol in the v1.3.4 section below supersedes the generic legacy task procedures in this file. Use goal_ledger_create_with_tasks, goal_ledger_claim_task, task_ledger_record_loop_iteration, task_ledger_record_parent_loop_iteration, task_ledger_verify_result and goal_ledger_finalize. Each task, including every parent, must execute its own persisted Loop Generator contract. Each task stores the goal context version it was created against; do not silently change the meaning of in-flight tasks when goal context is revised.
 
 ## Core model
 - tasks is the canonical task record. A task is a formal execution contract, not merely a title and status.
@@ -186,7 +186,7 @@ The user's ChatGPT browser conversations are the interactive agents. The user ma
 - Use `goal_ledger_claim_task(goal_name, agent_id, agent_name, agent_type, capabilities, session_id, lease_seconds)` to atomically claim one eligible leaf task within the named goal. It uses row locking with skip-locked semantics, dependencies, capabilities and expiring leases.
 - Supply a distinct opaque session_id and distinct agent_id label for every browser conversation. These labels identify chat instances; owner-scoped RLS binds all work to the authenticated user's goals. Worker agent_id must differ from the orchestrator agent_id so the orchestrator can verify independently. Claim tokens remain unique and mandatory for claim-bound writes.
 - Use `task_ledger_record_loop_iteration` to persist leaf-task inputs, outputs, observations, criterionResults, loopState, tools and evidence. A pass requires every criterion satisfied and evidence.
-- The orchestrator must also execute every parent/root task's Loop Generator cycle after its children are independently verified. Persist it with `task_ledger_record_parent_loop_iteration`; the database rejects a parent pass before all direct children are verified.
+- The orchestrator must also execute every parent/root task's Loop Generator cycle after its children are independently verified. Persist it with `task_ledger_record_parent_loop_iteration`; a passing parent loop marks that parent completed and verified, allowing nested parents to proceed bottom-up. The database rejects a parent pass before all direct children are verified.
 - Leaf task completion is database-guarded: a worker cannot submit completed unless its latest loop iteration passed every criterion with evidence. Do not bypass this guard.
 - Independently verify each worker result. After every parent loop also passes with evidence, use `goal_ledger_finalize(name, orchestrator_agent_id, report)`; it finalizes parent task rows and then the goal.
 - GitHub Actions is for finite CI/repository execution and does not create ChatGPT browser conversations. Supabase PostgreSQL is the shared persistence and atomic coordination layer. The browser-chat protocol does not call Supabase Edge Functions.

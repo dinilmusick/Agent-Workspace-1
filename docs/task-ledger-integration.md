@@ -64,6 +64,12 @@ The database enforces these gates. A worker's assertion that work is complete is
 
 The job has read-only repository permission, checkout credentials are not persisted, and no application secrets are passed to the executed process. The runner is finite compute, not a persistent workspace or ChatGPT agent. The source file must exist in the selected repository revision. Do not place credentials in source files. To invoke from a ChatGPT conversation when workflow_dispatch is unavailable, create a GitHub issue with title `[agent-compute] <goal-key> <runtime>` and a JSON body containing `ref`, `runtime`, `source_file`, `arguments` (string array) and `timeout_seconds`. The issue trigger accepts only repository owners, members and collaborators. Track the issue's Actions run and retrieve its artifact. Do not claim execution without a real completed run.
 
+## Workspace identity and security
+
+The connected project currently has no rows in `auth.users`. ChatGPT browser conversations therefore use unique `agent_id` and `session_id` values within one project-scoped workspace where `owner_user_id` is null. A different conversation can independently verify and finalize; the database rejects self-verification and finalization by a task worker.
+
+This is suitable for the current single-owner project. It is not multi-tenant isolation. If the project is shared with other human owners, provision Supabase Auth users, bind goals to `owner_user_id`, and enforce JWT/RLS owner boundaries before enabling shared access.
+
 ## Compute boundary
 
 - ChatGPT: reasoning, planning, code authoring, tool selection and verification.

@@ -113,8 +113,8 @@ jobs:
           base_url = manifest.get("baseUrl") or f"http://127.0.0.1:{port}"
           log_path = service.get("log") or os.environ["DEFAULT_SERVER_LOG"]
           with open(os.environ["GITHUB_ENV"], "a") as env:
-              env.write(f"API_BASE_URL={base_url}\\n")
-              env.write(f"SERVER_LOG_PATH={log_path}\\n")
+              env.write(f"API_BASE_URL={base_url}\n")
+              env.write(f"SERVER_LOG_PATH={log_path}\n")
           PY
           node tools/backend-api-diagnostics/scripts/run-api-diagnostics.mjs --manifest "$API_TEST_MANIFEST" --output artifacts/api
 

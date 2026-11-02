@@ -32,7 +32,9 @@ The runner is ephemeral, has read-only repository permissions, does not persist 
 
 ## Agent tools and skills
 
-- [Looper](tools/looper/README.md): bounded loop-state controller for agent iterations.\n- [Backend/API diagnostics](tools/backend-api-diagnostics/README.md): real local endpoint checks, contracts, auth/failure scenarios and correlated server-log artifacts.
+- [Looper](tools/looper/README.md): bounded loop-state controller for agent iterations.
+- [Backend/API diagnostics](tools/backend-api-diagnostics/README.md): real local endpoint checks, contracts, auth/failure scenarios and correlated server-log artifacts.
+- [Multi-service runtime](docs/multi-service-runtime.md): concurrent app services, health checks, ports, restart policies, logs and teardown.
 - [Tools catalogue](tools/catalog/README.md): curated coding, testing and browser tools.
 - [Skills catalogue](skills/catalog.json): versioned skill snapshot backed by the Skills Database.
 

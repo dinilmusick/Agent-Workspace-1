@@ -19,11 +19,16 @@ runner/
   resolve-compute-request.py    # validates workflow/issue requests
   checkout-public-repository.py # public target checkout helper
   react-project.py              # React project preparation and checks
+  service-runtime.py            # concurrent local service supervisor
+  test_service_runtime.py       # multi-service lifecycle regression tests
 tools/
   looper/
   react-typescript-fullstack/
   backend-api-diagnostics/       # local API contract, auth and server-log diagnostics
   agent-runtimes/
+examples/
+  services.json                  # multi-service target manifest example
+  fixture-service.py             # test-only HTTP service fixture
 workspaces/                     # disposable target checkout area
 results/                        # compute output area
 ```

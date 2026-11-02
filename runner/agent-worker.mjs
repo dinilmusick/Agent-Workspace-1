@@ -35,7 +35,7 @@ export function normalizeRuntimeOutput(value) {
   };
 }
 
-function runtimeEnvironment() {
+export function runtimeEnvironment() {
   const allow = new Set((process.env.AGENT_RUNTIME_ENV_ALLOWLIST ?? "").split(",").map(x => x.trim()).filter(Boolean));
   const safeDefaults = new Set(["PATH", "HOME", "TMPDIR", "TEMP", "TMP", "SYSTEMROOT", "WINDIR", "LANG", "LC_ALL"]);
   return Object.fromEntries(Object.entries(process.env).filter(([key]) =>

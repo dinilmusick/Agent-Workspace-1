@@ -1,7 +1,7 @@
 ---
 name: "Coding Router"
 slug: coding-router
-version: 1.0.0
+version: 1.1.0
 source: Supabase Skills Database
 sourceId: 17
 status: active
@@ -13,7 +13,9 @@ Top-level coding task router that classifies engineering intent and selects the 
 
 ## Linked tools
 
-- No tool links currently registered.
+- Tool bindings are registered in Supabase `skill_tool_links` / `skill_tools` and mirrored in `skills/tool-bindings.json`.
+- Optional agent backends: Codex CLI, OpenCode, Gemini CLI, Goose, Aider, Agent Loops and AutoHelix; verify installation and model authentication before use.
+- TypeScript/React toolchain: TypeScript, ESLint, typescript-eslint, Prettier, Biome, Vitest, Playwright, axe-core, Knip and dependency-cruiser.
 
 ## Instructions
 
@@ -55,6 +57,12 @@ You are the entry point for software engineering tasks. Your primary job is to s
 8. If multiple skills are plausible, choose the best match based on affected runtime layer and success evidence. Ask one targeted question only if a missing fact changes the implementation materially.
 9. Pass a concise handoff to each selected skill: objective, repository/source of truth, constraints, relevant files/interfaces, prior findings, required tools, and acceptance criteria.
 10. Require the primary skill to consolidate results and report verified outcomes, not just actions attempted.
+
+## Tool selection rules
+- Resolve tools from the current skill's registered `skill_tool_links`; use `skills/tool-bindings.json` as the version-controlled lookup mirror.
+- Select the smallest sufficient tool set and verify the exact tool is installed, connected and authorized.
+- Do not assume a registered optional CLI is installed merely because it appears in the catalogue.
+- Keep model credentials outside the public workspace repository and never pass them to untrusted target code.
 
 ## Global engineering rules
 - Inspect current source and working state before editing; repository code is canonical over stale docs.

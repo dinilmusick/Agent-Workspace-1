@@ -55,6 +55,19 @@ class PlatformAdapterTests(unittest.TestCase):
         self.assertTrue(all("deploy" not in args and "promote" not in args for args in commands))
         self.assertFalse((self.root / ".vercel" / ".env.preview.local").exists())
 
+    def test_vercel_restores_preexisting_preview_environment_file(self):
+        (self.root / "vercel.json").write_text('{"version":2}')
+        (self.root / ".vercel").mkdir()
+        (self.root / ".vercel" / "project.json").write_text('{"projectId":"prj_test","orgId":"team_test"}')
+        env_file = self.root / ".vercel" / ".env.preview.local"
+        original = b"KEEP_EXISTING=workspace-value\\n"
+        env_file.write_bytes(original)
+        with patch.dict(os.environ, {"VERCEL_TOKEN": "test-token"}, clear=True), patch.object(adapters, "run") as command:
+            command.side_effect = ["", ""]
+            result = adapters.run_vercel(self.root, self.out)
+        self.assertEqual(result["localBuild"], "passed")
+        self.assertEqual(env_file.read_bytes(), original)
+
     def test_vercel_refuses_production_deployment_target(self):
         (self.root / "vercel.json").write_text('{"version":2}')
         env = {"VERCEL_TOKEN": "test-token", "VERCEL_PREVIEW_URL": "https://preview-my-app.vercel.app"}

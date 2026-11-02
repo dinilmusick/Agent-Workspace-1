@@ -243,6 +243,48 @@
         "agent-systems-engineering",
         "coding-workflow"
       ]
+    },
+    {
+      "slug": "platform-adapters",
+      "type": "cli",
+      "path": "runner/platform_adapters.py",
+      "skills": [
+        "platform-adapters",
+        "cloud-platform-engineering",
+        "database-engineering",
+        "testing-strategy",
+        "devops-ci-release"
+      ]
+    },
+    {
+      "slug": "cloudflare-workers",
+      "type": "cli",
+      "package": "@cloudflare/vitest-plugin@1.4.12; vitest@5.0.5; wrangler@4.156.1",
+      "skills": [
+        "platform-adapters",
+        "cloud-platform-engineering",
+        "testing-strategy"
+      ]
+    },
+    {
+      "slug": "vercel-cli",
+      "type": "cli",
+      "package": "vercel@65.9.0",
+      "skills": [
+        "platform-adapters",
+        "cloud-platform-engineering",
+        "devops-ci-release"
+      ]
+    },
+    {
+      "slug": "supabase-cli",
+      "type": "cli",
+      "package": "supabase@3.0.0",
+      "skills": [
+        "platform-adapters",
+        "database-engineering",
+        "testing-strategy"
+      ]
     }
   ]
 }

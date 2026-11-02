@@ -4,8 +4,8 @@
   "generatedAt": "2026-11-02",
   "versions": {
     "loop-generator": "1.2.1",
-    "task-ledger": "1.7.3",
+    "task-ledger": "1.7.4",
     "coding-router": "1.2.0",
-    "universal-task-router": "1.3.4"
+    "universal-task-router": "1.3.5"
   }
 }

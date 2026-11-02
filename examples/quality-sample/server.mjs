@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { createServer } from "node:http";
-import { authorize, resolvePage, SESSION_TOKEN, validateCredentials } from "./app.mjs";
+import { authorize, resolvePage, validateCredentials } from "./app.mjs";
 
 async function readJson(request) {
   let body = "";
@@ -43,19 +43,19 @@ const server = createServer(async (request, response) => {
       send(response, status, { status: "ok" });
     } else if (request.method === "POST" && url.pathname === "/api/login") {
       const credentials = await readJson(request);
-      if (!validateCredentials(credentials)) {
+      if (!validateCredentials(credentials, process.env.QUALITY_TEST_EMAIL, process.env.QUALITY_TEST_PASSWORD)) {
         status = 401;
         send(response, status, { error: "invalid_credentials" });
       } else {
         status = 200;
-        send(response, status, { token: SESSION_TOKEN });
+        send(response, status, { token: process.env.QUALITY_SESSION_TOKEN });
       }
     } else if (request.method === "GET" && url.pathname === "/api/private") {
-      const access = authorize(token);
+      const access = authorize(token, process.env.QUALITY_SESSION_TOKEN);
       status = access.status;
       send(response, status, access.allowed ? { data: "private" } : { error: access.status === 401 ? "unauthenticated" : "forbidden" });
     } else if (request.method === "GET") {
-      const page = resolvePage(url.pathname, token);
+      const page = resolvePage(url.pathname, token, process.env.QUALITY_SESSION_TOKEN);
       status = page.status;
       send(response, status, renderPage(page), "text/html; charset=utf-8");
     } else {

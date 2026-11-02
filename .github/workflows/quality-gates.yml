@@ -12,7 +12,7 @@ permissions:
   pull-requests: read
 
 concurrency:
-  group: quality-gates-\${{ github.event.pull_request.number || github.ref }}
+  group: quality-gates-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -73,11 +73,11 @@ jobs:
           trivy config --severity HIGH,CRITICAL --exit-code 1 --format sarif --output artifacts/security/trivy-config.sarif examples/quality-sample
 
       - name: Build sample container
-        run: docker build --pull --tag quality-sample:\${{ github.sha }} examples/quality-sample
+        run: docker build --pull --tag quality-sample:${{ github.sha }} examples/quality-sample
 
       - name: Scan built container image
         run: |
-          trivy image --scanners vuln,secret --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 --format sarif --output artifacts/security/trivy-image.sarif quality-sample:\${{ github.sha }}
+          trivy image --scanners vuln,secret --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 --format sarif --output artifacts/security/trivy-image.sarif quality-sample:${{ github.sha }}
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@9b3254085494b55a0f7c4c2b3d2d52cc712ce370

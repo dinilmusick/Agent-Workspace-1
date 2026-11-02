@@ -63,7 +63,7 @@ export async function loadBrowserManifest() {
     discoveredCount: discovered.length,
     testedRoutes: testedRoutes.map(({ path, name, source }) => ({ path, name, source })),
     untestedRoutes,
-    note: discovered.length ? null : "No framework routes discovered; root route used. Configure routes explicitly for complete coverage."
+    note: discovered.length || configured ? null : "No framework routes discovered; root route used. Configure routes explicitly for complete coverage."
   }, null, 2) + "\n");
   return result;
 }

@@ -10,7 +10,7 @@ begin
   select * into registered from public.task_ledger_register(
     'recovery-threshold-test','Recovery Threshold Test','60-minute threshold leaf',
     'Disposable integration-test task',array['recovery-threshold']::text[],
-    'recovery-threshold-session','worker',3,'Testing heartbeat-based recovery','{}'::jsonb,null
+    'recovery-threshold-session','worker',3::smallint,'Testing heartbeat-based recovery','{}'::jsonb,null
   );
   select * into first_claim from public.task_ledger_claim_next(
     'recovery-threshold-old','Old Worker','worker',array['recovery-threshold']::text[],900

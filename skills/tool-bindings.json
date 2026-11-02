@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "provider": "Supabase",
+    "projectRef": "vcaerawuwffziufvpbvw",
+    "tables": ["public.skill_tools", "public.skill_tool_links"]
+  },
+  "tools": [
+    {"slug":"looper","type":"cli","path":"tools/looper/looper.mjs","skills":["loop-generator"]},
+    {"slug":"agent-loops","type":"cli","package":"@andromarces/agent-loops@0.8.0","path":"tools/agent-runtimes","skills":["loop-generator","coding-router","agent-systems-engineering","coding-workflow","code-review","devops-ci-release"]},
+    {"slug":"autohelix","type":"cli","package":"autohelix==0.1.1","repository":"https://github.com/awslabs/AutoHelix","skills":["loop-generator","coding-router","agent-systems-engineering","devops-ci-release"]},
+    {"slug":"playwright","type":"browser","path":"tools/react-typescript-fullstack","skills":["loop-generator","browser-qa","react-performance-composition","frontend-engineering","coding-router","debugging-root-cause","coding-workflow","testing-strategy"]},
+    {"slug":"axe-core","type":"library","package":"@axe-core/playwright@4.14.0","skills":["browser-qa","frontend-engineering","coding-router","coding-workflow","testing-strategy"]},
+    {"slug":"typescript","type":"cli","package":"typescript@7.0.2","skills":["react-performance-composition","frontend-engineering","coding-router","debugging-root-cause","coding-workflow","agent-systems-engineering","testing-strategy"]},
+    {"slug":"typescript-eslint","type":"library","package":"typescript-eslint@8.72.0","skills":["frontend-engineering","coding-router","coding-workflow"]},
+    {"slug":"eslint","type":"cli","package":"eslint@10.14.0","skills":["react-performance-composition","frontend-engineering","coding-router","coding-workflow","agent-systems-engineering","testing-strategy"]},
+    {"slug":"prettier","type":"cli","package":"prettier@3.9.10","skills":["frontend-engineering","coding-router","coding-workflow","testing-strategy"]},
+    {"slug":"biome","type":"cli","package":"@biomejs/biome@2.6.4","skills":["react-performance-composition","frontend-engineering","coding-router"]},
+    {"slug":"vitest","type":"cli","package":"vitest@5.0.5","skills":["frontend-engineering","coding-router","debugging-root-cause","coding-workflow","testing-strategy"]},
+    {"slug":"knip","type":"cli","package":"knip@6.43.0","skills":["refactoring","coding-router","codebase-architecture","coding-workflow"]},
+    {"slug":"dependency-cruiser","type":"cli","package":"dependency-cruiser@18.7.0","skills":["refactoring","coding-router","codebase-architecture","coding-workflow"]}
+  ]
+}

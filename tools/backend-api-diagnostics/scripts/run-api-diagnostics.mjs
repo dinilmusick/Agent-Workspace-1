@@ -126,7 +126,7 @@ async function main() {
       if (responseId && responseId !== id) result.assertions.push(`correlation id mismatch: sent ${id}, received ${responseId}`);
       result.requestHeaders = redactHeaders(headers);
     } catch (error) {
-      result.assertions.push(error.name === "AbortError" ? `timeout after ${scenario.timeoutMs ?? manifest.timeoutMs ?? 10000}ms` : error.message);
+      result.assertions.push(["AbortError", "TimeoutError"].includes(error.name) ? `timeout after ${scenario.timeoutMs ?? manifest.timeoutMs ?? 10000}ms` : error.message);
       result.error = { name: error.name, message: error.message };
     }
     result.durationMs = Date.now() - started;

@@ -124,6 +124,9 @@ jobs:
         continue-on-error: true
         env:
           TARGET_BASE_URL: http://127.0.0.1:4173
+          TARGET_ROOT: ${{ github.workspace }}/workspaces/target
+          PROJECT_PATH: ${{ inputs.project_path }}
+          BROWSER_EVIDENCE_KIND: real-target-preview
           ARTIFACT_DIR: ${{ github.workspace }}/artifacts/browser
         run: node tools/react-typescript-fullstack/scripts/inspect-browser.mjs
 

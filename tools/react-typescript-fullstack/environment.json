@@ -1,35 +1,38 @@
 {
   "id": "javascript.typescript.fullstack.react",
-  "version": 1,
+  "version": 2,
   "runtime": {
     "node": "22",
-    "packageManagers": [
-      "npm",
-      "pnpm",
-      "yarn"
-    ],
+    "packageManagers": ["npm", "pnpm", "yarn"],
     "browser": "chromium"
   },
   "detection": {
-    "required": [
-      "package.json"
-    ],
-    "signals": [
-      "react",
-      "typescript",
-      "vite",
-      "next",
-      "react-scripts"
+    "required": ["package.json"],
+    "signals": ["react", "typescript", "vite", "next", "react-scripts"]
+  },
+  "toolchain": {
+    "packageManifest": "tools/react-typescript-fullstack/package.json",
+    "installation": "npm install --prefix tools/react-typescript-fullstack --ignore-scripts",
+    "tools": [
+      {"name": "TypeScript", "package": "typescript", "version": "7.0.2", "purpose": "static type checking"},
+      {"name": "ESLint", "package": "eslint", "version": "10.14.0", "purpose": "config-driven linting"},
+      {"name": "typescript-eslint", "package": "typescript-eslint", "version": "8.72.0", "purpose": "TypeScript-aware ESLint rules"},
+      {"name": "Prettier", "package": "prettier", "version": "3.9.10", "purpose": "format verification"},
+      {"name": "Biome", "package": "@biomejs/biome", "version": "2.6.4", "purpose": "fast lint and format"},
+      {"name": "Vitest", "package": "vitest", "version": "5.0.5", "purpose": "unit and component tests"},
+      {"name": "Playwright", "package": "playwright", "version": "1.64.1", "purpose": "real-browser end-to-end inspection"},
+      {"name": "axe-core", "package": "@axe-core/playwright", "version": "4.14.0", "purpose": "automated accessibility audit"},
+      {"name": "Knip", "package": "knip", "version": "6.43.0", "purpose": "unused files, exports and dependencies"},
+      {"name": "dependency-cruiser", "package": "dependency-cruiser", "version": "18.7.0", "purpose": "dependency-boundary and cycle checks"}
     ]
   },
   "commands": {
-    "install": "lockfile-detected",
-    "build": "npm run build when present",
-    "test": "npm test -- --run when present",
-    "start": "npm run dev -- --host 0.0.0.0"
+    "installTarget": "runner/react-project.py prepare --project-path <path>",
+    "quality": "node tools/react-typescript-fullstack/scripts/quality-check.mjs",
+    "start": "runner/react-project.py start --project-path <path>",
+    "inspect": "node tools/react-typescript-fullstack/scripts/inspect-browser.mjs"
   },
   "inspection": {
-    "tool": "Playwright",
     "capture": [
       "screenshots",
       "DOM text snapshot",
@@ -37,7 +40,9 @@
       "uncaught page errors",
       "failed requests",
       "HTTP errors",
-      "trace"
+      "Playwright trace",
+      "axe accessibility violations"
     ]
-  }
+  },
+  "evidence": "artifacts/"
 }

@@ -1,0 +1,6 @@
+alter table public.tasks add column if not exists claimed_session_id text;
+create index if not exists tasks_claimed_session_idx on public.tasks(claimed_session_id) where claimed_session_id is not null;
+revoke all on function public.goal_ledger_claim_task(text,text,text,text,text[],text,integer) from public,anon,authenticated;
+grant execute on function public.goal_ledger_claim_task(text,text,text,text,text[],text,integer) to service_role;
+revoke all on function public.task_ledger_claim_goal_next(uuid,text,text,text,text[],integer) from public,anon;
+grant execute on function public.task_ledger_claim_goal_next(uuid,text,text,text,text[],integer) to authenticated,service_role;

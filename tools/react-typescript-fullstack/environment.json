@@ -21,7 +21,7 @@
   },
   "commands": {
     "installTarget": "runner/react-project.py prepare --project-path <path>",
-    "quality": "node tools/react-typescript-fullstack/scripts/quality-check.mjs",
+    "quality": "node tools/react-typescript-fullstack/scripts/quality-check-flat.mjs",
     "start": "runner/react-project.py start --project-path <path>",
     "inspect": "node tools/react-typescript-fullstack/scripts/inspect-browser.mjs"
   },

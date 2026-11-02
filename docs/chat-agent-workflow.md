@@ -33,7 +33,7 @@ The user manually opens ChatGPT browser conversations. No GitHub workflow create
 6. Record every meaningful iteration using `task_ledger_record_loop_iteration`, including actual input/output, observation, criterionResults, loopState, tools, evidence, verdict and next action.
 7. Record `pass` only when every criterion is `satisfied` and supporting evidence exists. Otherwise use `continue`, `error` or a legitimate terminal state.
 8. Submit with `task_ledger_submit_result`. The database rejects completed submissions without a passing latest loop iteration.
-9. Do not self-verify. A separate orchestrator/verifier inspects artifacts and calls `task_ledger_verify_result`. Parent finalization requires every child verified.
+9. Do not self-verify. A separate orchestrator/verifier inspects artifacts and calls `task_ledger_verify_result`. After every leaf result is independently verified, call `goal_ledger_finalize(name, agent_id, report)`; it finalizes parent rows bottom-up and marks the goal completed only when every task is verified.
 10. Claim another task only when the user explicitly asks the worker to continue.
 
 ## Worker instruction

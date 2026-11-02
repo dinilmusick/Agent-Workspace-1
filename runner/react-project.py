@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Prepare and run checked-out React/TypeScript applications and their services."""
 import argparse
+import json
 import os
 import signal
 import subprocess

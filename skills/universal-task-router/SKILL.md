@@ -89,6 +89,10 @@ When asked to continue, finish or resume an unfinished goal:
 - A goal loop may pass only after all descendant tasks are independently verified, all goal acceptance criteria are satisfied and non-empty evidence is recorded.
 - Finalize through `goal_ledger_finalize_by_key`. The database is canonical; recover from Supabase rather than chat history.
 
+
+### Proactive but consent-based task proposals
+After the global overview, compare the user's current request with the persisted task tree. If one concrete missing work item is clearly relevant, propose one task and ask the user **“Should I add this as a task?”** Include title, parent goal key, scope, observable acceptance criteria, dependencies and proposed readable slug. Do not insert it until explicit confirmation. On confirmation, call the canonical task-tree creation RPC with its complete loop and verification contract, then report the exact returned task key. Never invent/reserve a key in advance. Do not manufacture tasks when the existing tree already covers the work.
+
 ## 7. Task parameters
 
 Use task `parameters` for task-specific configuration, `parameter_contract.required` for mandatory values, and `parameter_contract.properties` for JSON types and optional enum constraints. Workers submit fulfilled values in `result_in.parameter_values`. The database rejects completion if required values are missing or invalid.

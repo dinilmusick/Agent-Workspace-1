@@ -51,3 +51,14 @@ Any coding implementation must route through **Coding Router** and then the narr
 
 ## GitHub repository tooling
 Permanent GitHub repository-management helpers live under `tools/github/`. They authenticate only through an environment-provided GitHub token, never contain credentials, support explicit repository visibility and initialization options, fail closed on missing credentials/API errors, and require no global third-party package. See `tools/github/README.md`.
+
+
+## Canonical Omni Loop ontology
+- Every new goal has exactly one `goal_type`, exactly one `target`, non-empty `behavior_inputs`, non-empty `expected_outputs`, acceptance criteria, and a goal-level Omni Loop.
+- Every new task has exactly one `task_type`, exactly one `target`, acceptance criteria, and its own Omni Loop.
+- A task target is immutable and must equal its parent goal/task target. Child tasks may refine execution but may not retarget the work.
+- Omni Loop input is an `edit`; the edit changes the target. Omni Loop output is the observed target behavior after that edit.
+- Canonical closed vocabularies live in `schemas/ontology.ts` and are enforced at the Supabase boundary.
+- New persistent goals should use `goal_ledger_create_omni_hierarchical`; legacy goal creation APIs remain for historical compatibility.
+- A Vision contains one root target, a decomposition graph of component targets, and goal links. Its tldraw board is a projection of Supabase state.
+- Vision boards use a **Vision Overview** page plus one page per component target. Persist tldraw workspace/board/page identifiers in Supabase.

@@ -129,3 +129,14 @@ Every substantive coding task must include a `general_pattern` in its task defin
 
 ## Coding execution gate
 For every coding request, route through Coding Router and then the narrowest specialist before execution. Substantive implementation additionally activates Coding Workflow. Do not begin code edits before the coding skill path has been selected.
+
+
+## Canonical Omni Loop model
+For actionable goals and tasks, use the Agentic Workspace Omni Loop ontology:
+- Goal: one type + one target + behavior inputs + expected outputs + goal Omni Loop.
+- Task: one type + one target inherited from its parent + task Omni Loop.
+- Loop input: an edit applied to the target.
+- Loop output: observed target behavior.
+- Goal completion: expected behavior is observed for the declared inputs and all independent verification gates pass.
+- Task targets are immutable; nested tasks cannot retarget.
+Use `schemas/ontology.ts` and the Supabase Omni Loop validation RPCs as the canonical vocabulary and persistence contract.

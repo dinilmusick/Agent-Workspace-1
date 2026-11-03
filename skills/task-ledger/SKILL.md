@@ -21,6 +21,12 @@ Persistent, owner-scoped orchestration for goals, recursively nested tasks, loop
 - Every task, including intermediate parent tasks, has its own loop definition, state and `task_iterations`.
 - `task_dependencies` stores blocking/advisory edges. `goal_events` and `task_events` preserve append-only history.
 
+## Mandatory Vision and universal decomposition
+Every substantive goal must be represented through the canonical planning hierarchy before task execution:
+Vision (when the work spans multiple goals/components) → target → goals → tasks → Omni Loops.
+Every goal and task is domain-independent: the 1–4 action law applies to every task type, not merely coding. Every goal/task requires a closed-vocabulary type, exactly one target, acceptance criteria and a complete Omni Loop contract. Every task target inherits its parent's target and cannot be changed by nested tasks.
+When a Vision exists, its tldraw board/projection is mandatory and must be synchronized with Supabase state; tldraw is never the source of truth.
+
 ## Goal creation
 
 Use `goal_ledger_create_hierarchical`. Do not use the legacy `goal_ledger_create_with_tasks` flow for new goals.
@@ -156,6 +162,9 @@ New task keys use `task-<descriptive-kebab-case>-<8-hex-suffix>`, generated atom
 
 ## Four-action task law
 Every newly created task must declare `actions` as a JSON array containing 1–4 concrete actions. A task requiring more than four actions must be split into additional tasks. This limit is enforced by the canonical `task_ledger_create_tree` / hierarchical goal validation boundary. Existing historical tasks are preserved unchanged.
+
+### Universal task-definition pattern
+Use the same structural decomposition for coding, learning, research, design, creative, operations, business, personal development, maintenance, system and general work. The `actions` array is always 1–4 concrete actions; split larger work into additional tasks.
 
 ### Task-definition pattern
 ```json

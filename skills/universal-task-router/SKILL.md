@@ -121,14 +121,14 @@ The current Supabase project has no Auth users. Browser chats therefore use uniq
 - Never expose service-role credentials or secrets in prompts, task records, source files, logs or artifacts.
 
 
-## Task decomposition law
-Every new task definition must contain an explicit `actions` array containing 1–4 concrete actions. If the work needs more than four actions, split it into additional tasks. Never encode five or more actions into one task. The canonical task-tree database boundary rejects action arrays outside this range.
+## Universal task decomposition law
+Every new **task**, regardless of domain, must contain an explicit `actions` array containing 1–4 concrete actions. This is a planning/decomposition invariant, not a coding rule. If work needs more than four actions, split it into additional tasks. The canonical task-tree database boundary rejects action arrays outside this range. Apply the same decomposition discipline to coding, learning, research, design, creative, operations, business, personal development, maintenance, system and general work.
 
-## General pattern visibility
-Every substantive coding task must include a `general_pattern` in its task definition. The pattern describes the conceptual implementation shape and must be included in progress/result reporting so the user can understand what the code is doing.
+## Universal pattern visibility
+Every substantive task must include a `general_pattern` describing the conceptual shape of the work and must surface it in progress/result reporting. Coding may use patterns such as `input → validate → transform → persist → verify`; other domains must use an appropriate domain pattern.
 
-## Coding execution gate
-For every coding request, route through Coding Router and then the narrowest specialist before execution. Substantive implementation additionally activates Coding Workflow. Do not begin code edits before the coding skill path has been selected.
+## Domain execution gates
+For coding, route through Coding Router and the narrowest specialist before execution. For every other domain, select the narrowest active specialist and supporting skills before execution. Substantive work uses Loop Generator and the applicable domain workflow. Do not treat Coding Router as a universal gate.
 
 
 ## Canonical Omni Loop model

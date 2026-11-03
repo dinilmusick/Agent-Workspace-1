@@ -11,7 +11,7 @@
     ],
     "exportedAt": "2026-11-03T00:00:00.000Z"
   },
-  "count": 30,
+  "count": 32,
   "skills": [
     {
       "id": 1,
@@ -612,6 +612,24 @@
       ],
       "status": "active",
       "version": "1.0.1"
+    },
+    {
+      "id": 36,
+      "name": "Diagram Engineering",
+      "slug": "diagram-engineering",
+      "version": "1.0.0",
+      "status": "active",
+      "path": "skills/diagram-engineering/SKILL.md",
+      "tools": []
+    },
+    {
+      "id": 37,
+      "name": "tldraw Agent",
+      "slug": "tldraw-agent",
+      "version": "1.0.0",
+      "status": "active",
+      "path": "skills/tldraw-agent/SKILL.md",
+      "tools": []
     }
   ],
   "exportedAt": "2026-11-03T00:00:00.000Z"

@@ -89,3 +89,7 @@ Return selected skill slugs, why each was selected, execution order, and any mis
   "source_repository": "obra/superpowers"
 }
 ```
+
+
+## Mandatory decomposition and pattern contract
+Before handing off substantive coding work, require a task definition with 1–4 explicit `actions` and a `general_pattern`. If the requested implementation needs more than four actions, split it into multiple tasks. The selected specialist must preserve the general pattern in its progress and result reporting.

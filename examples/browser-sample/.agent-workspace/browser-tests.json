@@ -1,0 +1,88 @@
+{
+  "version": 1,
+  "baseUrl": "http://127.0.0.1:4173",
+  "routes": [
+    {
+      "name": "home",
+      "path": "/",
+      "expect": { "title": "Agent Workspace Browser Sample", "heading": "Welcome to Agent Workspace Sample" }
+    },
+    {
+      "name": "about",
+      "path": "/about",
+      "expect": { "title": "Agent Workspace Browser Sample", "heading": "About this sample" }
+    },
+    {
+      "name": "login",
+      "path": "/login",
+      "expect": { "title": "Agent Workspace Browser Sample", "heading": "Sign in", "visible": ["#email", "#password"] }
+    }
+  ],
+  "viewports": [
+    { "name": "desktop", "width": 1440, "height": 1000 },
+    { "name": "mobile", "width": 390, "height": 844 }
+  ],
+  "authStates": {
+    "anonymous": { "storageState": null },
+    "authenticated": { "storageState": ".agent-workspace/authenticated.json" }
+  },
+  "workflows": [
+    {
+      "name": "login and open dashboard",
+      "authState": "anonymous",
+      "steps": [
+        { "action": "navigate", "path": "/login" },
+        { "action": "fill", "selector": "#email", "value": "qa@example.com" },
+        { "action": "fill", "selector": "#password", "value": "browser-test" },
+        { "action": "click", "selector": "#login-form button[type=submit]" },
+        { "action": "expectText", "selector": "#login-status", "value": "Signed in" },
+        { "action": "click", "selector": "#dashboard-link" },
+        { "action": "expectUrl", "value": "/dashboard" },
+        { "action": "expectText", "selector": "#dashboard-title", "value": "Dashboard" }
+      ]
+    },
+    {
+      "name": "authenticated dashboard",
+      "authState": "authenticated",
+      "steps": [
+        { "action": "navigate", "path": "/dashboard" },
+        { "action": "expectText", "selector": "#dashboard-title", "value": "Dashboard" }
+      ]
+    },
+    {
+      "name": "reject invalid credentials",
+      "authState": "anonymous",
+      "steps": [
+        { "action": "navigate", "path": "/login" },
+        { "action": "fill", "selector": "#email", "value": "qa@example.com" },
+        { "action": "fill", "selector": "#password", "value": "wrong-password" },
+        { "action": "click", "selector": "#login-form button[type=submit]" },
+        { "action": "expectText", "selector": "#login-status", "value": "Sign in failed" },
+        { "action": "expectHidden", "selector": "#dashboard-link" }
+      ]
+    },
+    {
+      "name": "mobile navigation",
+      "authState": "anonymous",
+      "viewport": { "width": 390, "height": 844 },
+      "steps": [
+        { "action": "navigate", "path": "/" },
+        { "action": "click", "selector": "#nav-toggle" },
+        { "action": "expectText", "selector": "#primary-nav", "value": "About" },
+        { "action": "expectVisible", "selector": "#primary-nav a[href='/about']" }
+      ]
+    }
+  ],
+  "accessibility": {
+    "enabled": true,
+    "failOnViolations": true,
+    "tags": ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]
+  },
+  "visual": {
+    "enabled": true,
+    "baselineDir": ".agent-workspace/visual-baselines",
+    "maxDiffPixelRatio": 0.01
+  },
+  "failOnRuntimeErrors": true,
+  "ignoreRuntimeErrors": ["/api/login", "401 (Unauthorized)"]
+}

@@ -29,6 +29,9 @@ When a Vision exists, its tldraw board/projection is mandatory and must be synch
 
 ## Goal creation
 
+### Mandatory Vision/tldraw gate
+Before creating a canonical Omni goal, create or load its Vision and component target, ensure the Vision has a real tldraw workspace/board attached, and pass `vision_id` and `vision_target_id` in `metadata_in` to `goal_ledger_create_omni_hierarchical`. The database rejects canonical Omni goal creation without this projection. Link the goal to the Vision target in the same transaction. The tldraw board is a synchronized visual projection; Supabase remains canonical.
+
 Use `goal_ledger_create_hierarchical`. Do not use the legacy `goal_ledger_create_with_tasks` flow for new goals.
 
 Required inputs:

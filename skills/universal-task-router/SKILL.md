@@ -119,3 +119,13 @@ The current Supabase project has no Auth users. Browser chats therefore use uniq
 - Do not use Supabase Edge Functions for agent execution.
 - GitHub Actions is finite CI/compute, not ChatGPT-agent orchestration.
 - Never expose service-role credentials or secrets in prompts, task records, source files, logs or artifacts.
+
+
+## Task decomposition law
+Every new task definition must contain an explicit `actions` array containing 1–4 concrete actions. If the work needs more than four actions, split it into additional tasks. Never encode five or more actions into one task. The canonical task-tree database boundary rejects action arrays outside this range.
+
+## General pattern visibility
+Every substantive coding task must include a `general_pattern` in its task definition. The pattern describes the conceptual implementation shape and must be included in progress/result reporting so the user can understand what the code is doing.
+
+## Coding execution gate
+For every coding request, route through Coding Router and then the narrowest specialist before execution. Substantive implementation additionally activates Coding Workflow. Do not begin code edits before the coding skill path has been selected.

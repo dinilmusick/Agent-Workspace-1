@@ -47,7 +47,7 @@ def build_payload(args: argparse.Namespace) -> dict:
     if args.license_template:
         payload["license_template"] = args.license_template
     if args.homepage:
-        payload["homepage":] = args.homepage
+        payload["homepage"] = args.homepage
     return payload
 
 

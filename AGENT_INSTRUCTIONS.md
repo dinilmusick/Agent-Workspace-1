@@ -1,13 +1,14 @@
 # Agent Instructions
 
-Supabase is the source of truth for goals, tasks, dependencies, ownership and heartbeats. Never rely on another chat's history.
+Supabase is the source of truth for goals, tasks, dependencies, ownership, heartbeats, skills and workflow memory. Never rely on another chat's history.
 
 ## New chat
-1. Load current Task Ledger and Universal Task Router skills.
-2. Before answering what remains, call `goal_ledger_overview(null)`. Show ALL planning, ready, active and blocked goals: readable key, status, counts, agents/heartbeat age, queued work, blockers and verification.
-3. Compare the request with persisted tasks. If meaningful work is missing, propose ONE task and ask **“Should I add this as a task?”** Show goal, title, scope, criteria, dependencies and proposed slug. Do not insert before yes.
-4. After yes, create via task-tree RPC with loop, criteria and verification plan. Report returned key. New keys: `task-<descriptive-kebab-case>-<8-hex-suffix>`. Never invent IDs; preserve old keys.
-5. To resume, load context via `goal_ledger_resume_by_key`, then atomically claim one task.
+1. For shallow conversation, answer directly; do not load skills/task infrastructure.
+2. For substantive requests, load the current Task Ledger and semantic-resource-resolution skill.
+3. Before answering what remains, call `goal_ledger_overview(null)`. Show ALL planning, ready, active and blocked goals: readable key, status, counts, agents/heartbeat age, queued work, blockers and verification.
+4. Compare the request with persisted tasks. If meaningful work is missing, propose ONE task and ask **“Should I add this as a task?”** Show goal, title, scope, criteria, dependencies and proposed slug. Do not insert before yes.
+5. After yes, create via task-tree RPC with loop, criteria and verification plan. New keys: `task-<descriptive-kebab-case>-<8-hex-suffix>`. Never invent IDs; preserve old keys.
+6. To resume, load context via `goal_ledger_resume_by_key`, then atomically claim one task.
 
 ## Execution
 - Use unique agent/session IDs; heartbeat active claims.
@@ -16,49 +17,24 @@ Supabase is the source of truth for goals, tasks, dependencies, ownership and he
 - Supabase is data/coordination; GitHub Actions is finite compute. Never expose secrets or edit ownership directly.
 - Ask before destructive, costly, publishing, deployment or merge actions. Verify with tests/evidence.
 
+## Semantic resource + obstacle memory
+For substantive work, semantically search the indexed resource layer before selecting skills/resources, then resolve results to canonical Supabase records. The vector index is an index, never the source of truth.
+When a workflow obstacle materially blocks, delays or changes work, search obstacle memory first. Deduplicate similar obstacles semantically; update the canonical obstacle and append an occurrence with goal/task, evidence and resolution. Do not create duplicate memories. Reuse prior solutions before retrying.
 
 ## Task decomposition law
-Every newly created task must contain an explicit `actions` array with **1–4 actions**.
-
-If the work requires more than four actions, **do not create a larger task**. Split the work into another task (or additional tasks) with their own 1–4 actions. This is enforced at the canonical task-tree database boundary.
-
-```text
-Goal
-├── Task A
-│   ├── Action 1
-│   ├── Action 2
-│   └── Action 3
-├── Task B
-│   ├── Action 1
-│   └── Action 2
-└── Task C
-    └── Action 1
-```
+Every new task must contain an explicit `actions` array with **1–4 actions**. If more are needed, split into additional tasks.
 
 ## General pattern visibility
-For every substantive coding task, the task definition must include a `general_pattern` describing the architectural/code pattern being applied. Worker progress and results must expose that pattern in user-facing reporting.
+Every substantive coding task must include `general_pattern`, describing the conceptual execution shape. Worker progress/results must expose it.
 
-Example:
-```text
-general_pattern:
-  input → validate → transform → persist → verify
-```
+## Coding
+Any coding implementation must route through **Coding Router** and the narrowest specialist skill before execution. For substantive work, Coding Workflow is mandatory. Verify at the observable layer: tests/typecheck/lint/build; browser/runtime inspection for rendered behavior; CI for repository integration.
 
-The pattern is the conceptual execution shape, not a file-by-file activity log.
-
-## Coding skill requirement
-Any coding implementation must route through **Coding Router** and then the narrowest specialist skill before code execution. For substantive work, Coding Workflow is mandatory. Verify at the observable layer: tests/typecheck/lint/build for code, browser/runtime inspection for rendered behavior, and CI for repository-level integration.
-
-## GitHub repository tooling
-Permanent GitHub repository-management helpers live under `tools/github/`. They authenticate only through an environment-provided GitHub token, never contain credentials, support explicit repository visibility and initialization options, fail closed on missing credentials/API errors, and require no global third-party package. See `tools/github/README.md`.
-
-
-## Canonical Omni Loop ontology
-- Every new goal has exactly one `goal_type`, exactly one `target`, non-empty `behavior_inputs`, non-empty `expected_outputs`, acceptance criteria, and a goal-level Omni Loop.
-- Every new task has exactly one `task_type`, exactly one `target`, acceptance criteria, and its own Omni Loop.
-- A task target is immutable and must equal its parent goal/task target. Child tasks may refine execution but may not retarget the work.
-- Omni Loop input is an `edit`; the edit changes the target. Omni Loop output is the observed target behavior after that edit.
-- Canonical closed vocabularies live in `schemas/ontology.ts` and are enforced at the Supabase boundary.
-- New persistent goals should use `goal_ledger_create_omni_hierarchical`; legacy goal creation APIs remain for historical compatibility.
-- A Vision contains one root target, a decomposition graph of component targets, and goal links. Its tldraw board is a projection of Supabase state.
-- Vision boards use a **Vision Overview** page plus one page per component target. Persist tldraw workspace/board/page identifiers in Supabase.
+## Omni Loop ontology
+- Every new goal: exactly one `goal_type`, one `target`, non-empty `behavior_inputs` and `expected_outputs`, acceptance criteria and goal-level Omni Loop.
+- Every new task: exactly one `task_type`, one `target`, acceptance criteria and its own Omni Loop.
+- Task target is immutable and must equal its parent target. Child tasks refine execution, never retarget it.
+- Omni Loop input is an `edit`; output is observed target behavior after that edit.
+- Closed vocabularies live in `schemas/ontology.ts` and are enforced at the Supabase boundary.
+- New persistent goals use `goal_ledger_create_omni_hierarchical`; legacy APIs remain for history.
+- A Vision has one root target, a component-target decomposition graph and goal links; its tldraw board is a Supabase-state projection.

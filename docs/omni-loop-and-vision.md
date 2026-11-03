@@ -4,7 +4,7 @@ The Agentic Workspace uses one canonical behavioral abstraction for goals, tasks
 
 ## Omni Loop
 
-\`\`\`text
+```text
 TARGET
   │
   ├── behavior inputs ──► TARGET ──► observed outputs
@@ -14,15 +14,15 @@ TARGET
              │
              ▼
         next loop input
-\`\`\`
+```
 
 An **edit** is a bounded change to the constitution, structure, configuration, code, data, or internals of exactly one target. The edit is the loop input/change. The target's behavior after the edit is the loop output.
 
 Every Omni Loop contains:
 
-- exactly one \`target\`
-- an \`objective\`
-- one or more \`edits\`
+- exactly one `target`
+- an `objective`
+- one or more `edits`
 - an input contract
 - an output contract
 - a transformation
@@ -32,23 +32,23 @@ Every Omni Loop contains:
 - stop conditions
 - bounded iteration policy
 
-A goal is an Omni Loop whose output is judged against its declared \`behavior_inputs\` and \`expected_outputs\`.
+A goal is an Omni Loop whose output is judged against its declared `behavior_inputs` and `expected_outputs`.
 
 A task is also an Omni Loop, but its target is immutable: a task must inherit exactly the target of its parent goal or parent task.
 
 ## Closed vocabularies
 
-**Goal types:** \`coding\`, \`learning\`, \`research\`, \`design\`, \`creative\`, \`operations\`, \`business\`, \`personal_development\`, \`maintenance\`, \`system\`, \`general\`.
+**Goal types:** `coding`, `learning`, `research`, `design`, `creative`, `operations`, `business`, `personal_development`, `maintenance`, `system`, `general`.
 
-**Task types:** \`implementation\`, \`investigation\`, \`research\`, \`design\`, \`learning\`, \`verification\`, \`documentation\`, \`maintenance\`, \`operations\`, \`review\`, \`general\`.
+**Task types:** `implementation`, `investigation`, `research`, `design`, `learning`, `verification`, `documentation`, `maintenance`, `operations`, `review`, `general`.
 
-**Target types:** \`repository\`, \`person\`, \`application\`, \`service\`, \`database\`, \`workspace\`, \`document\`, \`organization\`, \`system\`, \`device\`, \`general\`.
+**Target types:** `repository`, `person`, `application`, `service`, `database`, `workspace`, `document`, `organization`, `system`, `device`, `general`.
 
-These vocabularies are defined in \`schemas/ontology.ts\` and enforced by the database for canonical Omni Loop creation.
+These vocabularies are defined in `schemas/ontology.ts` and enforced by the database for canonical Omni Loop creation.
 
 ## Goal anatomy
 
-\`\`\`text
+```text
 Goal
 ├── type
 ├── target                         ← exactly one
@@ -62,19 +62,19 @@ Goal
     ├── observation
     ├── evaluation
     └── revisionPolicy
-\`\`\`
+```
 
 Goal completion means the target produces the expected outputs for the declared inputs and all persisted verification gates pass.
 
 ## Task anatomy
 
-\`\`\`text
+```text
 Task
 ├── type
 ├── target = parent target       ← immutable constraint
 ├── acceptanceCriteria[]
 └── omniLoop
-\`\`\`
+```
 
 Nested tasks may refine execution but may never retarget the work.
 
@@ -82,7 +82,7 @@ Nested tasks may refine execution but may never retarget the work.
 
 A Vision is the planning container above goals:
 
-\`\`\`text
+```text
 Vision
 └── one target
     │
@@ -95,7 +95,7 @@ Vision
     └── component target B
         └── Goal B1
             └── Tasks...
-\`\`\`
+```
 
 The database stores the vision, component-target graph, goal links, and tldraw identifiers. The tldraw skill owns creation of the external board and its pages.
 

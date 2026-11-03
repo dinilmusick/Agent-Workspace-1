@@ -112,3 +112,21 @@ When creating a Vision:
 7. Persist the board/workspace/page identifiers in Supabase.
 8. Reflect goal/task status from Supabase onto the relevant target page.
 9. Keep the visual board as a projection of Supabase state; Supabase remains the source of truth.
+
+## Universal decomposition invariant
+
+The planning architecture is domain-independent. The 1–4 action limit applies to **every task type**, not just implementation or coding: investigation, research, design, learning, verification, documentation, maintenance, operations, review and general work are subject to the same decomposition boundary. Each substantive task also carries a domain-appropriate `general_pattern`.
+
+The canonical representation is:
+
+```text
+Vision → Target(s) → Goal(s) → Task(s) → Omni Loop(s)
+```
+
+No substantive goal/task should be executed outside this representation. Coding-specific routers and workflows are specializations beneath the universal planning model.
+
+## Mandatory tldraw projection
+
+A persisted Vision must have a tldraw projection. The board is a visual projection, never a second source of truth. The projection must represent the Vision target, component targets, goals, tasks and relevant verification state. Changes to canonical Supabase state must be reflected on the board when the visual representation is used.
+
+Diagram quality is itself verified: inspect structured shapes plus the rendered canvas and correct overlap, crossing, ambiguity, unreadable labels, inconsistent spacing and missing relationships.

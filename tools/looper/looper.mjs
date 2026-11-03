@@ -38,6 +38,16 @@ if (!command || !first) fail(usage);
 if (command === "init") {
   const contract = await readJson(first);
   if (!contract.goal || !Array.isArray(contract.successCriteria) || !contract.successCriteria.length) fail("Contract requires goal and non-empty successCriteria.");
+  if (contract.loopKind === "omni") {
+    if (!contract.target || typeof contract.target !== "object" || Array.isArray(contract.target)) fail("Omni Loop requires a single target object.");
+    if (typeof contract.target.type !== "string" || typeof contract.target.id !== "string" || !contract.target.type.trim() || !contract.target.id.trim()) fail("Omni Loop target requires type and id.");
+    if (!Array.isArray(contract.edits) || contract.edits.length === 0) fail("Omni Loop requires at least one edit.");
+    for (const edit of contract.edits) {
+      if (!edit || typeof edit !== "object" || typeof edit.id !== "string" || typeof edit.description !== "string" || !("change" in edit)) fail("Every Omni Loop edit requires id, description and change.");
+    }
+    if (!contract.inputContract || typeof contract.inputContract !== "object") fail("Omni Loop requires inputContract.");
+    if (!contract.outputContract || typeof contract.outputContract !== "object") fail("Omni Loop requires outputContract.");
+  }
   const ids = contract.successCriteria.map((c) => c?.id);
   if (ids.some((id) => typeof id !== "string" || !id.trim()) || new Set(ids).size !== ids.length) fail("Every success criterion needs a unique non-empty string id.");
   const maxIterations = Number(contract.iterationPolicy?.maxIterations ?? contract.maxIterations ?? 8);
@@ -45,7 +55,7 @@ if (command === "init") {
   if (!Number.isInteger(maxIterations) || maxIterations < 1 || maxIterations > 100) fail("maxIterations must be an integer from 1 to 100.");
   if (!Number.isInteger(repeatedFailureThreshold) || repeatedFailureThreshold < 1 || repeatedFailureThreshold > 10) fail("repeatedFailureThreshold must be an integer from 1 to 10.");
   const state = {
-    schemaVersion: 1, loopId: contract.loopId ?? randomUUID(), goal: contract.goal,
+    schemaVersion: 1, loopId: contract.loopId ?? randomUUID(), loopKind: contract.loopKind ?? "standard", target: contract.target ?? null, edits: Array.isArray(contract.edits) ? contract.edits : [], goal: contract.goal,
     inputContract: contract.inputContract ?? null, outputContract: contract.outputContract ?? null,
     tools: Array.isArray(contract.tools) ? contract.tools : [], successCriteria: contract.successCriteria,
     iterationPolicy: { maxIterations, repeatedFailureThreshold }, iteration: 0, status: "ready",
@@ -66,6 +76,10 @@ if (command === "init") {
   if (!["continue", "pass", "error", "blocked", "cancelled"].includes(verdict)) fail("verdict must be continue, pass, error, blocked, or cancelled.");
   const input = result.input ?? state.currentInput;
   validateShape(state.inputContract, input, "input");
+  if (state.loopKind === "omni") {
+    if (!input || typeof input !== "object" || Array.isArray(input) || !input.edit) fail("Omni Loop iteration input must contain an edit.");
+    if (typeof input.edit.id !== "string" || !state.edits.some((edit) => edit.id === input.edit.id)) fail("Omni Loop iteration references an unknown edit.");
+  }
   validateShape(state.outputContract, result.output, "output");
   const criterionResults = Array.isArray(result.criterionResults) ? result.criterionResults : [];
   const validStatuses = new Set(["satisfied", "unsatisfied", "unknown"]);

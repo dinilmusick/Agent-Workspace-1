@@ -2,23 +2,136 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Agentic Workspace Omni Loop",
   "type": "object",
-  "required": ["kind","target","objective","edits","input_contract","output_contract","transformation","observation","evaluation","revision_policy","stop_conditions","initial_input","tools","iteration_policy","max_iterations"],
+  "required": [
+    "kind",
+    "target",
+    "objective",
+    "edits",
+    "actions",
+    "input_contract",
+    "output_contract",
+    "transformation",
+    "observation",
+    "evaluation",
+    "revision_policy",
+    "stop_conditions",
+    "initial_input",
+    "tools",
+    "iteration_policy",
+    "max_iterations",
+    "general_pattern"
+  ],
   "properties": {
-    "kind": {"const": "omni"},
-    "target": {"type":"object","required":["type","id"],"properties":{"type":{"enum":["repository","person","application","service","database","workspace","document","organization","system","device","general"]},"id":{"type":"string","minLength":1},"label":{"type":"string"},"uri":{"type":"string"},"metadata":{"type":"object"}}},
-    "objective": {"type":"string","minLength":1},
-    "edits": {"type":"array","minItems":1,"items":{"type":"object","required":["id","description","change"]}},
-    "input_contract": {"type":"object"},
-    "output_contract": {"type":"object"},
-    "transformation": {"type":"string","minLength":1},
-    "observation": {"type":"object"},
-    "evaluation": {"type":"object"},
-    "revision_policy": {"type":"object"},
-    "stop_conditions": {"type":"array","minItems":1,"items":{"type":"string"}},
+    "kind": {
+      "const": "omni"
+    },
+    "target": {
+      "type": "object",
+      "required": [
+        "type",
+        "id"
+      ],
+      "properties": {
+        "type": {
+          "enum": [
+            "repository",
+            "person",
+            "application",
+            "service",
+            "database",
+            "workspace",
+            "document",
+            "organization",
+            "system",
+            "device",
+            "general"
+          ]
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "label": {
+          "type": "string"
+        },
+        "uri": {
+          "type": "string"
+        },
+        "metadata": {
+          "type": "object"
+        }
+      }
+    },
+    "objective": {
+      "type": "string",
+      "minLength": 1
+    },
+    "edits": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "description",
+          "change"
+        ]
+      }
+    },
+    "input_contract": {
+      "type": "object"
+    },
+    "output_contract": {
+      "type": "object"
+    },
+    "transformation": {
+      "type": "string",
+      "minLength": 1
+    },
+    "observation": {
+      "type": "object"
+    },
+    "evaluation": {
+      "type": "object"
+    },
+    "revision_policy": {
+      "type": "object"
+    },
+    "stop_conditions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      }
+    },
     "initial_input": {},
-    "tools": {"type":"array","items":{"type":"string"}},
-    "iteration_policy": {"type":"object"},
-    "max_iterations": {"type":"integer","minimum":1,"maximum":100}
+    "tools": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "iteration_policy": {
+      "type": "object"
+    },
+    "max_iterations": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100
+    },
+    "actions": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 4,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "general_pattern": {
+      "type": "string",
+      "minLength": 1
+    }
   },
   "additionalProperties": true
 }

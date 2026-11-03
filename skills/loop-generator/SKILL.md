@@ -16,7 +16,7 @@ tools:
 # Loop Generator
 
 ## Purpose
-Convert a user's goal into a persistent, evidence-driven execution loop. Continue acting, observing, comparing, diagnosing and iterating until success conditions are verified, or a genuine blocker, safety boundary, permission boundary or user decision prevents progress.
+Convert any user's actionable objective into a persistent, evidence-driven Vision → Goal → Task → Omni Loop execution structure. Continue acting, observing, comparing, diagnosing and iterating until success conditions are verified, or a genuine blocker, safety boundary, permission boundary or user decision prevents progress.
 
 ## Activation
 Activate for explicit requests such as "loop on this goal", "keep iterating until it works" or "continue until complete", and when an orchestrator identifies a goal that genuinely requires repeated action and verification. Do not turn ordinary requests into indefinite loops.
@@ -31,7 +31,7 @@ Activate for explicit requests such as "loop on this goal", "keep iterating unti
 7. Repeat until verified completion or a valid stop condition.
 
 ## Goal and loop definition
-Represent the goal with goalId, description, domain, scope, constraints, permissions, successCriteria, toolsRequired, toolsAvailable, dependencies, currentState, evidence, remainingWork, status, iteration and timestamps.
+Represent every actionable objective with a Vision reference when applicable, goalId, description, type, target, scope, constraints, permissions, behaviorInputs, expectedOutputs, successCriteria, toolsRequired, toolsAvailable, dependencies, currentState, evidence, remainingWork, status, iteration and timestamps. Planning is domain-independent.
 
 Represent each loop with:
 - inputContract: the state or artifact supplied to an iteration.
@@ -80,6 +80,11 @@ Respect scope, authorization, budgets, deadlines, rate limits and platform polic
 
 ## Completion and handoff
 Declare completion only when every required criterion has supporting evidence. Report changes, checks, actual results and limitations. Persist enough state for another agent to resume; never persist secrets. If blocked, state the exact blocker, evidence and one required user action. Continue independent work where possible.
+
+## Mandatory planning representation
+Before execution of any substantive actionable goal, persist the planning representation:
+Vision → target/component targets → goals → tasks → Omni Loops.
+The representation is canonical in Supabase. When a Vision exists, its tldraw projection is mandatory and must mirror the persisted structure. Every goal and task must have a closed-vocabulary type, exactly one target, acceptance criteria and a complete Omni Loop contract. Every task must contain 1–4 actions; this applies to every domain, not only coding.
 
 ## Hierarchical loops: goal loop and task loops
 

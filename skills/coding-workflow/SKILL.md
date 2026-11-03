@@ -50,3 +50,13 @@ Use for substantive software implementation spanning more than a trivial edit.
   "source_repository": "obra/superpowers"
 }
 ```
+
+
+## Required task shape
+Before implementation, ensure the persisted task has 1–4 explicit `actions`. If more than four actions are needed, stop decomposition at four and create additional tasks rather than expanding the current task.
+
+## General pattern visibility
+For substantive coding work, define and report a `general_pattern` before editing. Use a compact conceptual flow such as `input → validate → transform → persist → verify`. Progress reports should state the pattern and which action is currently executing.
+
+## Coding-skill gate
+Coding Workflow is reached through Coding Router. The router and selected specialist must be resolved before implementation begins. Verify at the observable layer after implementation.

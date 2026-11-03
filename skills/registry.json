@@ -11,7 +11,7 @@
     ],
     "exportedAt": "2026-11-03T00:00:00.000Z"
   },
-  "count": 31,
+  "count": 33,
   "skills": [
     {
       "id": 1,
@@ -311,6 +311,24 @@
       "version": "1.0.0",
       "status": "active",
       "path": "skills/cooking-culinary-skills/SKILL.md",
+      "tools": []
+    },
+    {
+      "id": 34,
+      "name": "Semantic Resource Resolution",
+      "slug": "semantic-resource-resolution",
+      "version": "1.0.0",
+      "status": "active",
+      "path": "skills/semantic-resource-resolution/SKILL.md",
+      "tools": []
+    },
+    {
+      "id": 35,
+      "name": "Obstacle Memory Management",
+      "slug": "obstacle-memory-management",
+      "version": "1.0.0",
+      "status": "active",
+      "path": "skills/obstacle-memory-management/SKILL.md",
       "tools": []
     },
     {

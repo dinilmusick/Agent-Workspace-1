@@ -11,7 +11,7 @@
     ],
     "exportedAt": "2026-11-03T00:00:00.000Z"
   },
-  "count": 29,
+  "count": 31,
   "skills": [
     {
       "id": 1,
@@ -312,8 +312,26 @@
       "status": "active",
       "path": "skills/cooking-culinary-skills/SKILL.md",
       "tools": []
+    },
+    {
+      "id": 36,
+      "name": "Diagram Engineering",
+      "slug": "diagram-engineering",
+      "version": "1.0.0",
+      "status": "active",
+      "path": "skills/diagram-engineering/SKILL.md",
+      "tools": []
+    },
+    {
+      "id": 37,
+      "name": "tldraw Agent",
+      "slug": "tldraw-agent",
+      "version": "1.0.0",
+      "status": "active",
+      "path": "skills/tldraw-agent/SKILL.md",
+      "tools": []
     }
   ],
   "toolBindingsPath": "skills/tool-bindings.json",
-  "exportedAt": "2026-11-03"
+  "exportedAt": "2026-11-03T00:00:00.000Z"
 }

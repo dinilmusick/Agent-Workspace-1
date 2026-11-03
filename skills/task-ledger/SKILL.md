@@ -152,3 +152,23 @@ New task keys use `task-<descriptive-kebab-case>-<8-hex-suffix>`, generated atom
 ### Resolve the readable task key after insertion
 
 `task_ledger_create_tree` returns an internal UUID, not the public task key. Immediately query `SELECT task_key FROM public.tasks WHERE id = <returned UUID>` through the trusted Supabase SQL connector. Show only that database-generated key; keep UUIDs internal. For hierarchical goal creation, inspect returned task objects or query their IDs for `task_key`. Never derive the key from the title yourself.
+
+
+## Four-action task law
+Every newly created task must declare `actions` as a JSON array containing 1–4 concrete actions. A task requiring more than four actions must be split into additional tasks. This limit is enforced by the canonical `task_ledger_create_tree` / hierarchical goal validation boundary. Existing historical tasks are preserved unchanged.
+
+### Task-definition pattern
+```json
+{
+  "name": "Implement one coherent outcome",
+  "general_pattern": "input → validate → transform → persist → verify",
+  "actions": [
+    "Inspect the existing implementation",
+    "Implement the smallest coherent change",
+    "Add targeted verification",
+    "Run and record the relevant checks"
+  ]
+}
+```
+
+The `general_pattern` is mandatory for substantive coding tasks and must be surfaced in user-facing progress/result reporting.

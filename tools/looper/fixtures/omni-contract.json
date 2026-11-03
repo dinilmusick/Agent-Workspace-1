@@ -1,0 +1,68 @@
+{
+  "loopId": "fixture-omni-loop",
+  "loopKind": "omni",
+  "goal": "Change a repository so a declared behavior is observed",
+  "target": {
+    "type": "repository",
+    "id": "example/repository"
+  },
+  "objective": "Make the target produce the expected behavior",
+  "edits": [
+    {
+      "id": "edit-1",
+      "description": "Apply one bounded code change",
+      "change": {
+        "files": [
+          "src/example.ts"
+        ]
+      }
+    }
+  ],
+  "inputContract": {
+    "type": "object",
+    "required": [
+      "edit"
+    ]
+  },
+  "outputContract": {
+    "type": "object",
+    "required": [
+      "behavior"
+    ]
+  },
+  "transformation": "Apply edit to target",
+  "observation": {
+    "method": "run verification"
+  },
+  "evaluation": {
+    "criteria": "compare observed behavior to expected behavior"
+  },
+  "revisionPolicy": {
+    "next": "select the next smallest edit"
+  },
+  "stopConditions": [
+    "verified success",
+    "genuine blocker",
+    "budget exhausted"
+  ],
+  "initialInput": {
+    "edit": {
+      "id": "edit-1"
+    }
+  },
+  "successCriteria": [
+    {
+      "id": "behavior-correct",
+      "required": true
+    }
+  ],
+  "tools": [
+    "github",
+    "tests"
+  ],
+  "iterationPolicy": {
+    "maxIterations": 4,
+    "repeatedFailureThreshold": 2
+  },
+  "maxIterations": 4
+}

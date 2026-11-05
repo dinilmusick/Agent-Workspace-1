@@ -11,7 +11,7 @@
     ],
     "exportedAt": "2026-11-05T00:00:00.000Z"
   },
-  "count": 35,
+  "count": 36,
   "skills": [
     {
       "id": 1,
@@ -104,7 +104,7 @@
       "slug": "devops-ci-release",
       "tools": [],
       "status": "active",
-      "version": "1.0.4"
+      "version": "1.0.5"
     },
     {
       "id": 10,
@@ -324,7 +324,7 @@
       "slug": "coding-router",
       "tools": [],
       "status": "active",
-      "version": "1.2.5"
+      "version": "1.2.6"
     },
     {
       "id": 18,
@@ -388,7 +388,7 @@
         }
       ],
       "status": "active",
-      "version": "1.0.4"
+      "version": "1.0.5"
     },
     {
       "id": 21,
@@ -415,7 +415,7 @@
       "slug": "agent-systems-engineering",
       "tools": [],
       "status": "active",
-      "version": "1.0.2"
+      "version": "1.0.3"
     },
     {
       "id": 24,
@@ -541,7 +541,7 @@
       "slug": "universal-task-router",
       "tools": [],
       "status": "active",
-      "version": "1.4.4"
+      "version": "1.4.5"
     },
     {
       "id": 29,
@@ -611,7 +611,7 @@
         }
       ],
       "status": "active",
-      "version": "1.0.2"
+      "version": "1.0.3"
     },
     {
       "id": 34,
@@ -664,6 +664,22 @@
       ],
       "status": "active",
       "version": "1.0.0"
+    },
+    {
+      "id": 40,
+      "name": "GitHub Development Workspace",
+      "slug": "github-development-workspace",
+      "version": "1.0.0",
+      "status": "active",
+      "path": "skills/github-development-workspace/SKILL.md",
+      "tools": [
+        {
+          "slug": "github",
+          "type": "connector",
+          "required": true,
+          "usage": "Create repositories, dispatch development/scaffold workflows, inspect Actions evidence."
+        }
+      ]
     }
   ],
   "exportedAt": "2026-11-05T00:00:00.000Z"

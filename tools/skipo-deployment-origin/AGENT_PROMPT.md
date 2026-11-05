@@ -332,3 +332,6 @@ Return:
 - independent verification evidence
 - remaining external configuration, if any
 - obstacles encountered and their resolutions
+
+
+<!-- validation gate: APP_URL ecosystem reconciliation -->

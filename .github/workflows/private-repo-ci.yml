@@ -49,6 +49,17 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.PRIVATE_REPO_TOKEN }}
         run: bash tools/private-repo-ci/clone-private-repo.sh
 
+      - name: Validate target workflows
+        run: |
+          set -euo pipefail
+          repo="${TARGET_REPOSITORY#https://github.com/}"
+          repo="${repo#git@github.com:}"
+          repo="${repo%.git}"
+          owner="${repo%%/*}"
+          name="${repo#*/}"
+          export CLONED_REPO="${CLONE_ROOT}/${owner}__${name}"
+          bash tools/private-repo-ci/validate-workflows.sh
+
       - name: Execute target repository workflows
         env:
           ACT_BIN: act

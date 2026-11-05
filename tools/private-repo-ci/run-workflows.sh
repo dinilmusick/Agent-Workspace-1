@@ -24,7 +24,7 @@ fi
 run_one() {
   local wf="$1"
   echo "::group::CI workflow $wf"
-  "$ACT_BIN" "$EVENT" -W "$wf" --artifact-server-path /tmp/agent-workspace-artifacts
+  "$ACT_BIN" "$EVENT" -W "$wf" --artifact-server-path /tmp/agent-workspace-artifacts "${ACT_SECRET_ARGS[@]}"
   echo "::endgroup::"
 }
 

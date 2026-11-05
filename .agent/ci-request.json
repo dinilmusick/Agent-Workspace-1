@@ -3,6 +3,6 @@
   "ref": "main",
   "event": "push",
   "workflow": "ci.yml",
-  "token_mode": "workflow",
-  "request_id": "loky-architecture-hardening-2026-11-06-r7"
+  "token_mode": "clone-only",
+  "request_id": "loky-architectural-audit-2026-11-06-1"
 }

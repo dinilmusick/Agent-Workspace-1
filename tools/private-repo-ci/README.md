@@ -64,3 +64,23 @@ The configured secret should have only the minimum read access needed by the tar
 Local agents may invoke the scripts directly. Public Agent-Workspace-1 CI uses the same scripts.
 
 The runner intentionally executes the cloned workflow definitions rather than copying them into the workspace repository's workflow directory. This preserves the target workflow logic while using the public repository's runner for compute.
+
+
+## Generic workflow runner
+
+The reusable workflow `.github/workflows/private-repo-ci.yml` is manually dispatchable for any private repository the configured token can read.
+
+Inputs:
+
+- `repository`: `owner/name`
+- `ref`: branch, tag, or commit; empty uses the default branch
+- `event`: GitHub Actions event to emulate with `act`
+- `workflow`: optional workflow filename; empty runs every target workflow
+- `token_mode`: `workflow` passes the read-only repository token to `act` as `GITHUB_TOKEN` so normal `actions/checkout` steps can authenticate; `clone-only` keeps the token out of target workflows
+
+Use `workflow` mode only for repositories and workflow definitions that are trusted. Executing untrusted checked-out code with a credential can expose that credential. The configured token should therefore be fine-grained, read-only, and limited to the private repositories this runner is intended to verify.
+
+The runner validates the target workflow definitions, clones the requested ref, runs the target workflow definitions with pinned `act`, records an Actions summary/artifacts, and unconditionally removes the private clone.
+
+The target workflow files are never copied into Agent-Workspace-1's workflow directory.
+

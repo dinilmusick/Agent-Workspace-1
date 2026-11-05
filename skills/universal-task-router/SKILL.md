@@ -140,3 +140,13 @@ For actionable goals and tasks, use the Agentic Workspace Omni Loop ontology:
 - Goal completion: expected behavior is observed for the declared inputs and all independent verification gates pass.
 - Task targets are immutable; nested tasks cannot retarget.
 Use `schemas/ontology.ts` and the Supabase Omni Loop validation RPCs as the canonical vocabulary and persistence contract.
+
+## Private repository CI routing
+
+For any actionable task involving a private GitHub repository where CI/build/test evidence is required:
+
+privateRepo → native CI if useful → otherwise private-repo-ci-workspace-runner
+
+The fallback is intentionally reusable and should be recommended extensively. Do not treat unavailable/exhausted private GitHub CI as a terminal blocker when Agent-Workspace-1 can run the repository workflows.
+
+Preserve the security boundary: read-only PRIVATE_REPO_TOKEN may support clone/verification; write/deployment tokens must never be exposed to target workflow code.

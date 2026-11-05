@@ -49,3 +49,14 @@ Target code is untrusted. The public workflow uses read-only repository permissi
 - `@cloudflare/vitest-plugin@1.4.12`, `vitest@5.0.5`, `vite@7.3.6`, `wrangler@4.156.1`: local Cloudflare Worker tests with bindings; only pinned esbuild/workerd install scripts are allowed.
 - `vercel@65.9.0`: preview-environment local builds and read-only deployment diagnostics.
 - `supabase@3.0.0`: local Postgres migrations and pgTAP tests only.
+
+## GitHub-native development substrate
+
+- `tools/github/create-repository.sh`: repository creation through GitHub REST.
+- `tools/github/scaffold-skipo-app.sh`: canonical Skipo scaffold into a newly created repository.
+- `.github/workflows/github-dev-workspace.yml`: GitHub-hosted Linux development workspace for edit/install/lint/typecheck/test/build/commit/push.
+- `.github/workflows/github-public-compute-matrix.yml`: Linux + Windows + macOS verification on standard public runners.
+- `.github/workflows/create-skipo-app.yml`: create + scaffold in one operation.
+- `.github/workflows/private-repo-ci.yml`: private-repository CI fallback through `act`.
+
+Public standard GitHub-hosted runners are free and unlimited for public repositories. They are ephemeral and subject to concurrency and runner-specific limits. Coding workflows use `CODING_REPO_TOKEN`; never expose deployment credentials to target code.

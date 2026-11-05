@@ -10,6 +10,7 @@ on:
 
 permissions:
   contents: read
+  issues: write
 
 jobs:
   validate:
@@ -38,7 +39,29 @@ jobs:
           done
 
       - name: Run deterministic ecosystem validator
-        run: node tools/skipo-deployment-origin/validate.mjs "${{ github.workspace }}"
+        id: validator
+        continue-on-error: true
+        run: |
+          set +e
+          node tools/skipo-deployment-origin/validate.mjs "${{ github.workspace }}" 2>&1 | tee /tmp/validation.txt
+          status=${PIPESTATUS[0]}
+          echo "status=$status" >> /tmp/validation.txt
+          exit "$status"
+
+      - name: Publish validation evidence
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          {
+            echo "## Run ${{ github.run_id }}"
+            echo
+            echo 'VALIDATION_OUTPUT_BEGIN'
+            cat /tmp/validation.txt
+            echo 'VALIDATION_OUTPUT_END'
+          } > /tmp/comment.md
+          gh issue comment 46 --repo "${{ github.repository }}" --body-file /tmp/comment.md
+          test "${{ steps.validator.outcome }}" = "success"
 
       - name: Cleanup clones
         if: always()

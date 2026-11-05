@@ -1,0 +1,45 @@
+name: Skipo Deployment Origin Ecosystem Validation
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "tools/skipo-deployment-origin/**"
+      - ".github/workflows/validate-skipo-deployment-origin.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      PRIVATE_REPO_TOKEN: ${{ secrets.PRIVATE_REPO_TOKEN }}
+      CLONE_ROOT: ${{ github.workspace }}/clones
+    steps:
+      - name: Checkout Agent Workspace
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+
+      - name: Clone canonical ecosystem repositories
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$CLONE_ROOT"
+          repos=(
+            Skipo GutTS Kloks Luth Aiko Depm-Engine Qwnsr-Engine
+            DocuStack-Engine Srkl-Engine Fod-Engine Theta-Engine Kult-Engine Kelt-Engine
+          )
+          for repo in "${repos[@]}"; do
+            git clone --depth=1 "https://x-access-token:${PRIVATE_REPO_TOKEN}@github.com/dinilmusick/${repo}.git" "${CLONE_ROOT}/dinilmusick__${repo}"
+          done
+
+      - name: Run deterministic ecosystem validator
+        run: node tools/skipo-deployment-origin/validate.mjs "${{ github.workspace }}"
+
+      - name: Cleanup clones
+        if: always()
+        run: rm -rf "$CLONE_ROOT"

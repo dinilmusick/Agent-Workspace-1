@@ -4,9 +4,6 @@
  *
  * Usage:
  *   node tools/skipo-deployment-origin/validate.mjs <workspace-root>
- *
- * <workspace-root> must contain repositories either directly by name
- * (Luth, Skipo, GutTS, ...) or under clones/dinilmusick__<Repo>.
  */
 
 import fs from 'node:fs';
@@ -18,14 +15,14 @@ const repos = [
   'Skipo','GutTS','Kloks','Luth','Aiko','Depm-Engine','Qwnsr-Engine',
   'DocuStack-Engine','Srkl-Engine','Fod-Engine','Theta-Engine','Kult-Engine','Kelt-Engine',
 ];
+const sourceExtensions = new Set(['.ts','.tsx','.js','.jsx','.mjs','.cjs','.json','.jsonc','.toml','.yaml','.yml','.md']);
 
 function locate(repo) {
-  const candidates = [
+  return [
     path.join(root, repo),
     path.join(root, 'clones', `dinilmusick__${repo}`),
     path.join(root, 'clones', repo),
-  ];
-  return candidates.find((p) => fs.existsSync(p));
+  ].find((p) => fs.existsSync(p));
 }
 
 function read(repo, file) {
@@ -33,6 +30,21 @@ function read(repo, file) {
   if (!base) return '';
   const p = path.join(base, file);
   return fs.existsSync(p) ? fs.readFileSync(p, 'utf8') : '';
+}
+
+function walk(base) {
+  const files = [];
+  if (!base) return files;
+  const visit = (dir) => {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      if (['node_modules','.git','dist','build','.next','coverage','.aistudio'].includes(entry.name)) continue;
+      const target = path.join(dir, entry.name);
+      if (entry.isDirectory()) visit(target);
+      else if (sourceExtensions.has(path.extname(entry.name).toLowerCase())) files.push(target);
+    }
+  };
+  visit(base);
+  return files;
 }
 
 function requireText(repo, file, needle, label) {
@@ -45,34 +57,65 @@ function forbidText(repo, file, needle, label) {
   if (content.includes(needle)) failures.push(`${repo}/${file}: forbidden ${label || needle}`);
 }
 
+function requireAnywhere(repo, needle, label) {
+  const base = locate(repo);
+  if (!base) return;
+  const found = walk(base).some((file) => fs.readFileSync(file, 'utf8').includes(needle));
+  if (!found) failures.push(`${repo}: missing ${label || needle} in repository`);
+}
+
+function forbidAnywhere(repo, needle, label) {
+  const base = locate(repo);
+  if (!base) return;
+  for (const file of walk(base)) {
+    if (fs.readFileSync(file, 'utf8').includes(needle)) {
+      failures.push(`${repo}/${path.relative(base, file)}: forbidden ${label || needle}`);
+    }
+  }
+}
+
 const failures = [];
 const missing = [];
 
 for (const repo of repos) if (!locate(repo)) missing.push(repo);
 
-requireText('Skipo','scaffolds/nextjs/.env.example','APP_URL','APP_URL');
-requireText('Skipo','scaffolds/vite/.env.example','APP_URL','APP_URL');
-requireText('Skipo','scaffolds/nextjs/src/config/env.ts','APP_URL','typed APP_URL');
-requireText('Skipo','scaffolds/vite/src/config/env.ts','APP_URL','typed APP_URL');
+// Canonical Skipo scaffold contract.
+requireText('Skipo','scaffolds/nextjs/.env.example','APP_URL','Next.js APP_URL');
+requireText('Skipo','scaffolds/vite/.env.example','APP_URL','Vite APP_URL');
+requireText('Skipo','scaffolds/nextjs/src/config/env.ts','APP_URL','Next.js typed APP_URL');
+requireText('Skipo','scaffolds/vite/src/config/env.ts','APP_URL','Vite typed APP_URL');
+for (const variant of ['nextjs','vite']) {
+  const client = read('Skipo',`scaffolds/${variant}/src/libraries/client/luthAuthClient.ts`);
+  if (client.includes('origin: typeof window')) failures.push(`Skipo/${variant}: browser-only origin discovery remains in scaffold client`);
+}
 
-requireText('GutTS','src/auth/luthAuthClient.ts','APP_URL','non-browser APP_URL fallback');
-requireText('GutTS','tests/luthAuthClient.test.ts','APP_URL','APP_URL test coverage');
+// Canonical GutTS resolver.
+requireText('GutTS','src/auth/luthAuthClient.ts','resolveRuntimeAppUrl','runtime APP_URL resolver');
+requireText('GutTS','src/auth/luthAuthClient.ts','process?.env?.APP_URL','APP_URL runtime environment');
+requireText('GutTS','src/auth/luthAuthClient.ts','APPLICATION_ORIGIN_UNAVAILABLE','observable missing-origin failure');
+requireText('GutTS','tests/luthAuthClient.test.ts','uses APP_URL when no browser exists','non-browser APP_URL test');
 
+// Luth authority.
 requireText('Luth','src/backend/types.ts','APP_URL','Luth APP_URL binding');
-requireText('Luth','src/backend/auth/betterAuth.ts','baseURL','Better Auth baseURL');
-requireText('Luth','wrangler.jsonc','APP_URL','Cloudflare APP_URL binding');
+requireText('Luth','src/backend/auth/betterAuth.ts','getLuthBaseUrl','canonical APP_URL baseURL resolver');
+requireText('Luth','src/backend/auth/betterAuth.ts','baseURL: normalizedBaseUrl','Better Auth baseURL');
+requireText('Luth','wrangler.jsonc','"APP_URL"','Cloudflare APP_URL binding');
+for (const legacy of ['BETTER_AUTH_URL','BETTER_AUTH_SECRET','GOOGLE_CLIENT_ID','GOOGLE_CLIENT_SECRET','LUTH_ALLOWED_ORIGINS']) {
+  forbidAnywhere('Luth',legacy,`legacy runtime authority ${legacy}`);
+}
 
-forbidText('Luth','src/backend/auth/betterAuth.ts','BETTER_AUTH_URL','legacy Better Auth URL authority');
-forbidText('Luth','src/backend/auth/betterAuth.ts','BETTER_AUTH_SECRET','legacy Better Auth secret authority');
-forbidText('Luth','src/backend/auth/betterAuth.ts','GOOGLE_CLIENT_ID','legacy Google credential authority');
-forbidText('Luth','src/backend/auth/betterAuth.ts','GOOGLE_CLIENT_SECRET','legacy Google credential authority');
+// DEPM migration.
+requireText('Depm-Engine','.env.example','APP_URL','DEPM APP_URL');
+requireText('Depm-Engine','wrangler.toml','APP_URL','DEPM APP_URL binding');
+forbidAnywhere('Depm-Engine','DEPM_GATEWAY_DOMAIN','legacy DEPM gateway variable');
+forbidAnywhere('Srkl-Engine','SRKL_PUBLIC_URL','legacy SRKL deployment variable');
 
-requireText('Depm-Engine','.env.example','APP_URL','APP_URL');
-forbidText('Depm-Engine','.env.example','DEPM_GATEWAY_DOMAIN','legacy gateway variable');
-forbidText('Depm-Engine','wrangler.toml','DEPM_GATEWAY_DOMAIN','legacy gateway variable');
-
+// Every client repository must carry APP_URL and no Luth URL as its application origin.
 for (const repo of repos.filter((r) => !['Skipo','GutTS','Kloks','Luth'].includes(r))) {
-  requireText(repo,'.env.example','APP_URL','APP_URL');
+  requireAnywhere(repo,'APP_URL','APP_URL contract');
+}
+for (const repo of ['Aiko','Qwnsr-Engine','DocuStack-Engine','Srkl-Engine','Fod-Engine','Theta-Engine','Kult-Engine','Kelt-Engine']) {
+  forbidAnywhere(repo,'origin: baseUrl','Luth authority incorrectly used as application origin');
 }
 
 const result = {

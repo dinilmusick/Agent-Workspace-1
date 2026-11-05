@@ -5,9 +5,9 @@
   "versions": {
     "loop-generator": "1.2.1",
     "task-ledger": "1.9.0",
-    "coding-router": "1.2.3",
+    "coding-router": "1.2.4",
     "coding-workflow": "1.0.3",
-    "universal-task-router": "1.4.2",
-    "devops-ci-release": "1.0.2"
+    "universal-task-router": "1.4.3",
+    "devops-ci-release": "1.0.3"
   }
 }

@@ -30,6 +30,10 @@ on:
           - workflow
           - clone-only
 
+  push:
+    paths:
+      - ".agent/private-repo-ci-request.json"
+
 permissions:
   contents: read
 
@@ -38,10 +42,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
-      TARGET_REPOSITORY: ${{ inputs.repository }}
-      TARGET_REF: ${{ inputs.ref }}
-      CI_EVENT: ${{ inputs.event }}
-      CI_WORKFLOW: ${{ inputs.workflow }}
       CLONE_ROOT: ${{ github.workspace }}/clones
       PRIVATE_REPO_TOKEN: ${{ secrets.PRIVATE_REPO_TOKEN }}
     steps:
@@ -49,6 +49,52 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           persist-credentials: false
+
+      - name: Load CI request
+        shell: bash
+        env:
+          REQUEST_REPOSITORY: ${{ inputs.repository }}
+          REQUEST_REF: ${{ inputs.ref }}
+          REQUEST_EVENT: ${{ inputs.event }}
+          REQUEST_WORKFLOW: ${{ inputs.workflow }}
+          REQUEST_TOKEN_MODE: ${{ inputs.token_mode }}
+        run: |
+          set -euo pipefail
+
+          if [[ "${{ github.event_name }}" == "push" ]]; then
+            request=".agent/private-repo-ci-request.json"
+            test -f "$request"
+
+            repository="$(jq -er '.repository' "$request")"
+            ref="$(jq -er '.ref // ""' "$request")"
+            event="$(jq -er '.event // "push"' "$request")"
+            workflow="$(jq -er '.workflow // ""' "$request")"
+            token_mode="$(jq -er '.token_mode // "clone-only"' "$request")"
+          else
+            repository="$REQUEST_REPOSITORY"
+            ref="$REQUEST_REF"
+            event="$REQUEST_EVENT"
+            workflow="$REQUEST_WORKFLOW"
+            token_mode="$REQUEST_TOKEN_MODE"
+          fi
+
+          case "$repository" in
+            */*|https://github.com/*|git@github.com:*) ;;
+            *) echo "Invalid repository: $repository" >&2; exit 2 ;;
+          esac
+
+          case "$token_mode" in
+            clone-only|workflow) ;;
+            *) echo "Invalid token_mode: $token_mode" >&2; exit 2 ;;
+          esac
+
+          {
+            echo "TARGET_REPOSITORY=$repository"
+            echo "TARGET_REF=$ref"
+            echo "CI_EVENT=$event"
+            echo "CI_WORKFLOW=$workflow"
+            echo "TOKEN_MODE=$token_mode"
+          } >> "$GITHUB_ENV"
 
       - name: Install act
         shell: bash
@@ -75,9 +121,7 @@ jobs:
           bash tools/private-repo-ci/validate-workflows.sh
 
       - name: Execute target repository workflows
-        env:
-          ACT_BIN: act
-          ACT_GITHUB_TOKEN: ${{ inputs.token_mode == 'workflow' && secrets.PRIVATE_REPO_TOKEN || '' }}
+        shell: bash
         run: |
           set -euo pipefail
           repo="${TARGET_REPOSITORY#https://github.com/}"
@@ -86,6 +130,13 @@ jobs:
           owner="${repo%%/*}"
           name="${repo#*/}"
           export CLONED_REPO="${CLONE_ROOT}/${owner}__${name}"
+
+          if [[ "$TOKEN_MODE" == "workflow" ]]; then
+            export ACT_GITHUB_TOKEN="$PRIVATE_REPO_TOKEN"
+          else
+            unset ACT_GITHUB_TOKEN || true
+          fi
+
           bash tools/private-repo-ci/run-workflows.sh
 
       - name: Cleanup cloned repository

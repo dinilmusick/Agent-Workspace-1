@@ -60,11 +60,9 @@ jobs:
           REQUEST_TOKEN_MODE: ${{ inputs.token_mode }}
         run: |
           set -euo pipefail
-
           if [[ "${{ github.event_name }}" == "push" ]]; then
             request=".agent/private-repo-ci-request.json"
             test -f "$request"
-
             repository="$(jq -er '.repository' "$request")"
             ref="$(jq -er '.ref // ""' "$request")"
             event="$(jq -er '.event // "push"' "$request")"
@@ -77,17 +75,14 @@ jobs:
             workflow="$REQUEST_WORKFLOW"
             token_mode="$REQUEST_TOKEN_MODE"
           fi
-
           case "$repository" in
             */*|https://github.com/*|git@github.com:*) ;;
             *) echo "Invalid repository: $repository" >&2; exit 2 ;;
           esac
-
           case "$token_mode" in
             clone-only|workflow) ;;
             *) echo "Invalid token_mode: $token_mode" >&2; exit 2 ;;
           esac
-
           {
             echo "TARGET_REPOSITORY=$repository"
             echo "TARGET_REF=$ref"
@@ -101,7 +96,7 @@ jobs:
         run: |
           set -euo pipefail
           curl -fsSL https://github.com/nektos/act/releases/download/v0.2.89/act_Linux_x86_64.tar.gz -o /tmp/act.tar.gz
-          echo "0191d6f1b716ebff5a66de2b87e1e346893b02add0f16b92f560296b2151fc  /tmp/act.tar.gz" | sha256sum -c -
+          echo "0191d6f1f3b716b5c55820032605d05fc3c1cdbf581ebeff655019e5dd1524c0  /tmp/act.tar.gz" | sha256sum -c -
           tar -xzf /tmp/act.tar.gz -C /tmp act
           sudo install -m 0755 /tmp/act /usr/local/bin/act
           act --version
@@ -130,13 +125,11 @@ jobs:
           owner="${repo%%/*}"
           name="${repo#*/}"
           export CLONED_REPO="${CLONE_ROOT}/${owner}__${name}"
-
           if [[ "$TOKEN_MODE" == "workflow" ]]; then
             export ACT_GITHUB_TOKEN="$PRIVATE_REPO_TOKEN"
           else
             unset ACT_GITHUB_TOKEN || true
           fi
-
           bash tools/private-repo-ci/run-workflows.sh
 
       - name: Cleanup cloned repository

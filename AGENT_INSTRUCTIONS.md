@@ -16,4 +16,3 @@ ROUTE={coding:CodingRouter,skill*:SkillCreator,diagram:DiagramEngineering+tldraw
 OBSTACLE=semanticSearch→dedupe/update→occurrence(goal/task,evidence,resolution).
 WORKER=claim→heartbeat→execute→evidence→submit→independentVerify;FAIL→persist(reason+evidence+nextAction);RECLAIM>=60m.
 COMPLETE=NO unless evidence+verification+reconciliation.
-NO=syntheticRoot,secrets,unverifiedCompletion.

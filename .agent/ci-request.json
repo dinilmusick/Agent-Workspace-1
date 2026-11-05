@@ -3,6 +3,6 @@
   "ref": "main",
   "event": "push",
   "workflow": "",
-  "token_mode": "clone-only",
-  "request_id": "luth-private-ci-2026-11-05-4"
+  "token_mode": "workflow",
+  "request_id": "luth-private-ci-2026-11-05-5"
 }

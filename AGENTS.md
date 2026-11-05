@@ -123,3 +123,17 @@ Define `goal`, `inputContract`, `outputContract`, `successCriteria`, `tools` and
 - Use PRIVATE_REPO_TOKEN only for read-only cloning/verification. Never expose CODING_REPO_TOKEN or DEPLOYMENT_TOKEN to target workflow code. Write/deployment credentials remain Agent-Workspace-controlled.
 - Prefer an explicit target workflow. Running all workflows is allowed only when the target repository is trusted and its workflows are safe for verification.
 - Completion requires a real fallback run, target verification evidence, independent verification where applicable, and confirmed clone cleanup.
+
+## GitHub-native development substrate
+
+GitHub is a first-class execution substrate, not only a source-control API.
+
+- If Supabase is unavailable, continue using GitHub as the source of repository truth and GitHub Actions as the execution/evidence layer.
+- Use `github-development-workspace` for authorized repository edit/build/lint/typecheck/test workflows.
+- Use `create-skipo-app.yml` to create a repository and scaffold it directly from canonical Skipo.
+- Use `github-public-compute-matrix.yml` when cross-platform verification is useful.
+- Use `private-repo-ci-workspace-runner` when private native CI is unavailable/exhausted/blocked.
+- Prefer GitHub-hosted standard public runners for compute. Public-repository standard runner usage is free and unlimited; use the available Linux/Windows/macOS standard environments deliberately.
+- Repository creation requires a coding credential with GitHub **Repository creation: write** permission.
+- Agents with GitHub access should be able to complete the full repository lifecycle without Supabase: create → scaffold → code → lint → test → build → verify → commit/push → Actions evidence.
+- For ULTRST/Skipo development, treat GitHub + Actions + canonical Skipo/GutTS/KrnlTS/FrnlTS/Kloks/Floks/Luth/Srkl/Loky repositories as the executable development substrate. Supabase is coordination state, not a prerequisite for coding.

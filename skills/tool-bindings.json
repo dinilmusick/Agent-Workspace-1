@@ -184,7 +184,8 @@
         "debugging-root-cause",
         "devops-ci-release",
         "agent-systems-engineering",
-        "private-repo-ci-workspace-runner"
+        "private-repo-ci-workspace-runner",
+        "github-development-workspace"
       ]
     },
     {

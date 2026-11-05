@@ -80,6 +80,7 @@ const missing = [];
 for (const repo of repos) if (!locate(repo)) missing.push(repo);
 
 // Canonical Skipo scaffold contract.
+forbidAnywhere('Skipo','DEPM_GATEWAY_DOMAIN','legacy scaffold deployment variable');
 requireText('Skipo','scaffolds/nextjs/.env.example','APP_URL','Next.js APP_URL');
 requireText('Skipo','scaffolds/vite/.env.example','APP_URL','Vite APP_URL');
 requireText('Skipo','scaffolds/nextjs/src/config/env.ts','APP_URL','Next.js typed APP_URL');

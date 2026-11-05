@@ -44,3 +44,32 @@ The runner is ephemeral, has read-only repository permissions, does not persist 
 ## Repository safety
 
 This is a public repository. Never commit credentials, private source or personal data. GitHub-hosted compute is not a hardened hostile multi-tenant sandbox; do not use it to execute unknown users' code or process secrets.
+
+## GitHub-native development
+
+Agent Workspace can operate as a complete GitHub development substrate without Supabase.
+
+### Repository lifecycle
+
+```text
+create repository
+  -> Skipo scaffold
+  -> GitHub-hosted development workspace
+  -> edit/install/lint/typecheck/test/build
+  -> commit/push
+  -> GitHub Actions verification
+  -> artifacts/evidence
+```
+
+Use:
+
+- `.github/workflows/create-skipo-app.yml` — create a repository and scaffold canonical Skipo.
+- `.github/workflows/github-dev-workspace.yml` — edit/build/lint/test a target repository on GitHub-hosted compute.
+- `.github/workflows/github-public-compute-matrix.yml` — verify across standard Linux, Windows and macOS public runners.
+- `.github/workflows/private-repo-ci.yml` — execute private-repository workflows through Agent Workspace when native private CI is unavailable.
+- `skills/github-development-workspace/SKILL.md` — reusable agent instructions.
+- `tools/github/` — repository creation and Skipo scaffolding tools.
+
+GitHub Actions standard runners for public repositories are currently free and unlimited. Standard runner labels include Linux `ubuntu-latest`, Windows `windows-latest`, and macOS `macos-latest`; concurrency and runner-specific limits still apply. citeturn671976search1turn671976search14
+
+Supabase remains the coordination/state substrate when available, but it is not required for source development. An agent with GitHub access can perform repository creation, Skipo scaffolding, coding, verification and commits using GitHub alone.

@@ -1,0 +1,66 @@
+name: GitHub Public Compute Matrix
+
+on:
+  workflow_dispatch:
+    inputs:
+      repository:
+        description: "Target owner/name"
+        required: true
+        type: string
+      ref:
+        description: "Target branch/ref"
+        required: true
+        default: main
+        type: string
+      commands:
+        description: "Newline-separated verification commands"
+        required: true
+        type: string
+      oses:
+        description: "Comma-separated runner labels"
+        required: true
+        default: ubuntu-latest,windows-latest,macos-latest
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ${{ fromJSON(format('[{0}]', join(fromJSON(format('["{0}"]', inputs.oses)), '","'))) }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    env:
+      TARGET_REPOSITORY: ${{ inputs.repository }}
+      TARGET_REF: ${{ inputs.ref }}
+      COMMANDS: ${{ inputs.commands }}
+      CODING_REPO_TOKEN: ${{ secrets.CODING_REPO_TOKEN }}
+    steps:
+      - name: Checkout target
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af49 # v4.2.2
+        with:
+          repository: ${{ inputs.repository }}
+          ref: ${{ inputs.ref }}
+          token: ${{ secrets.CODING_REPO_TOKEN }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Prepare toolchain
+        shell: bash
+        run: |
+          set -euo pipefail
+          corepack enable || true
+          python3 --version || true
+          node --version || true
+          git status --short
+
+      - name: Verify
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash -eu <<'COMMANDS'
+          $COMMANDS
+          COMMANDS

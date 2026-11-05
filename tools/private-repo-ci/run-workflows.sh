@@ -6,6 +6,13 @@ set -euo pipefail
 EVENT="${CI_EVENT:-push}"
 WORKFLOW="${CI_WORKFLOW:-}"
 ACT_BIN="${ACT_BIN:-act}"
+ACT_PLATFORM="${ACT_PLATFORM:-ubuntu-latest=catthehacker/ubuntu:act-latest}"
+ACT_GITHUB_TOKEN="${ACT_GITHUB_TOKEN:-}"
+ACT_SECRET_ARGS=()
+
+if [[ -n "$ACT_GITHUB_TOKEN" ]]; then
+  ACT_SECRET_ARGS+=(--secret "GITHUB_TOKEN=$ACT_GITHUB_TOKEN")
+fi
 
 cd "$CLONED_REPO"
 
@@ -24,7 +31,11 @@ fi
 run_one() {
   local wf="$1"
   echo "::group::CI workflow $wf"
-  "$ACT_BIN" "$EVENT" -W "$wf" --artifact-server-path /tmp/agent-workspace-artifacts "${ACT_SECRET_ARGS[@]}"
+  "$ACT_BIN" "$EVENT" \
+    -W "$wf" \
+    --platform "$ACT_PLATFORM" \
+    --artifact-server-path /tmp/agent-workspace-artifacts \
+    "${ACT_SECRET_ARGS[@]}"
   echo "::endgroup::"
 }
 

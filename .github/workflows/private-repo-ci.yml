@@ -75,4 +75,6 @@ jobs:
 
       - name: Cleanup cloned repository
         if: always()
-        run: bash tools/private-repo-ci/cleanup-clone.sh
+        run: |
+          bash tools/private-repo-ci/cleanup-clone.sh
+          test -z "$(find "$CLONE_ROOT" -mindepth 1 -maxdepth 1 ! -name .gitkeep -print -quit)"

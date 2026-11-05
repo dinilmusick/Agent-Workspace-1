@@ -1,0 +1,35 @@
+#!/usr/bin/env node
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import { spawnSync } from 'node:child_process';
+
+const temp = fs.mkdtempSync(path.join(os.tmpdir(), 'skipo-origin-validator-'));
+for (const repo of ['Skipo','GutTS','Kloks','Luth','Aiko','Depm-Engine','Qwnsr-Engine','DocuStack-Engine','Srkl-Engine','Fod-Engine','Theta-Engine','Kult-Engine','Kelt-Engine']) {
+  fs.mkdirSync(path.join(temp, repo), { recursive: true });
+}
+function write(repo, file, content) {
+  const p = path.join(temp, repo, file);
+  fs.mkdirSync(path.dirname(p), { recursive: true });
+  fs.writeFileSync(p, content);
+}
+write('Skipo','scaffolds/nextjs/.env.example','APP_URL=');
+write('Skipo','scaffolds/vite/.env.example','APP_URL=');
+write('Skipo','scaffolds/nextjs/src/config/env.ts','APP_URL');
+write('Skipo','scaffolds/vite/src/config/env.ts','APP_URL');
+write('GutTS','src/auth/luthAuthClient.ts','process.env.APP_URL');
+write('GutTS','tests/luthAuthClient.test.ts','APP_URL');
+write('Luth','src/backend/types.ts','APP_URL');
+write('Luth','src/backend/auth/betterAuth.ts','baseURL');
+write('Luth','wrangler.jsonc','APP_URL');
+write('Depm-Engine','.env.example','APP_URL=');
+write('Depm-Engine','wrangler.toml','APP_URL');
+for (const repo of ['Aiko','Qwnsr-Engine','DocuStack-Engine','Srkl-Engine','Fod-Engine','Theta-Engine','Kult-Engine','Kelt-Engine']) {
+  write(repo,'.env.example','APP_URL=');
+}
+write('Depm-Engine','.env.example','APP_URL=');
+const script = path.resolve(import.meta.dirname, '..', 'skipo-deployment-origin', 'validate.mjs');
+const run = spawnSync(process.execPath, [script, temp], { encoding: 'utf8' });
+assert.equal(run.status, 0, run.stdout + run.stderr);
+console.log('validator positive fixture: PASS');

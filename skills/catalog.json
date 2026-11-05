@@ -9,9 +9,9 @@
       "public.skill_tool_links",
       "public.skill_tools"
     ],
-    "exportedAt": "2026-11-03T00:00:00.000Z"
+    "exportedAt": "2026-11-05T00:00:00.000Z"
   },
-  "count": 34,
+  "count": 35,
   "skills": [
     {
       "id": 1,
@@ -104,7 +104,7 @@
       "slug": "devops-ci-release",
       "tools": [],
       "status": "active",
-      "version": "1.0.0"
+      "version": "1.0.4"
     },
     {
       "id": 10,
@@ -324,7 +324,7 @@
       "slug": "coding-router",
       "tools": [],
       "status": "active",
-      "version": "1.2.1"
+      "version": "1.2.5"
     },
     {
       "id": 18,
@@ -388,7 +388,7 @@
         }
       ],
       "status": "active",
-      "version": "1.0.1"
+      "version": "1.0.4"
     },
     {
       "id": 21,
@@ -415,7 +415,7 @@
       "slug": "agent-systems-engineering",
       "tools": [],
       "status": "active",
-      "version": "1.0.0"
+      "version": "1.0.2"
     },
     {
       "id": 24,
@@ -541,7 +541,7 @@
       "slug": "universal-task-router",
       "tools": [],
       "status": "active",
-      "version": "1.3.9"
+      "version": "1.4.4"
     },
     {
       "id": 29,
@@ -611,7 +611,7 @@
         }
       ],
       "status": "active",
-      "version": "1.0.1"
+      "version": "1.0.2"
     },
     {
       "id": 34,
@@ -648,7 +648,23 @@
       "status": "active",
       "path": "skills/tldraw-agent/SKILL.md",
       "tools": []
+    },
+    {
+      "id": 39,
+      "name": "Private Repository CI Workspace Runner",
+      "path": "skills/private-repo-ci-workspace-runner/SKILL.md",
+      "slug": "private-repo-ci-workspace-runner",
+      "tools": [
+        {
+          "slug": "github",
+          "type": "connector",
+          "usage": "Dispatch and inspect Agent-Workspace-1 private-repository CI fallback runs.",
+          "required": true
+        }
+      ],
+      "status": "active",
+      "version": "1.0.0"
     }
   ],
-  "exportedAt": "2026-11-03T00:00:00.000Z"
+  "exportedAt": "2026-11-05T00:00:00.000Z"
 }

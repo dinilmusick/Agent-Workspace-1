@@ -1,0 +1,7 @@
+{
+  "repository": "dinilmusick/Luth",
+  "ref": "main",
+  "event": "push",
+  "workflow": "",
+  "token_mode": "clone-only"
+}

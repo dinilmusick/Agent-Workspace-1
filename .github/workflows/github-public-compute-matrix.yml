@@ -16,11 +16,6 @@ on:
         description: "Newline-separated verification commands"
         required: true
         type: string
-      oses:
-        description: "Comma-separated runner labels"
-        required: true
-        default: ubuntu-latest,windows-latest,macos-latest
-        type: string
 
 permissions:
   contents: read
@@ -30,7 +25,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ${{ fromJSON(format('[{0}]', join(fromJSON(format('["{0}"]', inputs.oses)), '","'))) }}
+        os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 45
     env:

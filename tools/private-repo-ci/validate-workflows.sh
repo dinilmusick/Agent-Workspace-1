@@ -17,7 +17,7 @@ for wf in "${workflows[@]}"; do
   echo "workflow=$wf"
   grep -E '^[[:space:]]*(runs-on|uses|container):' "$wf" || true
 
-  if grep -Eq 'runs-on:[[:space:]]*(["'\'' ]*)(macos|windows)' "$wf"; then
+  if grep -Eq "runs-on:[[:space:]]*[\\"']*(macos|windows)" "$wf"; then
     echo "::warning file=$wf::Non-Linux runner requested. act in the public Linux workspace cannot faithfully execute this workflow."
     status=1
   fi

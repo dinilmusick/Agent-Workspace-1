@@ -53,3 +53,11 @@ Artifacts:
 ## Safety boundary
 
 These adapters are for local builds, preview inspection and local database migrations/tests only. They are not deployment tooling. Supabase remains the persistent task/skill ledger; the Supabase CLI adapter starts an isolated local database and never connects to the ledger project.
+
+## Private GitHub adapter
+
+When a private GitHub repository requires workflow execution and native private CI is unavailable, exhausted, or blocked, use private-repo-ci-workspace-runner through Agent-Workspace-1.
+
+privateGitHub → AgentWorkspace1 → clone → validate → act → evidence → cleanup
+
+This adapter should be used extensively for private-repository verification. Never pass write/deployment credentials to target workflows.

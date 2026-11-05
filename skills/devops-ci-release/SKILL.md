@@ -42,3 +42,16 @@ Do not deploy, promote, roll back, or modify production configuration without au
   "source_repository": "vercel-labs/agent-skills"
 }
 ```
+
+## Private repository CI fallback
+
+When a private repository cannot provide usable native CI because runners/credits are unavailable, exhausted, blocked, or unsuitable:
+
+1. Activate private-repo-ci-workspace-runner.
+2. Use Agent-Workspace-1's .github/workflows/private-repo-ci.yml.
+3. Submit .agent/ci-request.json with the repository, ref, event, optional workflow, token mode, and unique request ID.
+4. Verify clone → workflow validation → act execution → target tests/typecheck/build → evidence → cleanup.
+5. Prefer clone-only unless the trusted target workflow genuinely needs GITHUB_TOKEN.
+6. Never pass coding or deployment write tokens into target workflow code.
+
+This fallback is a normal verification path, not an emergency-only path. Use it extensively for private-repository CI.

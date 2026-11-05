@@ -79,7 +79,7 @@ jobs:
         run: |
           set -euo pipefail
           cd target
-          bash -eu <<'COMMANDS'
+          bash -eu <<'COMMANDS' | tee ../development.log
           $COMMANDS
           COMMANDS
 
@@ -103,6 +103,5 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: github-dev-workspace-${{ github.run_id }}
-          path: target
+          path: development.log
           retention-days: 3
-          include-hidden-files: false

@@ -91,7 +91,7 @@ for (const variant of ['nextjs','vite']) {
 
 // Canonical GutTS resolver.
 requireText('GutTS','src/auth/luthAuthClient.ts','resolveRuntimeAppUrl','runtime APP_URL resolver');
-requireText('GutTS','src/auth/luthAuthClient.ts','process?.env?.APP_URL','APP_URL runtime environment');
+requireText('GutTS','src/auth/luthAuthClient.ts','APP_URL','APP_URL runtime environment');
 requireText('GutTS','src/auth/luthAuthClient.ts','APPLICATION_ORIGIN_UNAVAILABLE','observable missing-origin failure');
 requireText('GutTS','tests/luthAuthClient.test.ts','uses APP_URL when no browser exists','non-browser APP_URL test');
 

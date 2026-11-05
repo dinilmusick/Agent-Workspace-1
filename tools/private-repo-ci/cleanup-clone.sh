@@ -15,5 +15,5 @@ if [[ -d "$DEST" ]]; then
   rm -rf "$DEST"
 fi
 
-# The dedicated clone directory must be empty after every run.
-find "$ROOT" -mindepth 1 -maxdepth 1 -exec rm -rf -- {} +
+# Remove stale clones while preserving the tracked directory marker.
+find "$ROOT" -mindepth 1 -maxdepth 1 ! -name .gitkeep -exec rm -rf -- {} +

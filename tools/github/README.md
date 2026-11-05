@@ -1,41 +1,37 @@
-# GitHub repository tools
+# GitHub Development Tools
 
-These scripts provide safe repository-management helpers for Agent Workspace.
+These tools turn Agent-Workspace-1 into a GitHub-native development substrate.
 
-## Authentication
+## Capabilities
 
-Set one environment variable in the execution environment:
+- `create-repository.sh`: create a public/private repository through the GitHub REST API.
+- `scaffold-skipo-app.sh`: clone canonical Skipo, scaffold a new application directly into a target repository, validate it, commit and push.
+- `github-dev-workspace.yml`: use GitHub-hosted compute to clone, edit, build, lint, test and optionally push any authorized repository.
+- `create-skipo-app.yml`: create a repository and immediately scaffold a Skipo application into it.
+
+## Token boundary
+
+`CODING_REPO_TOKEN` is the coding credential. It must never be printed or placed in generated files.
+
+Repository creation requires GitHub **Repository creation: write** permission. Private target repositories additionally require appropriate repository access and Contents: write for direct commits.
+
+## Development loop
 
 ```text
-GITHUB_TOKEN=<token>
+intent
+  -> create/select repository
+  -> optional Skipo scaffold
+  -> GitHub-hosted development workspace
+  -> edit
+  -> install
+  -> lint/typecheck/test/build
+  -> evidence artifact
+  -> commit/push
+  -> GitHub Actions verification
 ```
 
-`GH_TOKEN` is accepted as a compatibility fallback. Tokens are never accepted as command-line arguments and are never written to files.
+Agents do not require Supabase for this loop. Supabase adds persistent goal/task/evidence coordination; GitHub is sufficient for repository state, source, workflows, CI evidence and execution.
 
-## Create a repository
+## Security
 
-```bash
-python3 tools/github/create_repository.py --name MyRepo --visibility private --description "Example"
-```
-
-Supported options include `--visibility private|public`, `--description`, `--private`, `--public`, `--initialize`, `--gitignore-template`, `--license-template`, and `--homepage`.
-
-The tool calls GitHub's authenticated `POST /user/repos` API and returns the canonical repository URL and default branch. It does not clone, push, publish packages, or alter existing repositories.
-
-## Validate without mutation
-
-```bash
-python3 tools/github/create_repository.py --name MyRepo --dry-run
-```
-
-Dry-run performs argument validation and reports the API operation that would be requested without contacting GitHub.
-
-## Safety model
-
-- No token on argv.
-- No token in output.
-- HTTPS-only GitHub API.
-- Explicit repository name and visibility.
-- Non-2xx responses are fatal.
-- Existing repository conflicts are reported without mutation.
-- No shell commands or third-party Python packages are required.
+Only run coding commands against repositories and workflow definitions you trust. A workflow with `CODING_REPO_TOKEN` can modify the target repository. Keep deployment credentials out of this workflow.

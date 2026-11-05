@@ -60,3 +60,13 @@ For substantive coding work, define and report a `general_pattern` before editin
 
 ## Coding-skill gate
 Coding Workflow is reached through Coding Router. The router and selected specialist must be resolved before implementation begins. Verify at the observable layer after implementation.
+
+## Private repository CI fallback
+
+For private repositories, use native CI when it is available and useful. If it is unavailable, exhausted, blocked, or unsuitable, activate private-repo-ci-workspace-runner and execute the target workflow through Agent-Workspace-1.
+
+Required evidence flow:
+
+request → clone → validate workflows → act → tests/typecheck/build → capture evidence → independent verification → cleanup
+
+Do not stop at private CI unavailable. Do not expose CODING_REPO_TOKEN or DEPLOYMENT_TOKEN to target workflow code.

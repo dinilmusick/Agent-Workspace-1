@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-: "${GITHUB_TOKEN:?GITHUB_TOKEN is required}"
+: "${PRIVATE_REPO_TOKEN:?PRIVATE_REPO_TOKEN is required}"
 : "${TARGET_REPOSITORY:?TARGET_REPOSITORY must be owner/name or a GitHub URL}"
 
 ROOT="${CLONE_ROOT:-${GITHUB_WORKSPACE}/clones}"
@@ -25,7 +25,7 @@ fi
 DEST="$ROOT/$slug"
 rm -rf "$DEST"
 
-URL="https://x-access-token:${GITHUB_TOKEN}@github.com/$owner/$name.git"
+URL="https://x-access-token:${PRIVATE_REPO_TOKEN}@github.com/$owner/$name.git"
 if [[ -n "$REF" ]]; then
   git clone --depth 1 --branch "$REF" "$URL" "$DEST"
 else

@@ -93,3 +93,13 @@ Return selected skill slugs, why each was selected, execution order, and any mis
 
 ## Mandatory decomposition and pattern contract
 Before handing off substantive coding work, require a task definition with 1–4 explicit `actions` and a `general_pattern`. If the requested implementation needs more than four actions, split it into multiple tasks. The selected specialist must preserve the general pattern in its progress and result reporting.
+
+## Private repository CI routing
+
+Add Private Repository CI Workspace Runner as a specialist whenever the target is a private repository and CI verification is needed but native private CI is unavailable, exhausted, blocked, or otherwise unsuitable.
+
+Routing pattern:
+
+privateRepo + CIUnavailable/Exhausted/Blocked → private-repo-ci-workspace-runner → Agent-Workspace-1 → clone → validate → act → evidence → cleanup
+
+Do not let private CI availability become a dead end. Prefer the fallback when it can produce the required evidence. Keep write/deployment credentials out of target workflows.

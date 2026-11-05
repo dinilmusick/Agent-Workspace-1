@@ -34,6 +34,17 @@ Before triggering remote CI after adding or changing tests:
 
 Known failure pattern: a certification test imported getSystemDatabaseUrl from src/backend/auth/betterAuth even though the canonical export was src/backend/types.ts. Typecheck passed, but CI failed with TypeError: getSystemDatabaseUrl is not a function. The fix was to import the canonical resolver from src/backend/types.ts. Do not repeat this class of error.
 
+## Verification discipline
+
+Before triggering remote CI after adding or changing tests:
+1. Inspect the target implementation exports.
+2. Verify every test import resolves to the canonical module boundary actually exporting the symbol.
+3. Run the narrow affected test locally when the environment permits.
+4. Only then trigger Agent-Workspace private-repo CI.
+5. If CI fails in test collection or execution, classify whether the failure is implementation, test wiring, workflow infrastructure, or environment before changing source.
+
+Known failure pattern: a certification test imported getSystemDatabaseUrl from src/backend/auth/betterAuth even though the canonical export was src/backend/types.ts. Typecheck passed, but CI failed with TypeError: getSystemDatabaseUrl is not a function. The fix was to import the canonical resolver from src/backend/types.ts. Do not repeat this class of error.
+
 ## Skipo application flow
 
 ```text

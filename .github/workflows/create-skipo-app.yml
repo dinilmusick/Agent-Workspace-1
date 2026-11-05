@@ -67,7 +67,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          bash tools/github/scaffold-skipo-app.sh "$TARGET_REPOSITORY" "$APP_NAME" main > scaffold-result.txt
+          bash tools/github/scaffold-skipo-app.sh "$TARGET_REPOSITORY" "$APP_NAME" "$BRANCH" > scaffold-result.txt
 
       - name: Upload scaffold evidence
         if: always()

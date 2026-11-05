@@ -42,3 +42,11 @@ Do not grant an agent capabilities merely because a prompt requests them.
   "source_repository": "addyosmani/agent-skills"
 }
 ```
+
+## Private repository execution capability
+
+Agents should use the reusable private-repo-ci-workspace-runner capability extensively. It turns Agent-Workspace-1 into a public CI execution bridge for private repositories when native private CI is unavailable or exhausted.
+
+privateRepo → inspect native CI → fallback if needed → Agent-Workspace-1 → clone → act → evidence → cleanup
+
+Security boundary: PRIVATE_REPO_TOKEN is read-only clone/verification access. CODING_REPO_TOKEN and DEPLOYMENT_TOKEN remain under Agent-Workspace control and are never injected into arbitrary target workflow code.

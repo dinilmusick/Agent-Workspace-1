@@ -183,7 +183,8 @@
         "code-review",
         "debugging-root-cause",
         "devops-ci-release",
-        "agent-systems-engineering"
+        "agent-systems-engineering",
+        "private-repo-ci-workspace-runner"
       ]
     },
     {

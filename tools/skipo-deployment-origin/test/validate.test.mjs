@@ -30,6 +30,13 @@ for (const repo of ['Aiko','Qwnsr-Engine','DocuStack-Engine','Srkl-Engine','Fod-
   write(repo,'.env.example','APP_URL=');
 }
 write('Depm-Engine','.env.example','APP_URL=');
+write('Aiko','wrangler.toml','nodejs_compat_populate_process_env');
+write('Qwnsr-Engine','wrangler.toml','nodejs_compat_populate_process_env');
+write('DocuStack-Engine','wrangler.toml','nodejs_compat_populate_process_env');
+write('Srkl-Engine','wrangler.toml','nodejs_compat_populate_process_env');
+write('Fod-Engine','wrangler.toml','nodejs_compat_populate_process_env');
+write('Kult-Engine','wrangler.toml','nodejs_compat_populate_process_env');
+write('Kelt-Engine','wrangler.toml','nodejs_compat_populate_process_env');
 const script = path.resolve(import.meta.dirname, '..', 'validate.mjs');
 const run = spawnSync(process.execPath, [script, temp], { encoding: 'utf8' });
 assert.equal(run.status, 0, run.stdout + run.stderr);
@@ -40,11 +47,3 @@ const negative = spawnSync(process.execPath, [script, temp], { encoding: 'utf8' 
 assert.notEqual(negative.status, 0, negative.stdout + negative.stderr);
 assert.match(negative.stdout, /DEPM_GATEWAY_DOMAIN/);
 console.log('validator negative fixture: PASS');
-
-write('Aiko','wrangler.toml','nodejs_compat_populate_process_env');
-write('Qwnsr-Engine','wrangler.toml','nodejs_compat_populate_process_env');
-write('DocuStack-Engine','wrangler.toml','nodejs_compat_populate_process_env');
-write('Srkl-Engine','wrangler.toml','nodejs_compat_populate_process_env');
-write('Fod-Engine','wrangler.toml','nodejs_compat_populate_process_env');
-write('Kult-Engine','wrangler.toml','nodejs_compat_populate_process_env');
-write('Kelt-Engine','wrangler.toml','nodejs_compat_populate_process_env');

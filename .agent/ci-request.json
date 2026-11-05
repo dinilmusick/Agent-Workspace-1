@@ -4,5 +4,5 @@
   "event": "push",
   "workflow": "ci.yml",
   "token_mode": "workflow",
-  "request_id": "loky-architecture-hardening-2026-11-06-r4"
+  "request_id": "loky-architecture-hardening-2026-11-06-r5"
 }

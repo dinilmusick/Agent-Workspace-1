@@ -46,10 +46,10 @@ The configured secret should have only the minimum read access needed by the tar
 
 ## Runtime security invariants
 
-- The private-repository access token is used only for cloning.
-- The token-bearing Git remote is replaced immediately after clone.
-- The private token is NOT passed to `act` workflows.
-- Target workflows execute as untrusted code; do not expose unrelated secrets.
+- Clone authentication is removed from the target repository's Git configuration immediately after cloning.
+- The default workflow runner can execute trusted target workflows with their normal checkout authentication.
+- Use `token_mode=clone-only` when target workflow code must not receive repository authentication.
+- Run target code only from repositories and refs you trust.
 - Cleanup is mandatory and runs through the workflow's exit trap.
 - Private source is never committed to Agent-Workspace-1.
 

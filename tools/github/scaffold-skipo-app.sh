@@ -20,6 +20,7 @@ pnpm install --frozen-lockfile
 python3 assistant.py generate scaffold "$WORK/app" --name "$APP_NAME" --force
 
 cd "$WORK/app"
+if [[ "$REF" != "main" ]]; then git switch -c "$REF"; fi
 if [[ -f package.json ]]; then
   corepack enable
   pnpm install --no-frozen-lockfile

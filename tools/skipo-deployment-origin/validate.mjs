@@ -114,6 +114,9 @@ forbidAnywhere('Srkl-Engine','SRKL_PUBLIC_URL','legacy SRKL deployment variable'
 for (const repo of repos.filter((r) => !['Skipo','GutTS','Kloks','Luth'].includes(r))) {
   requireAnywhere(repo,'APP_URL','APP_URL contract');
 }
+for (const repo of ['Aiko','Qwnsr-Engine','DocuStack-Engine','Srkl-Engine','Fod-Engine','Kult-Engine','Kelt-Engine']) {
+  requireText(repo,'wrangler.toml','nodejs_compat_populate_process_env','Worker APP_URL runtime environment bridge');
+}
 for (const repo of ['Aiko','Qwnsr-Engine','DocuStack-Engine','Srkl-Engine','Fod-Engine','Theta-Engine','Kult-Engine','Kelt-Engine']) {
   forbidAnywhere(repo,'origin: baseUrl','Luth authority incorrectly used as application origin');
 }

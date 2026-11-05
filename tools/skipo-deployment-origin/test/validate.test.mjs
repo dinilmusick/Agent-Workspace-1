@@ -30,7 +30,7 @@ for (const repo of ['Aiko','Qwnsr-Engine','DocuStack-Engine','Srkl-Engine','Fod-
   write(repo,'.env.example','APP_URL=');
 }
 write('Depm-Engine','.env.example','APP_URL=');
-const script = path.resolve(import.meta.dirname, '..', 'skipo-deployment-origin', 'validate.mjs');
+const script = path.resolve(import.meta.dirname, '..', 'validate.mjs');
 const run = spawnSync(process.execPath, [script, temp], { encoding: 'utf8' });
 assert.equal(run.status, 0, run.stdout + run.stderr);
 console.log('validator positive fixture: PASS');

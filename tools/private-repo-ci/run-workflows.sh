@@ -4,6 +4,7 @@ set -euo pipefail
 : "${CLONED_REPO:?CLONED_REPO is required}"
 
 EVENT="${CI_EVENT:-push}"
+REF="${TARGET_REF:-}"
 WORKFLOW="${CI_WORKFLOW:-}"
 ACT_BIN="${ACT_BIN:-act}"
 ACT_PLATFORM="${ACT_PLATFORM:-ubuntu-latest=catthehacker/ubuntu:act-latest}"
@@ -15,6 +16,14 @@ if [[ -n "$ACT_GITHUB_TOKEN" ]]; then
 fi
 
 cd "$CLONED_REPO"
+if [[ -n "$REF" ]]; then
+  actual="$(git rev-parse HEAD)"
+  expected="$(git rev-parse "$REF" 2>/dev/null || true)"
+  if [[ -n "$expected" && "$actual" != "$expected" ]]; then
+    echo "Clone ref verification failed: expected $REF ($expected), got $actual" >&2
+    exit 3
+  fi
+fi
 
 if ! command -v "$ACT_BIN" >/dev/null 2>&1; then
   echo "act is required. Install it on local agents or use the public Agent-Workspace CI workflow." >&2

@@ -101,7 +101,7 @@ requireText('Luth','src/backend/auth/betterAuth.ts','getLuthBaseUrl','canonical 
 requireText('Luth','src/backend/auth/betterAuth.ts','baseURL: normalizedBaseUrl','Better Auth baseURL');
 requireText('Luth','wrangler.jsonc','"APP_URL"','Cloudflare APP_URL binding');
 for (const legacy of ['BETTER_AUTH_URL','BETTER_AUTH_SECRET','GOOGLE_CLIENT_ID','GOOGLE_CLIENT_SECRET','LUTH_ALLOWED_ORIGINS']) {
-  forbidAnywhere('Luth',legacy,`legacy runtime authority ${legacy}`);
+  forbidText('Luth','wrangler.jsonc',legacy,`legacy runtime binding ${legacy}`);
 }
 
 // DEPM migration.

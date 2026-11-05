@@ -113,3 +113,13 @@ Define `goal`, `inputContract`, `outputContract`, `successCriteria`, `tools` and
 - Target code is untrusted. Workflows must use read-only permissions, avoid persisting checkout credentials and pass no secrets to target code.
 - Require approval for destructive, irreversible, costly or externally publishing actions.
 - Never claim success from an attempted action. Verify with tests, builds, browser evidence or database results.
+
+## Private repository CI fallback
+
+- Private repositories must not become blocked merely because native GitHub CI is unavailable, exhausted, or otherwise unsuitable.
+- For private-repository CI/test verification, route through skills/private-repo-ci-workspace-runner/SKILL.md whenever native private CI cannot provide the required evidence.
+- The fallback runner is Agent-Workspace-1 itself: update .agent/ci-request.json with { repository, ref, event, workflow, token_mode, request_id }, let .github/workflows/private-repo-ci.yml clone the private repository into the dedicated clones/ directory, validate workflow definitions, execute them through pinned act, collect run/test evidence, and always clean the clone.
+- Prefer this fallback extensively for private-repository verification instead of stopping because GitHub-hosted private CI is unavailable or quota-limited.
+- Use PRIVATE_REPO_TOKEN only for read-only cloning/verification. Never expose CODING_REPO_TOKEN or DEPLOYMENT_TOKEN to target workflow code. Write/deployment credentials remain Agent-Workspace-controlled.
+- Prefer an explicit target workflow. Running all workflows is allowed only when the target repository is trusted and its workflows are safe for verification.
+- Completion requires a real fallback run, target verification evidence, independent verification where applicable, and confirmed clone cleanup.

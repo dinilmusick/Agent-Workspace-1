@@ -1,8 +1,8 @@
 {
-  "repository": "dinilmusick/Aiko",
+  "repository": "dinilmusick/Loky-Engine",
   "ref": "main",
   "event": "push",
-  "workflow": "validate.yml",
+  "workflow": "ci.yml",
   "token_mode": "workflow",
-  "request_id": "auth-certification-2026-11-05-aiko-r3"
+  "request_id": "loky-architecture-hardening-2026-11-06-r1"
 }

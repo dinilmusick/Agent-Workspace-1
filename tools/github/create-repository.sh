@@ -17,7 +17,7 @@ import json, os, sys, urllib.request, urllib.error
 name, private, description = sys.argv[1], sys.argv[2] == "true", sys.argv[3]
 if not all(c.isalnum() or c in "._-" for c in name) or len(name) > 100:
     raise SystemExit("invalid repository name")
-body = json.dumps({"name": name, "private": private, "description": description}).encode()
+body = json.dumps({"name": name, "private": private, "description": description, "auto_init": true}).encode()
 req = urllib.request.Request(
     "https://api.github.com/user/repos", data=body, method="POST",
     headers={"Accept":"application/vnd.github+json",

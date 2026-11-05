@@ -70,6 +70,6 @@ Use:
 - `skills/github-development-workspace/SKILL.md` — reusable agent instructions.
 - `tools/github/` — repository creation and Skipo scaffolding tools.
 
-GitHub Actions standard runners for public repositories are currently free and unlimited. Standard runner labels include Linux `ubuntu-latest`, Windows `windows-latest`, and macOS `macos-latest`; concurrency and runner-specific limits still apply. citeturn671976search1turn671976search14
+GitHub Actions standard runners for public repositories are currently free and unlimited. Standard runner labels include Linux `ubuntu-latest`, Windows `windows-latest`, and macOS `macos-latest`; concurrency and runner-specific limits still apply.
 
 Supabase remains the coordination/state substrate when available, but it is not required for source development. An agent with GitHub access can perform repository creation, Skipo scaffolding, coding, verification and commits using GitHub alone.

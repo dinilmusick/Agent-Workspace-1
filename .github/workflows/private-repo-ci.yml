@@ -1,0 +1,67 @@
+name: Private Repository CI Fallback
+
+on:
+  workflow_dispatch:
+    inputs:
+      repository:
+        description: "Private GitHub repository owner/name or URL"
+        required: true
+        type: string
+      ref:
+        description: "Branch, tag, or SHA; blank uses the default branch"
+        required: false
+        type: string
+      event:
+        description: "act event used to execute the target workflows"
+        required: false
+        default: push
+        type: string
+      workflow:
+        description: "Optional workflow filename under .github/workflows/"
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  run-private-repo-ci:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      TARGET_REPOSITORY: ${{ inputs.repository }}
+      TARGET_REF: ${{ inputs.ref }}
+      CI_EVENT: ${{ inputs.event }}
+      CI_WORKFLOW: ${{ inputs.workflow }}
+      CLONE_ROOT: ${{ github.workspace }}/clones
+    steps:
+      - name: Checkout Agent Workspace
+        uses: actions/checkout@v5
+
+      - name: Install act
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL https://raw.githubusercontent.com/nektos/act/master/install.sh | sudo bash -s -- -b /usr/local/bin
+
+      - name: Clone private repository
+        env:
+          GITHUB_TOKEN: ${{ secrets.PRIVATE_REPO_TOKEN }}
+        run: bash tools/private-repo-ci/clone-private-repo.sh
+
+      - name: Execute target repository workflows
+        env:
+          ACT_BIN: act
+        run: |
+          set -euo pipefail
+          repo="${TARGET_REPOSITORY#https://github.com/}"
+          repo="${repo#git@github.com:}"
+          repo="${repo%.git}"
+          owner="${repo%%/*}"
+          name="${repo#*/}"
+          export CLONED_REPO="${CLONE_ROOT}/${owner}__${name}"
+          bash tools/private-repo-ci/run-workflows.sh
+
+      - name: Cleanup cloned repository
+        if: always()
+        run: bash tools/private-repo-ci/cleanup-clone.sh

@@ -57,3 +57,7 @@ jobs:
           PY
           GITHUB_EVENT_NAME=issues GITHUB_EVENT_PATH="$issue_event" GITHUB_OUTPUT="$issue_output" python runner/resolve-compute-request.py
           grep -Fq "runtime=node" "$issue_output"
+
+      - name: Validate Skipo deployment-origin tool
+        run: |
+          node --test tools/skipo-deployment-origin/test/validate.test.mjs

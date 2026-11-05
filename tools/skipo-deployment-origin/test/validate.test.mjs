@@ -19,7 +19,7 @@ write('Skipo','scaffolds/vite/.env.example','APP_URL=');
 write('Skipo','scaffolds/nextjs/src/config/env.ts','APP_URL');
 write('Skipo','scaffolds/vite/src/config/env.ts','APP_URL');
 write('GutTS','src/auth/luthAuthClient.ts','resolveRuntimeAppUrl APP_URL APPLICATION_ORIGIN_UNAVAILABLE');
-write('GutTS','tests/luthAuthClient.test.ts','APP_URL');
+write('GutTS','tests/luthAuthClient.test.ts','uses APP_URL when no browser exists');
 write('Luth','src/backend/types.ts','APP_URL');
 write('Luth','src/backend/auth/betterAuth.ts','getLuthBaseUrl baseURL: normalizedBaseUrl');
 write('Luth','wrangler.jsonc','"APP_URL"');

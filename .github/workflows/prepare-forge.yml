@@ -37,9 +37,9 @@ jobs:
       - name: Recover complete source material from detached workspace history
         run: |
           set -euo pipefail
-          git show 2c0a38452ac65d1c304977e1d28d4a11dec516c9:upstream/forge/src/compiler >/dev/null 2>&1 || true
+          git show 3a64be20c0f75ce8197ece31c5863bb5c8e8f3d4:upstream/forge/src/compiler >/dev/null 2>&1 || true
           rm -rf /tmp/forge-history
-          git worktree add --detach /tmp/forge-history 2c0a38452ac65d1c304977e1d28d4a11dec516c9
+          git worktree add --detach /tmp/forge-history 3a64be20c0f75ce8197ece31c5863bb5c8e8f3d4
           mkdir -p embedded/forge/source/full
           cp -R /tmp/forge-history/upstream/forge/src/compiler embedded/forge/source/full/compiler
           cp -R /tmp/forge-history/upstream/forge/src/core embedded/forge/source/full/core

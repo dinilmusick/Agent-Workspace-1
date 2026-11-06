@@ -1,0 +1,59 @@
+name: Import Forge Upstream
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  import:
+    if: >-
+      startsWith(github.event.issue.title, '[import-forge]') &&
+      contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.issue.author_association)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      CODING_REPO_TOKEN: ${{ secrets.CODING_REPO_TOKEN }}
+    steps:
+      - name: Checkout Agent Workspace
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af49
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+          token: ${{ secrets.CODING_REPO_TOKEN }}
+
+      - name: Import Forge source
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$CODING_REPO_TOKEN"
+          rm -rf upstream/forge
+          mkdir -p upstream
+          git clone --depth 1 https://github.com/wasm-oj/forge.git upstream/forge
+          UPSTREAM_SHA=$(git -C upstream/forge rev-parse HEAD)
+          UPSTREAM_SUBJECT=$(git -C upstream/forge log -1 --format='%s')
+          UPSTREAM_DATE=$(git -C upstream/forge log -1 --format='%ad' --date=iso)
+          rm -rf upstream/forge/.git
+          printf '%s\n%s\n%s\n' "$UPSTREAM_SHA" "$UPSTREAM_SUBJECT" "$UPSTREAM_DATE" > upstream/forge-upstream-revision.txt
+          printf '%s\n' '# Forge upstream snapshot' '' 'Public wasm-oj/forge source snapshot used as the upstream basis for our embedded runtime.' 'The upstream repository is not modified by this project.' '' 'See forge-upstream-revision.txt for the exact source revision.' > upstream/README.md
+
+      - name: Commit imported source
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add upstream/forge upstream/forge-upstream-revision.txt upstream/README.md
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "chore: import Forge upstream source for embedded runtime"
+          git push origin HEAD:main
+
+      - name: Close import request
+        if: success()
+        env:
+          GH_TOKEN: ${{ secrets.CODING_REPO_TOKEN }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: gh issue close "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" --comment "Forge upstream snapshot imported into upstream/forge. The upstream repository was not modified."

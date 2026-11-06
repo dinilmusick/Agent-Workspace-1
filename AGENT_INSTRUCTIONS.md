@@ -11,6 +11,9 @@ PROMPT=eachTask→persistWorkerPrompt[context,scope,IO,acceptance,verify,deps,to
 RECONCILE=mandatoryFinalTask→dependsOn(allRequiredChildren)→inspect+verify+reconcile+finalize.
 CODING=parallelChildren→onePR/task→recordPR→reconcile→mergeValid+closeOther→NO openChildPRs.
 TOOLING=Container→mandatory real-time executable verification whenever code can be inspected/executed/compiled/linted/typechecked/tested/built;Agent-Workspace-1→larger repository/CI/integration/ecosystem checks.
+SCRIPT_LOOP=for each changed small script/unit: pull or copy into isolated Container→create focused tests when needed→run tests→debug→retest→verify→write only the verified script back into codebase→then continue.
+INTEGRATION=after script/unit verification, use Agent-Workspace-1 for whole-codebase integration, cross-repo, CI, deployment, and ecosystem validation.
+VERIFY_ROUTING=small-script-first-container-loop→Agent-Workspace-1-for-integration;never-return-unverified-script-changes;never-replace-executable-verification-with-reasoning.
 VERIFY_ROUTING=Container-first-for-immediate-code-checks→Agent-Workspace-1-for-cross-repo/CI/integration/system-validation;never-replace-executable-verification-with-reasoning.
 CREATE→goal_ledger_create_omni_hierarchical(vision_id,vision_target_id);Vision→tldraw;Supabase=canonical;tldraw=projection.
 SEMANTIC=RETRIEVAL_ONLY→canonicalFetch.

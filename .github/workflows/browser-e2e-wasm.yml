@@ -75,8 +75,6 @@ jobs:
           </script>
           HTML
           (node /tmp/wasm-e2e-server.mjs >/tmp/wasm-e2e-server.log 2>&1 & echo $! > /tmp/wasm-e2e.pid)
-          npx playwright test --config=/dev/null --reporter=line <<'JS'
-          JS
           node --input-type=module <<'NODE'
           import { chromium } from 'playwright';
           const browser=await chromium.launch({headless:true});

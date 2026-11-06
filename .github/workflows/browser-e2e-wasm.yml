@@ -1,0 +1,103 @@
+name: Browser E2E Forge Runtime
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  e2e:
+    if: startsWith(github.event.issue.title, '[browser-e2e-wasm]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout Kloks
+        uses: actions/checkout@v4
+        with:
+          repository: dinilmusick/Kloks
+          ref: feat/intelligent-wasm-runtime
+          token: ${{ secrets.CODING_REPO_TOKEN }}
+          fetch-depth: 0
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.0
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Install
+        run: pnpm install --force --no-frozen-lockfile
+      - name: Build runtime package
+        run: pnpm --filter @kloks/wasm-runtime build
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Run real browser compile/run tests
+        run: |
+          cat > /tmp/wasm-e2e-server.mjs <<'NODE'
+          import http from 'node:http';
+          import fs from 'node:fs';
+          import path from 'node:path';
+          import { fileURLToPath } from 'node:url';
+          const root=process.cwd();
+          const mime={'.html':'text/html','.js':'text/javascript','.mjs':'text/javascript','.json':'application/json','.wasm':'application/wasm','.bin':'application/octet-stream','.d.ts':'text/plain'};
+          const server=http.createServer((req,res)=>{
+            const url=new URL(req.url,'http://127.0.0.1');
+            let rel=decodeURIComponent(url.pathname);
+            if(rel==='/') rel='/e2e.html';
+            const file=path.join(root,rel);
+            if(!file.startsWith(root) || !fs.existsSync(file) || fs.statSync(file).isDirectory()){res.writeHead(404);res.end();return;}
+            res.setHeader('Cross-Origin-Opener-Policy','same-origin');
+            res.setHeader('Cross-Origin-Embedder-Policy','require-corp');
+            res.setHeader('Cross-Origin-Resource-Policy','same-origin');
+            res.setHeader('Content-Type',mime[path.extname(file)]||'application/octet-stream');
+            fs.createReadStream(file).pipe(res);
+          });
+          server.listen(4173,'127.0.0.1');
+          NODE
+          cat > e2e.html <<'HTML'
+          <!doctype html><meta charset="utf-8"><body>loading</body>
+          <script type="module">
+          const { createBrowserWasmRuntime } = await import('/packages/wasm-runtime/dist/index.js');
+          const runtime = await createBrowserWasmRuntime('/packages/wasm-runtime/vendor/forge/browser/');
+          const cases = [];
+          async function run(name, request) { try { const result=await runtime.execute(request); cases.push({name,result}); } catch(error) { cases.push({name,error:String(error)}); } }
+          await run('rust-hello',{language:'rust',filename:'main.rs',source:'fn main() { println!("hello-rust"); }'});
+          await run('go-hello',{language:'go',filename:'main.go',source:'package main\nimport "fmt"\nfunc main(){fmt.Println("hello-go")}'});
+          await run('rust-input',{language:'rust',filename:'main.rs',source:'use std::io::{self, Read}; fn main(){let mut s=String::new();io::stdin().read_to_string(&mut s).unwrap();print!("{}",s);}',inputs:{value:42}});
+          await run('rust-invalid',{language:'rust',filename:'main.rs',source:'fn main( {'});
+          runtime.dispose();
+          document.body.textContent=JSON.stringify({crossOriginIsolated, cases});
+          </script>
+          HTML
+          (node /tmp/wasm-e2e-server.mjs >/tmp/wasm-e2e-server.log 2>&1 & echo $! > /tmp/wasm-e2e.pid)
+          npx playwright test --config=/dev/null --reporter=line <<'JS'
+          JS
+          node --input-type=module <<'NODE'
+          import { chromium } from 'playwright';
+          const browser=await chromium.launch({headless:true});
+          const page=await browser.newPage();
+          await page.goto('http://127.0.0.1:4173/',{waitUntil:'load',timeout:30000});
+          await page.waitForFunction(()=>document.body.textContent?.startsWith('{"crossOriginIsolated"'),null,{timeout:600000});
+          const data=JSON.parse(await page.locator('body').textContent());
+          if(!data.crossOriginIsolated) throw new Error('Browser is not cross-origin isolated');
+          const rust=data.cases.find(x=>x.name==='rust-hello')?.result;
+          const go=data.cases.find(x=>x.name==='go-hello')?.result;
+          const input=data.cases.find(x=>x.name==='rust-input')?.result;
+          const invalid=data.cases.find(x=>x.name==='rust-invalid')?.result;
+          if(!rust?.success || rust.stdout.trim()!=='hello-rust') throw new Error('Rust E2E failed: '+JSON.stringify(rust));
+          if(!go?.success || go.stdout.trim()!=='hello-go') throw new Error('Go E2E failed: '+JSON.stringify(go));
+          if(!input?.success || !input.stdout.includes('42')) throw new Error('Input E2E failed: '+JSON.stringify(input));
+          if(invalid?.success) throw new Error('Invalid-source E2E unexpectedly succeeded');
+          console.log(JSON.stringify(data));
+          await browser.close();
+          NODE
+      - name: Close issue
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh issue close "${{ github.event.issue.number }}" --repo dinilmusick/Agent-Workspace-1 --comment "Browser E2E workflow finished; inspect the run result for PASS/FAIL."

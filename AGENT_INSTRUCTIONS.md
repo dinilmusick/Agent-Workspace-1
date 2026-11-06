@@ -17,4 +17,4 @@ SEMANTIC=RETRIEVAL_ONLY→canonicalFetch.
 ROUTE={coding:CodingRouter;other:closestActive}.
 OBSTACLE=semanticSearch→dedupe/update→occurrence+evidence+resolution.
 WORKER=claim→heartbeat→execute→evidence→submit→independentVerify;FAIL→persist(reason+evidence+nextAction);RECLAIM>=60m.
-COMPLETE=NO unless evidence+verification+reconciliation.
+COMPLETE=NO unless evidence+verification+reconciliation

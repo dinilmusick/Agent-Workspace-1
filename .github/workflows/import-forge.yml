@@ -1,6 +1,8 @@
 name: Import Forge Upstream
 
 on:
+  push:
+    branches: [main]
   issues:
     types: [opened]
 
@@ -11,8 +13,10 @@ permissions:
 jobs:
   import:
     if: >-
-      startsWith(github.event.issue.title, '[import-forge]') &&
-      contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.issue.author_association)
+      (github.event_name == 'issues' &&
+       startsWith(github.event.issue.title, '[import-forge]') &&
+       contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.issue.author_association)) ||
+      (github.event_name == 'push' && contains(github.event.head_commit.message, '[import-forge]'))
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
@@ -56,4 +60,5 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.CODING_REPO_TOKEN }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
-        run: gh issue close "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" --comment "Forge upstream snapshot imported into upstream/forge. The upstream repository was not modified."
+        run: |
+          if [ -n "${ISSUE_NUMBER:-}" ]; then gh issue close "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" --comment "Forge upstream snapshot imported into upstream/forge. The upstream repository was not modified."; fi

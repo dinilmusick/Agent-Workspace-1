@@ -1,0 +1,59 @@
+name: Force Add Vendored Forge Dist
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  add:
+    if: startsWith(github.event.issue.title, '[force-forge-dist]')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Agent Workspace
+        uses: actions/checkout@v4
+      - name: Checkout Kloks
+        uses: actions/checkout@v4
+        with:
+          repository: dinilmusick/Kloks
+          ref: feat/intelligent-wasm-runtime
+          token: ${{ secrets.CODING_REPO_TOKEN }}
+          path: kloks
+          fetch-depth: 0
+      - name: Copy and patch dist trees
+        run: |
+          set -euo pipefail
+          base=kloks/packages/wasm-runtime/vendor/forge
+          cp -R embedded/forge/vendor/browser/dist "$base/browser/"
+          cp -R embedded/forge/vendor/core/dist "$base/core/"
+          cp -R embedded/forge/vendor/contracts/dist "$base/contracts/"
+          cp -R embedded/forge/vendor/toolchain-go/dist "$base/toolchain-go/"
+          cp -R embedded/forge/vendor/toolchain-rust/dist "$base/toolchain-rust/"
+          find "$base" -type f \( -name '*.js' -o -name '*.mjs' -o -name '*.d.ts' \) -print0 | while IFS= read -r -d '' f; do
+            case "$f" in
+              *'/browser/'*) sed -i 's#"@wasm-oj/core"#"../../core/dist/index.js"#g; s#'"'"'@wasm-oj/core'"'"'#'"'"'../../core/dist/index.js'"'"'#g; s#"@wasm-oj/contracts"#"../../contracts/dist/index.js"#g; s#'"'"'@wasm-oj/contracts'"'"'#'"'"'../../contracts/dist/index.js'"'"'#g' "$f";;
+              *'/core/'*) sed -i 's#"@wasm-oj/contracts"#"../../contracts/dist/index.js"#g; s#'"'"'@wasm-oj/contracts'"'"'#'"'"'../../contracts/dist/index.js'"'"'#g' "$f";;
+              *'/toolchain-go/'*|*'/toolchain-rust/'*) sed -i 's#"@wasm-oj/contracts"#"../../contracts/dist/index.js"#g; s#'"'"'@wasm-oj/contracts'"'"'#'"'"'../../contracts/dist/index.js'"'"'#g' "$f";;
+            esac
+          done
+      - name: Verify files and detach imports
+        run: |
+          test -f kloks/packages/wasm-runtime/vendor/forge/browser/dist/index.js
+          test -f kloks/packages/wasm-runtime/vendor/forge/core/dist/index.js
+          test -f kloks/packages/wasm-runtime/vendor/forge/contracts/dist/index.js
+          ! grep -R '"@wasm-oj/\(core\|contracts\)"' kloks/packages/wasm-runtime/vendor/forge --include='*.js' --include='*.mjs' --include='*.d.ts'
+      - name: Force add dist and push
+        working-directory: kloks
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add -f packages/wasm-runtime/vendor/forge/*/dist
+          git commit -m "fix: include detached Forge runtime distributions"
+          git push origin feat/intelligent-wasm-runtime
+      - name: Close issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh issue close "${{ github.event.issue.number }}" --repo dinilmusick/Agent-Workspace-1 --comment "Vendored Forge distribution files were force-added to Kloks and detached imports were verified."

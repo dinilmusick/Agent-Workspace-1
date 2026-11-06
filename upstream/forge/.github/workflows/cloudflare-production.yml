@@ -1,0 +1,109 @@
+name: Deploy Cloudflare production
+
+on:
+  workflow_dispatch:
+    inputs:
+      resume_formal_mutations:
+        description: Confirm admin Container check, exact catalog sync, content, submission, and stale-projection smoke passed.
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cloudflare-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    environment: production
+    env:
+      CONTAINER_IMAGE: wasm-oj-submission-production:${{ github.sha }}
+      DOCKER_BUILD_RECORD_UPLOAD: "false"
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          lfs: true
+          persist-credentials: false
+      - uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271
+        with:
+          version: 10.34.5
+          run_install: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: 24.18.0
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run typecheck
+      - run: pnpm run build
+      - name: Render exact Worker and Container build identity
+        run: >-
+          node scripts/render-production-config.mjs
+          --build-id "$GITHUB_SHA"
+          --config wrangler.quick-production.jsonc
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@d7f5e7f509e45cec5c76c4d5afdd7de93d0b3df5
+        with:
+          driver: docker-container
+      - name: Build exact Container image with GitHub Actions cache
+        uses: docker/build-push-action@f9f3042f7e2789586610d6e8b85c8f03e5195baf
+        with:
+          context: .
+          file: ./Dockerfile
+          platforms: linux/amd64
+          load: true
+          provenance: false
+          tags: ${{ env.CONTAINER_IMAGE }}
+          build-args: WASM_OJ_BUILD_ID=${{ github.sha }}
+          cache-from: type=gha,scope=wasm-oj-submission-production
+          cache-to: type=gha,scope=wasm-oj-submission-production,mode=max
+      - name: Apply migrations with repository-cutover preflight
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DEPLOY_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+        run: node scripts/production-migrations.mjs apply --database DB --config wrangler.quick-production.jsonc
+      - name: Capture current Container rollout baseline
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DEPLOY_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+        run: >-
+          node scripts/wait-container-rollout.mjs
+          --config wrangler.quick-production.jsonc
+          --capture-baseline "$RUNNER_TEMP/container-rollout-baseline.json"
+      - name: Push exact Container image
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DEPLOY_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+        run: pnpm exec wrangler containers push "$CONTAINER_IMAGE" --config wrangler.quick-production.jsonc
+      - name: Deploy Worker with prebuilt Container image
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DEPLOY_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+        run: pnpm exec wrangler deploy --config wrangler.quick-production.jsonc --tag "$GITHUB_SHA"
+      - name: Wait for Submission Container rollout
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DEPLOY_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+        run: >-
+          node scripts/wait-container-rollout.mjs
+          --config wrangler.quick-production.jsonc
+          --baseline "$RUNNER_TEMP/container-rollout-baseline.json"
+          --timeout-seconds 1800
+      - name: HTTP smoke
+        run: |
+          curl --fail --retry 6 --retry-all-errors --retry-delay 5 \
+            https://wasm-oj-forge-production.jacob.workers.dev/api/health/live
+          curl --fail --retry 6 --retry-all-errors --retry-delay 5 \
+            https://wasm-oj-forge-production.jacob.workers.dev/api/health/ready
+      - name: Restore formal mutations after confirmed product smoke
+        if: ${{ inputs.resume_formal_mutations }}
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DEPLOY_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+        run: >-
+          node scripts/production-migrations.mjs resume --cutover-smoke-confirmed
+          --database DB --config wrangler.quick-production.jsonc

@@ -1,23 +1,20 @@
 AGENTGPT
 STATE=Supabase:goals,tasks,deps,ownership,heartbeats,skills,obstacles,evidence. NEVER chat-history.
 GATE={shallow→direct;bounded→direct/minSkill;substantive→pipeline}.
-FMT=CODELIKE;PRIMARY=PSEUDO;TS>prose;STRUCT=[IN,STATE,PLAN,DO,OUT,VERIFY].
-PIPE=[semanticResolve→Router→Plan→Persist→Execute→Evidence→IndependentVerify→Finalize].
-PLAN=Vision→Target(s)→Goal(s)→Task(s)→OmniLoop(s).
-PROMOTE=explicit("time to make this into a goal"|equiv)→hierarchicalGoal+fullDecompose;TASKS=small|mid,independent,executable.
-Goal={type,target,behavior_inputs,expected_outputs,acceptance,OmniLoop}.
-Task={type,target=parent.target,acceptance,OmniLoop,general_pattern,actions[1..4]};>4→split.
-PROMPT=eachTask→persistWorkerPrompt[context,scope,IO,acceptance,verify,deps,tools,pattern].
-RECONCILE=mandatoryFinalTask→dependsOn(allRequiredChildren)→inspect+verify+reconcile+finalize.
+PIPE=semanticResolve→Router→Plan→Persist→Execute→Evidence→IndependentVerify→Finalize.
+PLAN=Vision→Target→Goal→Tasks→OmniLoop.
+PROMOTE=explicit("time to make this into a goal"|equiv)→hierarchicalGoal+decompose.
+TASK={target=parent.target,acceptance,actions[1..4]};>4→split.
+PROMPT=eachTask→persistWorkerPrompt[context,scope,IO,acceptance,verify,deps,tools].
+RECONCILE=finalTask→dependsOn(allRequiredChildren)→inspect+verify+reconcile+finalize.
 CODING=parallelChildren→onePR/task→recordPR→reconcile→mergeValid+closeOther→NO openChildPRs.
-TOOLING=Container→mandatory real-time executable verification whenever code can be inspected/executed/compiled/linted/typechecked/tested/built;Agent-Workspace-1→larger repository/CI/integration/ecosystem checks.
-SCRIPT_LOOP=for each changed small script/unit: pull or copy into isolated Container→create focused tests when needed→run tests→debug→retest→verify→write only the verified script back into codebase→then continue.
-INTEGRATION=after script/unit verification, use Agent-Workspace-1 for whole-codebase integration, cross-repo, CI, deployment, and ecosystem validation.
-VERIFY_ROUTING=small-script-first-container-loop→Agent-Workspace-1-for-integration;never-return-unverified-script-changes;never-replace-executable-verification-with-reasoning.
-VERIFY_ROUTING=Container-first-for-immediate-code-checks→Agent-Workspace-1-for-cross-repo/CI/integration/system-validation;never-replace-executable-verification-with-reasoning.
-CREATE→goal_ledger_create_omni_hierarchical(vision_id,vision_target_id);Vision→tldraw;Supabase=canonical;tldraw=projection.
+TOOLING=Container→verification;Agent-Workspace-1→CI/integration/ecosystem validation.
+SCRIPT_LOOP=eachChangedUnit→Container→focusedTests→run→debug→retest→verify→writeBack.
+INTEGRATION=unitsPass→Agent-Workspace-1→codebase/crossRepo/CI/deployment checks.
+VERIFY=Container-first→Agent-Workspace-1-integration;never return unverified changes or replace execution with reasoning.
+CREATE→goal_ledger_create_omni_hierarchical;Vision→tldraw;Supabase=canonical.
 SEMANTIC=RETRIEVAL_ONLY→canonicalFetch.
-ROUTE={coding:CodingRouter,skill*:SkillCreator,diagram:DiagramEngineering+tldrawAgent,other:closestActive}.
-OBSTACLE=semanticSearch→dedupe/update→occurrence(goal/task,evidence,resolution).
+ROUTE={coding:CodingRouter;other:closestActive}.
+OBSTACLE=semanticSearch→dedupe/update→occurrence+evidence+resolution.
 WORKER=claim→heartbeat→execute→evidence→submit→independentVerify;FAIL→persist(reason+evidence+nextAction);RECLAIM>=60m.
 COMPLETE=NO unless evidence+verification+reconciliation.

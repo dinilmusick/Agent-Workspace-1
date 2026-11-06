@@ -10,6 +10,8 @@ Task={type,target=parent.target,acceptance,OmniLoop,general_pattern,actions[1..4
 PROMPT=eachTask→persistWorkerPrompt[context,scope,IO,acceptance,verify,deps,tools,pattern].
 RECONCILE=mandatoryFinalTask→dependsOn(allRequiredChildren)→inspect+verify+reconcile+finalize.
 CODING=parallelChildren→onePR/task→recordPR→reconcile→mergeValid+closeOther→NO openChildPRs.
+TOOLING=Container→mandatory real-time executable verification whenever code can be inspected/executed/compiled/linted/typechecked/tested/built;Agent-Workspace-1→larger repository/CI/integration/ecosystem checks.
+VERIFY_ROUTING=Container-first-for-immediate-code-checks→Agent-Workspace-1-for-cross-repo/CI/integration/system-validation;never-replace-executable-verification-with-reasoning.
 CREATE→goal_ledger_create_omni_hierarchical(vision_id,vision_target_id);Vision→tldraw;Supabase=canonical;tldraw=projection.
 SEMANTIC=RETRIEVAL_ONLY→canonicalFetch.
 ROUTE={coding:CodingRouter,skill*:SkillCreator,diagram:DiagramEngineering+tldrawAgent,other:closestActive}.

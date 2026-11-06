@@ -1,8 +1,6 @@
 name: Create Skipo Application Repository
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
     inputs:
       repository:
@@ -39,11 +37,11 @@ jobs:
     timeout-minutes: 45
     env:
       GITHUB_TOKEN: ${{ secrets.CODING_REPO_TOKEN }}
-      TARGET_REPOSITORY: dinilmusick/${{ inputs.repository || 'TYL' }}
-      APP_NAME: ${{ inputs.app_name || 'TYL' }}
-      VISIBILITY: ${{ inputs.visibility || 'private' }}
-      DESCRIPTION: ${{ inputs.description || 'TYL — Skipo application' }}
-      BRANCH: ${{ inputs.branch || 'main' }}
+      TARGET_REPOSITORY: dinilmusick/${{ inputs.repository }}
+      APP_NAME: ${{ inputs.app_name }}
+      VISIBILITY: ${{ inputs.visibility }}
+      DESCRIPTION: ${{ inputs.description }}
+      BRANCH: ${{ inputs.branch }}
     steps:
       - name: Checkout Agent Workspace
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af49 # v4.2.2
@@ -63,7 +61,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 tools/github/create_repository.py --name "${TARGET_REPOSITORY#dinilmusick/}" --description "$DESCRIPTION" --private > repo-created.txt
+          bash tools/github/create-repository.sh "${{ inputs.repository }}" "$VISIBILITY" "$DESCRIPTION" > repo-created.txt
 
       - name: Scaffold from canonical Skipo
         shell: bash

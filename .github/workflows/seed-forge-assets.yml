@@ -1,0 +1,47 @@
+name: Seed Forge Toolchain Assets
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  seed:
+    if: startsWith(github.event.issue.title, '[seed-forge-assets]')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: dinilmusick/Kloks
+          ref: feat/intelligent-wasm-runtime
+          token: ${{ secrets.CODING_REPO_TOKEN }}
+          path: kloks
+          fetch-depth: 0
+      - name: Copy toolchain assets and runtime core
+        run: |
+          set -euo pipefail
+          base=kloks/packages/wasm-runtime/vendor/forge
+          mkdir -p "$base/toolchain-assets/rust" "$base/toolchain-assets/go" "$base/runtime-core"
+          cp -R embedded/forge/vendor/toolchain-rust/assets/. "$base/toolchain-assets/rust/"
+          cp -R embedded/forge/vendor/toolchain-go/assets/. "$base/toolchain-assets/go/"
+          cp embedded/forge/generated/runtime-core.js "$base/runtime-core/runtime-core.js"
+          cp embedded/forge/generated/runtime-core_bg.wasm "$base/runtime-core/runtime-core_bg.wasm"
+          cp embedded/forge/generated/runtime-core.d.ts "$base/runtime-core/runtime-core.d.ts"
+          cp embedded/forge/generated/runtime-core_bg.wasm.d.ts "$base/runtime-core/runtime-core_bg.wasm.d.ts"
+      - name: Commit assets
+        working-directory: kloks
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add -f packages/wasm-runtime/vendor/forge/toolchain-assets packages/wasm-runtime/vendor/forge/runtime-core
+          git commit -m "fix: vendor Forge toolchain assets and runtime core"
+          git push origin feat/intelligent-wasm-runtime
+      - name: Close issue
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh issue close "${{ github.event.issue.number }}" --repo dinilmusick/Agent-Workspace-1 --comment "Detached Forge toolchain assets and runtime core copied into Kloks."

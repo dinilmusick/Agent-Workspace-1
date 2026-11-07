@@ -149,8 +149,8 @@ jobs:
             await run('rust-limit', {
               language: 'rust',
               filename: 'main.rs',
-              source: 'fn main() { let mut i = 0u64; loop { i = i.wrapping_add(1); if i == 1_000_000_000 { println!("done"); break; } } }',
-              options: { instructionBudget: 50_000 }
+              source: 'fn main() { let mut i = 0u64; loop { i = i.wrapping_add(1); } }',
+              options: { instructionBudget: 5_000 }
             });
 
             // 10. repeated execution/cache behavior

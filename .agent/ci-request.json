@@ -1,8 +1,7 @@
 {
-  "repository": "dinilmusick/Loky-Engine",
+  "repository": "dinilmusick/GutTS",
   "ref": "main",
   "event": "push",
-  "workflow": "ci.yml",
-  "token_mode": "clone-only",
-  "request_id": "loky-architectural-audit-2026-11-06-1"
+  "workflow": ".github/workflows/ci.yml",
+  "token_mode": "workflow"
 }

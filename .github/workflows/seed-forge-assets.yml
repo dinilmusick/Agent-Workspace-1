@@ -29,6 +29,7 @@ jobs:
           cp -R embedded/forge/vendor/toolchain-rust/assets/. "$base/toolchain-assets/rust/"
           cp -R embedded/forge/vendor/toolchain-go/assets/. "$base/toolchain-assets/go/"
           cp -R embedded/forge/vendor/browser/dist/assets/. "$base/browser/dist/assets/"
+          cp kloks/node_modules/fflate/esm/browser.js "$base/fflate.js"
           cp embedded/forge/generated/runtime-core.js "$base/runtime-core/runtime-core.js"
           cp embedded/forge/generated/runtime-core_bg.wasm "$base/runtime-core/runtime-core_bg.wasm"
           cp embedded/forge/generated/runtime-core.d.ts "$base/runtime-core/runtime-core.d.ts"
@@ -38,7 +39,7 @@ jobs:
         run: |
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add -f packages/wasm-runtime/vendor/forge/toolchain-assets packages/wasm-runtime/vendor/forge/runtime-core
+          git add -f packages/wasm-runtime/vendor/forge/toolchain-assets packages/wasm-runtime/vendor/forge/runtime-core packages/wasm-runtime/vendor/forge/fflate.js
           git commit -m "fix: vendor Forge toolchain assets and runtime core"
           git push origin feat/intelligent-wasm-runtime
       - name: Close issue

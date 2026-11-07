@@ -42,22 +42,33 @@ jobs:
           import http from 'node:http';
           import fs from 'node:fs';
           import path from 'node:path';
-          import { fileURLToPath } from 'node:url';
-          const root=process.cwd();
-          const mime={'.html':'text/html','.js':'text/javascript','.mjs':'text/javascript','.json':'application/json','.wasm':'application/wasm','.bin':'application/octet-stream','.d.ts':'text/plain'};
-          const server=http.createServer((req,res)=>{
-            const url=new URL(req.url,'http://127.0.0.1');
-            let rel=decodeURIComponent(url.pathname);
-            if(rel==='/') rel='/e2e.html';
-            const file=path.join(root,rel);
-            if(!file.startsWith(root) || !fs.existsSync(file) || fs.statSync(file).isDirectory()){res.writeHead(404);res.end();return;}
-            res.setHeader('Cross-Origin-Opener-Policy','same-origin');
-            res.setHeader('Cross-Origin-Embedder-Policy','require-corp');
-            res.setHeader('Cross-Origin-Resource-Policy','same-origin');
-            res.setHeader('Content-Type',mime[path.extname(file)]||'application/octet-stream');
+          const root = process.cwd();
+          const mime = {
+            '.html': 'text/html',
+            '.js': 'text/javascript',
+            '.mjs': 'text/javascript',
+            '.json': 'application/json',
+            '.wasm': 'application/wasm',
+            '.bin': 'application/octet-stream',
+            '.d.ts': 'text/plain'
+          };
+          const server = http.createServer((req, res) => {
+            const url = new URL(req.url, 'http://127.0.0.1');
+            let rel = decodeURIComponent(url.pathname);
+            if (rel === '/') rel = '/e2e.html';
+            const file = path.join(root, rel);
+            if (!file.startsWith(root) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) {
+              res.writeHead(404);
+              res.end();
+              return;
+            }
+            res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
+            res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp');
+            res.setHeader('Cross-Origin-Resource-Policy', 'same-origin');
+            res.setHeader('Content-Type', mime[path.extname(file)] || 'application/octet-stream');
             fs.createReadStream(file).pipe(res);
           });
-          server.listen(4173,'127.0.0.1');
+          server.listen(4173, '127.0.0.1');
           NODE
           cat > e2e.html <<'HTML'
           <!doctype html><meta charset="utf-8"><body>loading</body>
@@ -66,37 +77,158 @@ jobs:
             const { createBrowserWasmRuntime } = await import('/packages/wasm-runtime/dist/index.js');
             const runtime = await createBrowserWasmRuntime('/packages/wasm-runtime/vendor/forge/toolchain-assets/');
             const cases = [];
-            async function run(name, request) { try { const result=await runtime.execute(request); cases.push({name,result}); } catch(error) { cases.push({name,error:String(error)}); } }
-            await run('rust-hello',{language:'rust',filename:'main.rs',source:'fn main() { println!("hello-rust"); }'});
-            await run('go-hello',{language:'go',filename:'main.go',source:'package main\nimport "fmt"\nfunc main(){fmt.Println("hello-go")}'});
-            await run('rust-input',{language:'rust',filename:'main.rs',source:'use std::io::{self, Read}; fn main(){let mut s=String::new();io::stdin().read_to_string(&mut s).unwrap();print!("{}",s);}',inputs:{value:42}});
-            await run('rust-invalid',{language:'rust',filename:'main.rs',source:'fn main( {'});
+            async function run(name, request) {
+              try {
+                const t0 = performance.now();
+                const result = await runtime.execute(request);
+                const wallTimeMs = performance.now() - t0;
+                cases.push({ name, result, wallTimeMs });
+              } catch (error) {
+                cases.push({ name, error: String(error) });
+              }
+            }
+
+            // 1. Rust Hello World
+            await run('rust-hello', {
+              language: 'rust',
+              filename: 'main.rs',
+              source: 'fn main() { println!("hello-rust"); }'
+            });
+
+            // 2. Go Hello World
+            await run('go-hello', {
+              language: 'go',
+              filename: 'main.go',
+              source: 'package main\nimport "fmt"\nfunc main(){ fmt.Println("hello-go"); }'
+            });
+
+            // 3. Rust arithmetic
+            await run('rust-arithmetic', {
+              language: 'rust',
+              filename: 'main.rs',
+              source: 'fn main() { let a: i64 = 12345; let b: i64 = 67890; println!("{}", a * b); }'
+            });
+
+            // 4. Go arithmetic
+            await run('go-arithmetic', {
+              language: 'go',
+              filename: 'main.go',
+              source: 'package main\nimport "fmt"\nfunc main() { a := 12345; b := 67890; fmt.Println(a * b); }'
+            });
+
+            // 5. stdin/input
+            await run('rust-input', {
+              language: 'rust',
+              filename: 'main.rs',
+              source: 'use std::io::{self, Read}; fn main() { let mut s = String::new(); io::stdin().read_to_string(&mut s).unwrap(); print!("{}", s); }',
+              inputs: { value: 42 }
+            });
+
+            // 6. invalid source
+            await run('rust-invalid', {
+              language: 'rust',
+              filename: 'main.rs',
+              source: 'fn main( {'
+            });
+
+            // 7. runtime failure/trap
+            await run('rust-trap', {
+              language: 'rust',
+              filename: 'main.rs',
+              source: 'fn main() { panic!("intentional runtime trap"); }'
+            });
+
+            // 8. larger program
+            await run('rust-larger', {
+              language: 'rust',
+              filename: 'main.rs',
+              source: 'fn fib(n: u32) -> u64 { if n <= 1 { n as u64 } else { fib(n - 1) + fib(n - 2) } } fn main() { println!("fib(15) = {}", fib(15)); }'
+            });
+
+            // 9. resource-limit enforcement (low instruction budget triggers termination)
+            await run('rust-limit', {
+              language: 'rust',
+              filename: 'main.rs',
+              source: 'fn main() { let mut i = 0u64; loop { i = i.wrapping_add(1); if i == 1_000_000_000 { println!("done"); break; } } }',
+              options: { instructionBudget: 50_000 }
+            });
+
+            // 10. repeated execution/cache behavior
+            await run('rust-cache-repeat', {
+              language: 'rust',
+              filename: 'main.rs',
+              source: 'fn main() { println!("hello-rust"); }'
+            });
+
             runtime.dispose();
-            document.body.textContent=JSON.stringify({crossOriginIsolated, cases});
+            document.body.textContent = JSON.stringify({ crossOriginIsolated, cases });
           } catch (error) {
-            document.body.textContent=JSON.stringify({crossOriginIsolated, bootError:String(error), stack:error?.stack});
+            document.body.textContent = JSON.stringify({ crossOriginIsolated, bootError: String(error), stack: error?.stack });
           }
           </script>
           HTML
           (node /tmp/wasm-e2e-server.mjs >/tmp/wasm-e2e-server.log 2>&1 & echo $! > /tmp/wasm-e2e.pid)
           node --input-type=module <<'NODE'
           import { chromium } from 'playwright';
-          const browser=await chromium.launch({headless:true});
-          const page=await browser.newPage();
-          await page.goto('http://127.0.0.1:4173/',{waitUntil:'load',timeout:30000});
-          await page.waitForFunction(()=>document.body.textContent?.startsWith('{"crossOriginIsolated"'),null,{timeout:120000});
-          console.log(await page.locator('body').textContent());
-          const data=JSON.parse(await page.locator('body').textContent());
-          if(!data.crossOriginIsolated) throw new Error('Browser is not cross-origin isolated');
-          const rust=data.cases.find(x=>x.name==='rust-hello')?.result;
-          const go=data.cases.find(x=>x.name==='go-hello')?.result;
-          const input=data.cases.find(x=>x.name==='rust-input')?.result;
-          const invalid=data.cases.find(x=>x.name==='rust-invalid')?.result;
-          if(!rust?.success || rust.stdout.trim()!=='hello-rust') throw new Error('Rust E2E failed: '+JSON.stringify(rust));
-          if(!go?.success || go.stdout.trim()!=='hello-go') throw new Error('Go E2E failed: '+JSON.stringify(go));
-          if(!input?.success || !input.stdout.includes('42')) throw new Error('Input E2E failed: '+JSON.stringify(input));
-          if(invalid?.success) throw new Error('Invalid-source E2E unexpectedly succeeded');
-          console.log(JSON.stringify(data));
+          const browser = await chromium.launch({ headless: true });
+          const page = await browser.newPage();
+          page.on('console', msg => console.log('PAGE LOG:', msg.text()));
+          page.on('pageerror', err => console.log('PAGE ERROR:', err));
+          await page.goto('http://127.0.0.1:4173/', { waitUntil: 'load', timeout: 30000 });
+          await page.waitForFunction(() => document.body.textContent?.startsWith('{"crossOriginIsolated"'), null, { timeout: 300000 });
+          const rawText = await page.locator('body').textContent();
+          console.log('BODY RESULT:', rawText);
+          const data = JSON.parse(rawText);
+          if (!data.crossOriginIsolated) throw new Error('Browser is not cross-origin isolated');
+          if (data.bootError) throw new Error('Browser boot error: ' + data.bootError);
+
+          function findCase(name) {
+            const found = data.cases.find(x => x.name === name);
+            if (!found) throw new Error(`Missing test case result: ${name}`);
+            return found;
+          }
+
+          // 1. Rust Hello World
+          const rustHello = findCase('rust-hello').result;
+          if (!rustHello?.success || rustHello.stdout.trim() !== 'hello-rust') throw new Error('Rust hello failed: ' + JSON.stringify(rustHello));
+
+          // 2. Go Hello World
+          const goHello = findCase('go-hello').result;
+          if (!goHello?.success || goHello.stdout.trim() !== 'hello-go') throw new Error('Go hello failed: ' + JSON.stringify(goHello));
+
+          // 3. Rust arithmetic
+          const rustArith = findCase('rust-arithmetic').result;
+          if (!rustArith?.success || !rustArith.stdout.includes('838102050')) throw new Error('Rust arithmetic failed: ' + JSON.stringify(rustArith));
+
+          // 4. Go arithmetic
+          const goArith = findCase('go-arithmetic').result;
+          if (!goArith?.success || !goArith.stdout.includes('838102050')) throw new Error('Go arithmetic failed: ' + JSON.stringify(goArith));
+
+          // 5. stdin/input
+          const rustInput = findCase('rust-input').result;
+          if (!rustInput?.success || !rustInput.stdout.includes('42')) throw new Error('Rust input failed: ' + JSON.stringify(rustInput));
+
+          // 6. invalid source
+          const rustInvalid = findCase('rust-invalid').result;
+          if (rustInvalid?.success || !rustInvalid?.diagnostics?.length) throw new Error('Rust invalid source failed: ' + JSON.stringify(rustInvalid));
+
+          // 7. runtime failure/trap
+          const rustTrap = findCase('rust-trap').result;
+          if (rustTrap?.success) throw new Error('Rust runtime trap unexpectedly succeeded: ' + JSON.stringify(rustTrap));
+
+          // 8. larger program
+          const rustLarger = findCase('rust-larger').result;
+          if (!rustLarger?.success || !rustLarger.stdout.includes('610')) throw new Error('Rust larger program failed: ' + JSON.stringify(rustLarger));
+
+          // 9. resource-limit enforcement
+          const rustLimit = findCase('rust-limit').result;
+          if (rustLimit?.success) throw new Error('Rust resource limit unexpectedly succeeded: ' + JSON.stringify(rustLimit));
+
+          // 10. repeated execution/cache behavior
+          const repeatCase = findCase('rust-cache-repeat');
+          if (!repeatCase.result?.success || repeatCase.result.stdout.trim() !== 'hello-rust') throw new Error('Rust repeat execution failed: ' + JSON.stringify(repeatCase));
+
+          console.log('ALL 10 MANDATORY REAL WASM RUNTIME TESTS VERIFIED SUCCESSFULLY IN BROWSER!');
           await browser.close();
           NODE
       - name: Close issue

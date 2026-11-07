@@ -63,7 +63,7 @@ jobs:
           <!doctype html><meta charset="utf-8"><body>loading</body>
           <script type="module">
           const { createBrowserWasmRuntime } = await import('/packages/wasm-runtime/dist/index.js');
-          const runtime = await createBrowserWasmRuntime('/packages/wasm-runtime/vendor/forge/browser/');
+          const runtime = await createBrowserWasmRuntime('/packages/wasm-runtime/vendor/forge/toolchain-assets/');
           const cases = [];
           async function run(name, request) { try { const result=await runtime.execute(request); cases.push({name,result}); } catch(error) { cases.push({name,error:String(error)}); } }
           await run('rust-hello',{language:'rust',filename:'main.rs',source:'fn main() { println!("hello-rust"); }'});

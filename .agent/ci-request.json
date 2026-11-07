@@ -1,7 +1,7 @@
 {
-  "repository": "dinilmusick/GutTS",
+  "repository": "dinilmusick/Skipo",
   "ref": "main",
   "event": "push",
-  "workflow": ".github/workflows/ci.yml",
+  "workflow": "ci.yml",
   "token_mode": "workflow"
 }

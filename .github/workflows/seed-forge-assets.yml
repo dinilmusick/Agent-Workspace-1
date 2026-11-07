@@ -32,6 +32,14 @@ jobs:
       - name: Install Kloks dependencies
         working-directory: kloks
         run: pnpm install --force --no-frozen-lockfile
+      - name: Fetch fflate source for one-time vendoring
+        working-directory: kloks
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/fflate
+          cd /tmp/fflate
+          pnpm pack fflate@0.8.3
+          tar -xzf fflate-0.8.3.tgz
       - name: Copy toolchain assets and runtime core
         run: |
           set -euo pipefail
@@ -40,7 +48,7 @@ jobs:
           cp -R embedded/forge/vendor/toolchain-rust/assets/. "$base/toolchain-assets/rust/"
           cp -R embedded/forge/vendor/toolchain-go/assets/. "$base/toolchain-assets/go/"
           cp -R embedded/forge/vendor/browser/dist/assets/. "$base/browser/dist/assets/"
-          cp kloks/node_modules/fflate/esm/browser.js "$base/fflate.js"
+          cp /tmp/fflate/package/esm/browser.js "$base/fflate.js"
           cp embedded/forge/generated/runtime-core.js "$base/runtime-core/runtime-core.js"
           cp embedded/forge/generated/runtime-core_bg.wasm "$base/runtime-core/runtime-core_bg.wasm"
           cp embedded/forge/generated/runtime-core.d.ts "$base/runtime-core/runtime-core.d.ts"

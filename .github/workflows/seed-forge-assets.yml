@@ -28,6 +28,7 @@ jobs:
           mkdir -p "$base/toolchain-assets/rust" "$base/toolchain-assets/go" "$base/runtime-core"
           cp -R embedded/forge/vendor/toolchain-rust/assets/. "$base/toolchain-assets/rust/"
           cp -R embedded/forge/vendor/toolchain-go/assets/. "$base/toolchain-assets/go/"
+          cp -R embedded/forge/vendor/browser/dist/assets/. "$base/browser/dist/assets/"
           cp embedded/forge/generated/runtime-core.js "$base/runtime-core/runtime-core.js"
           cp embedded/forge/generated/runtime-core_bg.wasm "$base/runtime-core/runtime-core_bg.wasm"
           cp embedded/forge/generated/runtime-core.d.ts "$base/runtime-core/runtime-core.d.ts"

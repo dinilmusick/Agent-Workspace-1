@@ -80,7 +80,7 @@ jobs:
           const browser=await chromium.launch({headless:true});
           const page=await browser.newPage();
           await page.goto('http://127.0.0.1:4173/',{waitUntil:'load',timeout:30000});
-          await page.waitForFunction(()=>document.body.textContent?.startsWith('{"crossOriginIsolated"'),null,{timeout:600000});
+          await page.waitForFunction(()=>document.body.textContent?.startsWith('{"crossOriginIsolated"'),null,{timeout:120000});
           const data=JSON.parse(await page.locator('body').textContent());
           if(!data.crossOriginIsolated) throw new Error('Browser is not cross-origin isolated');
           const rust=data.cases.find(x=>x.name==='rust-hello')?.result;

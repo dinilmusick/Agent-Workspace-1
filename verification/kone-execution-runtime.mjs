@@ -12,7 +12,7 @@ const run = (command, args) => {
 run('git', ['clone', '--branch', 'feature/section-graph-midi-foundation', '--depth', '1', 'https://github.com/dinilmusick/Kone.git', target]);
 run('npm', ['install', '--no-audit', '--no-fund']);
 run('npm', ['run', 'lint']);
-run('npm', ['test]);
+run('npm', ['test']);
 run('npm', ['run', 'build']);
 run('npm', ['run', 'validate']);
 console.log('Kone execution-runtime verification completed.');

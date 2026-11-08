@@ -35,11 +35,13 @@ jobs:
           corepack enable || true
           node --version
           npm --version
+          npm pack @ultrst-armada/floks@1.13.15 --pack-destination /tmp
+          tar -tf /tmp/ultrst-armada-floks-1.13.15.tgz | grep -E 'useNodeGraph|FrnlEditableNodeGraph' || true
           npm install --no-audit --no-fund
           npm run lint
           npm run build
           npm run validate
-          npm exec --yes vitest@3.1.0 run src/frontend/components/performance/transport.test.ts
+          npm exec --yes tsx src/frontend/components/performance/transport.test.ts
           if git grep -n -E 'class (Clock|Osc)(Service|Manager)|function (createClock|createOsc)' -- 'src/frontend' ':!src/frontend/components/performance/transport.ts' ':!src/frontend/components/performance/osc.ts'; then
             echo "Duplicate Kone Clock/OSC implementation detected"
             exit 1

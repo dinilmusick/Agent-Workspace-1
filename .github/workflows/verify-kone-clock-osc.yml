@@ -3,6 +3,8 @@ name: Verify Kone Clock OSC Integration
 on:
   push:
     branches: [verify/kone-clock-osc-20261108]
+  pull_request:
+    branches: [main]
 
 permissions:
   contents: read

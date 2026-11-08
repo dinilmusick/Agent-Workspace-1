@@ -1,0 +1,46 @@
+name: Verify Kone Clock OSC Integration
+
+on:
+  push:
+    branches: [verify/kone-clock-osc-20261108]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout Agent Workspace
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Checkout Kone target
+        uses: actions/checkout@v4
+        with:
+          repository: dinilmusick/Kone
+          ref: feature/section-graph-midi-foundation
+          token: ${{ secrets.CODING_REPO_TOKEN }}
+          path: target
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Verify target
+        working-directory: target
+        shell: bash
+        run: |
+          set -euo pipefail
+          corepack enable || true
+          node --version
+          npm --version
+          npm install --no-audit --no-fund
+          npm run lint
+          npm run build
+          npm run validate
+          npm exec --yes vitest@3.1.0 run src/frontend/components/performance/transport.test.ts
+          if git grep -n -E 'class (Clock|Osc)(Service|Manager)|function (createClock|createOsc)' -- 'src/frontend' ':!src/frontend/components/performance/transport.ts' ':!src/frontend/components/performance/osc.ts'; then
+            echo "Duplicate Kone Clock/OSC implementation detected"
+            exit 1
+          fi
+          git diff --check
+          echo "Agent-Workspace-1 independent Kone verification passed."

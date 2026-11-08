@@ -1,7 +1,7 @@
 {
-  "repository": "dinilmusick/Skipo",
-  "ref": "main",
+  "repository": "dinilmusick/Kone",
+  "ref": "reconcile/kone-first-major-update",
   "event": "push",
-  "workflow": "ci.yml",
+  "workflow": "",
   "token_mode": "workflow"
 }

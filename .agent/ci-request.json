@@ -1,8 +1,8 @@
 {
   "repository": "dinilmusick/Kone",
-  "ref": "reconcile/kone-first-major-update",
+  "ref": "main",
   "event": "push",
   "workflow": "",
   "token_mode": "workflow",
-  "nonce": "deadbeefcafebabefeedface0011223344556677"
+  "nonce": "1234567890abcdef1234567890abcdef12345678"
 }

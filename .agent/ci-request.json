@@ -4,5 +4,5 @@
   "event": "push",
   "workflow": "",
   "token_mode": "workflow",
-  "nonce": "1234567890abcdef1234567890abcdef12345678"
+  "nonce": "abcdef0123456789abcdef0123456789abcdef01"
 }

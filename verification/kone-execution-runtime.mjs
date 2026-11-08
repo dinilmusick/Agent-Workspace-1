@@ -6,7 +6,7 @@ rmSync(target, { recursive: true, force: true });
 
 const run = (command, args) => {
   console.log('$', command, ...args);
-  execFileSync(command, args, { stdio: 'inherit', cwd: '/tmp' });
+  execFileSync(command, args, { stdio: 'inherit', cwd: command === 'git' ? '/tmp' : target });
 };
 
 run('git', ['clone', '--branch', 'feature/section-graph-midi-foundation', '--depth', '1', 'https://github.com/dinilmusick/Kone.git', target]);

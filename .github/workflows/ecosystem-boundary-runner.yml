@@ -1,0 +1,148 @@
+name: Ecosystem Boundary Runner
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Ref to test for all repositories (blank uses each default branch)"
+        required: false
+        default: ""
+        type: string
+      workflow:
+        description: "Optional workflow filename to run; blank auto-selects boundary workflows"
+        required: false
+        default: ""
+        type: string
+  push:
+    paths:
+      - ".agent/ecosystem-boundary-request.json"
+
+permissions:
+  contents: read
+
+jobs:
+  boundary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - repository: dinilmusick/GutTS
+          - repository: dinilmusick/KrnlTS
+          - repository: dinilmusick/FrnlTS
+          - repository: dinilmusick/Kloks
+          - repository: dinilmusick/Floks
+          - repository: dinilmusick/Skipo
+          - repository: dinilmusick/Krusbl-Engine
+    env:
+      TARGET_REPOSITORY: ${{ matrix.repository }}
+      TARGET_REF: ${{ inputs.ref }}
+      REQUEST_WORKFLOW: ${{ inputs.workflow }}
+      CODING_REPO_TOKEN: ${{ secrets.CODING_REPO_TOKEN }}
+    steps:
+      - name: Checkout Agent Workspace
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af49
+        with:
+          persist-credentials: false
+
+      - name: Load request
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "${{ github.event_name }}" == "push" && -f .agent/ecosystem-boundary-request.json ]]; then
+            export REQUEST_FILE=.agent/ecosystem-boundary-request.json
+            TARGET_REF="$(jq -r '.ref // ""' "$REQUEST_FILE")"
+            REQUEST_WORKFLOW="$(jq -r '.workflow // ""' "$REQUEST_FILE")"
+          else
+            TARGET_REF="${TARGET_REF:-}"
+            REQUEST_WORKFLOW="${REQUEST_WORKFLOW:-}"
+          fi
+          {
+            echo "TARGET_REF=$TARGET_REF"
+            echo "REQUEST_WORKFLOW=$REQUEST_WORKFLOW"
+          } >> "$GITHUB_ENV"
+          test -n "$CODING_REPO_TOKEN"
+
+      - name: Clone target repository
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p clones
+          owner="${TARGET_REPOSITORY%%/*}"
+          name="${TARGET_REPOSITORY#*/}"
+          dest="clones/${owner}__${name}"
+          url="https://x-access-token:${CODING_REPO_TOKEN}@github.com/${TARGET_REPOSITORY}.git"
+          if [[ -n "${TARGET_REF}" ]]; then
+            git clone --depth 1 --branch "${TARGET_REF}" "$url" "$dest"
+          else
+            git clone --depth 1 "$url" "$dest"
+          fi
+          git -C "$dest" remote set-url origin "https://github.com/${TARGET_REPOSITORY}.git"
+          echo "CLONED_REPO=$dest" >> "$GITHUB_ENV"
+
+      - name: Install act
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 8 --retry-delay 5 --retry-all-errors --connect-timeout 20 --max-time 240 \
+            https://github.com/nektos/act/releases/download/v0.2.89/act_Linux_x86_64.tar.gz -o /tmp/act.tar.gz
+          echo "0191d6f1f3b716b5c55820032605d05fc3c1cdbf581ebeff655019e5dd1524c0  /tmp/act.tar.gz" | sha256sum -c -
+          tar -xzf /tmp/act.tar.gz -C /tmp act
+          sudo install -m 0755 /tmp/act /usr/local/bin/act
+          act --version
+
+      - name: Select boundary workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$CLONED_REPO"
+          if [[ -n "${REQUEST_WORKFLOW}" ]]; then
+            test -f ".github/workflows/${REQUEST_WORKFLOW}"
+            echo "BOUNDARY_WORKFLOW=.github/workflows/${REQUEST_WORKFLOW}" >> "$GITHUB_ENV"
+            exit 0
+          fi
+          mapfile -t candidates < <(
+            find .github/workflows -type f \( -name '*.yml' -o -name '*.yaml' \) -print 2>/dev/null |
+            while read -r wf; do
+              if grep -Eiq 'boundary|architecture' "$wf"; then printf '%s\n' "$wf"; fi
+            done | sort
+          )
+          if [[ ${#candidates[@]} -eq 0 ]]; then
+            echo "No boundary/architecture workflow found" >&2
+            exit 4
+          fi
+          printf '%s\n' "${candidates[@]}"
+          echo "BOUNDARY_WORKFLOW=${candidates[0]}" >> "$GITHUB_ENV"
+
+      - name: Execute boundary workflow through Agent Workspace
+        shell: bash
+        env:
+          ACT_GITHUB_TOKEN: ${{ secrets.CODING_REPO_TOKEN }}
+        run: |
+          set -euo pipefail
+          cd "$CLONED_REPO"
+          mkdir -p /tmp/agent-workspace-artifacts
+          act push \
+            -W "$BOUNDARY_WORKFLOW" \
+            --platform "ubuntu-24.04=catthehacker/ubuntu:act-latest" \
+            --artifact-server-path /tmp/agent-workspace-artifacts \
+            --secret "GITHUB_TOKEN=$ACT_GITHUB_TOKEN" | tee "$GITHUB_WORKSPACE/$(basename "$CLONED_REPO").boundary.log"
+
+      - name: Upload boundary evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: boundary-${{ matrix.repository }}-${{ github.run_id }}
+          path: |
+            *.boundary.log
+            /tmp/agent-workspace-artifacts/**
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Cleanup clone
+        if: always()
+        shell: bash
+        run: |
+          rm -rf "${CLONED_REPO:-}" /tmp/agent-workspace-artifacts
+          test -z "$(find clones -mindepth 1 -maxdepth 1 -print -quit 2>/dev/null || true)"

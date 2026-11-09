@@ -15,6 +15,7 @@
 4. For coding goals, activate `skills/coding-router/SKILL.md` and its narrow specialist skills.
 5. For multi-stage or ambiguous goals, use Prompt Map; for repeated action/verification, use Loop Generator and Looper.
 6. For multi-agent work, use Task Ledger in Supabase as the shared source of truth.
+7. For explicit implementation-push requests, route to the dedicated Implementation Push skill and require the full completion/verification loop.
 
 ## Skill and tool catalogue
 
@@ -137,3 +138,19 @@ GitHub is a first-class execution substrate, not only a source-control API.
 - Repository creation requires a coding credential with GitHub **Repository creation: write** permission.
 - Agents with GitHub access should be able to complete the full repository lifecycle without Supabase: create → scaffold → code → lint → test → build → verify → commit/push → Actions evidence.
 - For ULTRST/Skipo development, treat GitHub + Actions + canonical Skipo/GutTS/KrnlTS/FrnlTS/Kloks/Floks/Luth/Srkl/Loky repositories as the executable development substrate. Supabase is coordination state, not a prerequisite for coding.
+
+## Implementation Push
+
+An **implementation push** is a first-class coding execution mode, not merely a review. When the user explicitly asks for an implementation push (or equivalent), route to `skills/implementation-push/SKILL.md`.
+
+The implementation-push agent must:
+- re-analyze the **entire target codebase** with a fresh perspective, not just the latest diff;
+- rediscover architecture, execution paths, interfaces, dependencies, data flow, runtime boundaries and tests;
+- actively search for bugs, stubs, TODOs, placeholders, dead paths, fake behavior, missing error handling, incomplete contracts and systems that are implemented but not actually wired together;
+- reproduce and diagnose findings, then implement the missing behavior and fix root causes rather than merely reporting them;
+- rewire affected layers and verify actual runtime reachability;
+- run verification from focused/unit checks through integration and end-to-end/browser/API/platform checks as applicable;
+- loop through re-analysis → fix → verification until the implementation is complete, or every remaining gap has a concrete external blocker or explicit out-of-scope reason;
+- record evidence and require independent verification before declaring completion.
+
+A green build or test suite is not sufficient proof of an implementation push. Source presence is not proof of wiring, and analysis is not completion.

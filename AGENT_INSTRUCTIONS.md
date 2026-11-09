@@ -16,3 +16,4 @@ CREATE→goal_ledger_create_omni_hierarchical;Vision→tldraw.
 ROUTE={coding:CodingRouter;skill*:SkillCreator;diagram:DiagramEngineering+tldrawAgent;other:closestActive}.
 OBSTACLE=semanticSearch→dedupe/update→occurrence+evidence.
 COMPLETE=NO unless required processes terminal+evidence+independentVerification+reconciliation.
+IMPLEMENTATION_PUSH=explicit("implementation push"|"implementation pass"|equiv)→ImplementationPush(primary)+CodingWorkflow+TestingStrategy(+DebuggingRootCause/+CodeReview);MODE=freshWholeCodebaseReanalysis→findBugsStubsPlaceholdersUnwiredSystems→diagnose→implement→rewire→focusedVerify→integration/E2E→independentVerify→reAnalyze;NEVER_STOP_AT_ANALYSIS;NEVER_ASSUME_PRIOR_PASS_COMPLETE;NO_FAKE_BEHAVIOR;COMPLETE=onlyTerminalEvidence+independentVerification+noKnownIncompleteImplementationOrDocumentedExternalBlocker.

@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
-      CODING_REPO_TOKEN: __DOLLAR__{{ secrets.CODING_REPO_TOKEN }}
+      CODING_REPO_TOKEN: ${{ secrets.CODING_REPO_TOKEN }}
     steps:
       - uses: actions/checkout@v4
       - name: Checkout GutTS branch
@@ -32,6 +32,12 @@ jobs:
           path: target/Floks
           fetch-depth: 0
           persist-credentials: false
+
+      - name: Setup pnpm
+        shell: bash
+        run: |
+          corepack enable
+          corepack prepare pnpm@10.33.0 --activate
 
       - name: Implement GutTS
         shell: bash
@@ -207,7 +213,7 @@ jobs:
           git config user.name "Krusbl Agent"
           git config user.email "155351357+dinilmusick@users.noreply.github.com"
           git commit -m "refactor: enforce browser-owned Floks graph boundary" || true
-          git remote set-url origin https://x-access-token:__DOLLAR__{CODING_REPO_TOKEN}@github.com/dinilmusick/Floks.git
+          git remote set-url origin https://x-access-token:${CODING_REPO_TOKEN}@github.com/dinilmusick/Floks.git
           git push origin HEAD:refactor/browser-server-boundary
 
       - name: Push GutTS
@@ -219,5 +225,5 @@ jobs:
           git config user.name "Krusbl Agent"
           git config user.email "155351357+dinilmusick@users.noreply.github.com"
           git commit -m "refactor: harden browser dependency boundary" || true
-          git remote set-url origin https://x-access-token:__DOLLAR__{CODING_REPO_TOKEN}@github.com/dinilmusick/GutTS.git
+          git remote set-url origin https://x-access-token:${CODING_REPO_TOKEN}@github.com/dinilmusick/GutTS.git
           git push origin HEAD:refactor/browser-server-boundary-complete

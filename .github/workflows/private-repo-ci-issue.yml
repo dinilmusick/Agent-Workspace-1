@@ -37,7 +37,7 @@ jobs:
       CODING_REPO_TOKEN: ${{ secrets.CODING_REPO_TOKEN }}
     steps:
       - name: Checkout runner substrate
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af49
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           persist-credentials: false
 

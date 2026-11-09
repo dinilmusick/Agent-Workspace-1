@@ -1,8 +1,8 @@
 {
   "repository": "dinilmusick/Kone",
-  "ref": "main",
+  "ref": "implementation-push/kone/fresh-completion-20261109",
   "event": "push",
   "workflow": "ci.yml",
   "token_mode": "workflow",
-  "nonce": "kone-implementation-push-post-merge-20261109-1"
+  "nonce": "kone-implementation-push-20261109-fresh-1"
 }

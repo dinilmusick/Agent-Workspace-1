@@ -11,7 +11,7 @@
     ],
     "exportedAt": "2026-11-05T00:00:00.000Z"
   },
-  "count": 36,
+  "count": 37,
   "skills": [
     {
       "id": 1,
@@ -680,7 +680,29 @@
           "usage": "Create repositories, dispatch development/scaffold workflows, inspect Actions evidence."
         }
       ]
+    },
+    {
+      "id": 42,
+      "name": "Implementation Push",
+      "slug": "implementation-push",
+      "version": "1.0.0",
+      "status": "active",
+      "path": "skills/implementation-push/SKILL.md",
+      "tools": [
+        {
+          "slug": "github",
+          "type": "connector",
+          "required": true,
+          "usage": "Inspect and modify the target repository and CI evidence when authorized."
+        },
+        {
+          "slug": "container",
+          "type": "other",
+          "required": true,
+          "usage": "Run executable verification and integration checks; use Agent-Workspace-1 for broader repository/CI/ecosystem verification."
+        }
+      ]
     }
   ],
-  "exportedAt": "2026-11-05T00:00:00.000Z"
+  "exportedAt": "2026-11-09"
 }

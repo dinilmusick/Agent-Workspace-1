@@ -4,5 +4,5 @@
   "event": "push",
   "workflow": "ci.yml",
   "token_mode": "workflow",
-  "nonce": "loky-implementation-push-1794211850617"
+  "nonce": "loky-implementation-push-1794212067656"
 }

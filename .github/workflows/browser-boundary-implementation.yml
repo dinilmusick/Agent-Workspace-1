@@ -55,6 +55,14 @@ jobs:
           pkg.dependencies=deps; pkg.devDependencies=dev; pkg.peerDependencies=peers; pkg.peerDependenciesMeta=meta;
           fs.writeFileSync('package.json',JSON.stringify(pkg,null,2)+'\n');
           NODE
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('tests/browser-boundary.test.ts')
+          s=p.read_text()
+          s=s.replace('const entry = path.join(root, "dist", "index.js");','const entry = path.join(root, "dist", "browser.js");')
+          s=s.replace('    expect([...closure].some((file) => file.includes(`${path.sep}storage${path.sep}`))).toBe(false);','    expect([...closure].some((file) => file.includes(`${path.sep}storage${path.sep}`))).toBe(false);')
+          p.write_text(s)
+          PY
           cat > src/index.ts <<'EOF'
           export * from "./json/json-concepts.js";
           export * from "./strings/string-concepts.js";

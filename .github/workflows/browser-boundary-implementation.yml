@@ -224,7 +224,15 @@ jobs:
           p=Path('packages/canvas-ui/package.json'); d=json.loads(p.read_text()); d.get('dependencies',{}).pop('@kloks/state-graph',None); d['dependencies']['@floks/contracts']='workspace:*'; d['scripts']['build']=d['scripts']['build'].replace(' --external @kloks/state-graph','').replace(' --external @kloks/audio-midi',''); p.write_text(json.dumps(d,indent=2)+'\n')
           p=Path('packages/canvas-ui/tsconfig.json')
           if p.exists():
-              d=json.loads(p.read_text()); paths=d.get('compilerOptions',{}).get('paths',{}); paths.pop('@kloks/state-graph',None); paths.pop('@kloks/audio-midi',None); p.write_text(json.dumps(d,indent=2)+'\n')
+              d=json.loads(p.read_text()); paths=d.get('compilerOptions',{}).get('paths',{})
+              paths.pop('@kloks/state-graph',None); paths.pop('@kloks/audio-midi',None)
+              paths['@floks/contracts']=['../contracts/src/index.ts']; paths['@floks/contracts/state-graph']=['../contracts/src/state-graph.ts']; paths['@floks/ui']=['../ui/src/index.ts']
+              p.write_text(json.dumps(d,indent=2)+'\n')
+          p=Path('packages/ui/tsconfig.json')
+          if p.exists():
+              d=json.loads(p.read_text()); paths=d.get('compilerOptions',{}).get('paths',{})
+              paths.pop('@kloks/state-graph',None); paths.pop('@kloks/audio-midi',None); paths['@floks/ui']=['../ui/src/index.ts']; paths['@floks/contracts']=['../contracts/src/index.ts']; paths['@floks/contracts/state-graph']=['../contracts/src/state-graph.ts']
+              p.write_text(json.dumps(d,indent=2)+'\n')
           p=Path('packages/ui/tsconfig.json')
           if p.exists():
               d=json.loads(p.read_text()); paths=d.get('compilerOptions',{}).get('paths',{}); paths.pop('@kloks/audio-midi',None); p.write_text(json.dumps(d,indent=2)+'\n')

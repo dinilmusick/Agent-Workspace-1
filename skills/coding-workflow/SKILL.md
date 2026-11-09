@@ -1,7 +1,7 @@
 ---
 name: "Coding Workflow"
 slug: coding-workflow
-version: 1.0.0
+version: 1.0.9
 source: Supabase Skills Database
 sourceId: 20
 status: active
@@ -70,3 +70,13 @@ Required evidence flow:
 request → clone → validate workflows → act → tests/typecheck/build → capture evidence → independent verification → cleanup
 
 Do not stop at private CI unavailable. Do not expose CODING_REPO_TOKEN or DEPLOYMENT_TOKEN to target workflow code.
+
+## Implementation Push mode
+
+When the request is explicitly an implementation push or implementation pass, do not treat it as an ordinary feature task or a narrow review. Activate the Implementation Push skill as the primary specialist.
+
+Required execution pattern:
+
+`whole-codebase re-analysis → completeness audit → reproduce/diagnose → implement/fix → rewire → focused verification → integration/runtime/E2E verification → independent verification → fresh re-analysis`
+
+The pass must search for and address bugs, stubs, placeholders, TODO-like incomplete behavior, disconnected interfaces, partial implementations, dead paths, broken contracts, missing error handling, missing persistence, and systems that are present in source but unreachable in the real execution flow. Continue the loop until no known implementable incompleteness remains. A report of findings without implementing the available fixes is not an implementation push completion.

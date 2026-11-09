@@ -47,13 +47,13 @@ jobs:
           INPUT_REPOSITORY: ${{ inputs.repository }}
           INPUT_REF: ${{ inputs.ref }}
           INPUT_WORKFLOW: ${{ inputs.workflow }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
         run: |
           set -euo pipefail
           if [[ "${{ github.event_name }}" == "issues" ]]; then
-            body="${{ github.event.issue.body }}"
-            repository="$(python3 -c 'import json,sys; print(json.loads(sys.argv[1])["repository"])' "$body")"
-            ref="$(python3 -c 'import json,sys; print(json.loads(sys.argv[1]).get("ref","main"))' "$body")"
-            workflow="$(python3 -c 'import json,sys; print(json.loads(sys.argv[1]).get("workflow","architecture-boundary.yml"))' "$body")"
+            repository="$(python3 -c 'import json,os; print(json.loads(os.environ["ISSUE_BODY"])["repository"])')"
+            ref="$(python3 -c 'import json,os; print(json.loads(os.environ["ISSUE_BODY"]).get("ref","main"))')"
+            workflow="$(python3 -c 'import json,os; print(json.loads(os.environ["ISSUE_BODY"]).get("workflow","architecture-boundary.yml"))')"
           else
             repository="$INPUT_REPOSITORY"
             ref="$INPUT_REF"

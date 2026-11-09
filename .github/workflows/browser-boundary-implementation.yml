@@ -120,10 +120,6 @@ jobs:
           Harden the explicit browser surface by isolating model runtimes as optional runtime peers and removing model, semantic-input, and API runtime exports from the browser entrypoint.
           EOF
           pnpm install --no-frozen-lockfile
-          pnpm --filter @floks/contracts build
-          pnpm --filter @floks/ui build
-          echo "=== BUILT PACKAGE OUTPUTS ==="
-          find packages/contracts/dist packages/ui/dist -maxdepth 2 -type f | head -80
           pnpm typecheck
           pnpm test
           pnpm build
@@ -259,6 +255,10 @@ jobs:
           Remove backend package coupling from browser UI packages and move the browser node-graph contract/runtime helpers into Floks contracts.
           EOF
           pnpm install --no-frozen-lockfile
+          pnpm --filter @floks/contracts build
+          pnpm --filter @floks/ui build
+          echo "=== BUILT PACKAGE OUTPUTS ==="
+          find packages/contracts/dist packages/ui/dist -maxdepth 2 -type f | head -80
           pnpm typecheck
           pnpm test
           pnpm build
@@ -266,7 +266,7 @@ jobs:
           git config user.name "Krusbl Agent"
           git config user.email "155351357+dinilmusick@users.noreply.github.com"
           git commit -m "refactor: enforce browser-owned Floks graph boundary" || true
-          git remote set-url origin https://x-access-token:${CODING_REPO_TOKEN}@github.com/dinilmusick/Floks.git
+          git config credential.helper '!f() { printf "username=x-access-token\npassword=%s\n" "$CODING_REPO_TOKEN"; }; f'
           git push origin HEAD:refactor/browser-server-boundary
 
       - name: Push GutTS
@@ -278,5 +278,5 @@ jobs:
           git config user.name "Krusbl Agent"
           git config user.email "155351357+dinilmusick@users.noreply.github.com"
           git commit -m "refactor: harden browser dependency boundary" || true
-          git remote set-url origin https://x-access-token:${CODING_REPO_TOKEN}@github.com/dinilmusick/GutTS.git
+          git config credential.helper '!f() { printf "username=x-access-token\npassword=%s\n" "$CODING_REPO_TOKEN"; }; f'
           git push origin HEAD:refactor/browser-server-boundary-complete

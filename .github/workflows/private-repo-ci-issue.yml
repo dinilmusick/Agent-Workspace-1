@@ -1,0 +1,127 @@
+name: Private Repository CI Runner
+
+on:
+  issues:
+    types: [opened]
+  workflow_dispatch:
+    inputs:
+      repository:
+        description: "Target owner/name"
+        required: true
+        type: string
+      ref:
+        description: "Branch, tag or SHA"
+        required: false
+        default: main
+        type: string
+      workflow:
+        description: "Workflow filename under .github/workflows"
+        required: true
+        default: architecture-boundary.yml
+        type: string
+
+permissions:
+  contents: read
+  issues: read
+
+jobs:
+  run:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'issues' &&
+       github.event.action == 'opened' &&
+       contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.issue.author_association))
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      CODING_REPO_TOKEN: ${{ secrets.CODING_REPO_TOKEN }}
+    steps:
+      - name: Checkout runner substrate
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af49
+        with:
+          persist-credentials: false
+
+      - name: Resolve request
+        shell: bash
+        env:
+          INPUT_REPOSITORY: ${{ inputs.repository }}
+          INPUT_REF: ${{ inputs.ref }}
+          INPUT_WORKFLOW: ${{ inputs.workflow }}
+        run: |
+          set -euo pipefail
+          if [[ "${{ github.event_name }}" == "issues" ]]; then
+            body="${{ github.event.issue.body }}"
+            repository="$(python3 -c 'import json,sys; print(json.loads(sys.argv[1])["repository"])' "$body")"
+            ref="$(python3 -c 'import json,sys; print(json.loads(sys.argv[1]).get("ref","main"))' "$body")"
+            workflow="$(python3 -c 'import json,sys; print(json.loads(sys.argv[1]).get("workflow","architecture-boundary.yml"))' "$body")"
+          else
+            repository="$INPUT_REPOSITORY"
+            ref="$INPUT_REF"
+            workflow="$INPUT_WORKFLOW"
+          fi
+          [[ "$repository" =~ ^[^/]+/[^/]+$ ]]
+          [[ "$workflow" =~ ^[^/]+\.ya?ml$ ]]
+          {
+            echo "TARGET_REPOSITORY=$repository"
+            echo "TARGET_REF=$ref"
+            echo "TARGET_WORKFLOW=$workflow"
+          } >> "$GITHUB_ENV"
+          test -n "$CODING_REPO_TOKEN"
+
+      - name: Clone private repository
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p clones
+          owner="${TARGET_REPOSITORY%%/*}"
+          name="${TARGET_REPOSITORY#*/}"
+          dest="clones/${owner}__${name}"
+          url="https://x-access-token:${CODING_REPO_TOKEN}@github.com/${TARGET_REPOSITORY}.git"
+          git clone --depth 1 --branch "${TARGET_REF}" "$url" "$dest"
+          git -C "$dest" remote set-url origin "https://github.com/${TARGET_REPOSITORY}.git"
+          echo "CLONED_REPO=$dest" >> "$GITHUB_ENV"
+
+      - name: Install act
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 8 --retry-delay 5 --retry-all-errors --connect-timeout 20 --max-time 240 \
+            https://github.com/nektos/act/releases/download/v0.2.89/act_Linux_x86_64.tar.gz -o /tmp/act.tar.gz
+          echo "0191d6f1f3b716b5c55820032605d05fc3c1cdbf581ebeff655019e5dd1524c0  /tmp/act.tar.gz" | sha256sum -c -
+          tar -xzf /tmp/act.tar.gz -C /tmp act
+          sudo install -m 0755 /tmp/act /usr/local/bin/act
+          act --version
+
+      - name: Validate requested workflow
+        run: |
+          set -euo pipefail
+          test -f "${CLONED_REPO}/.github/workflows/${TARGET_WORKFLOW}"
+          grep -Eq '^[[:space:]]*jobs:' "${CLONED_REPO}/.github/workflows/${TARGET_WORKFLOW}"
+
+      - name: Execute target workflow with Agent Workspace runner
+        env:
+          ACT_GITHUB_TOKEN: ${{ secrets.CODING_REPO_TOKEN }}
+        run: |
+          set -euo pipefail
+          cd "$CLONED_REPO"
+          mkdir -p /tmp/agent-workspace-artifacts
+          act push \
+            -W ".github/workflows/${TARGET_WORKFLOW}" \
+            --platform "ubuntu-24.04=catthehacker/ubuntu:act-latest" \
+            --artifact-server-path /tmp/agent-workspace-artifacts \
+            --secret "GITHUB_TOKEN=$ACT_GITHUB_TOKEN" | tee "$GITHUB_WORKSPACE/target-workflow.log"
+
+      - name: Upload runner evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: private-repo-ci-${{ github.run_id }}
+          path: |
+            target-workflow.log
+            /tmp/agent-workspace-artifacts/**
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Cleanup
+        if: always()
+        run: rm -rf "${CLONED_REPO:-}" /tmp/agent-workspace-artifacts

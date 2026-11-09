@@ -82,6 +82,54 @@ jobs:
           git commit -m "fix: replace Kloks graph imports with Floks browser contracts"
           git push origin HEAD:refactor/browser-server-boundary
 
+  verify-upstream:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout GutTS
+        uses: actions/checkout@v4
+        with:
+          repository: dinilmusick/GutTS
+          ref: main
+          token: ${{ secrets.CODING_REPO_TOKEN }}
+          path: GutTS
+      - name: Checkout FrnlTS
+        uses: actions/checkout@v4
+        with:
+          repository: dinilmusick/FrnlTS
+          ref: main
+          token: ${{ secrets.CODING_REPO_TOKEN }}
+          path: FrnlTS
+      - name: Verify GutTS browser boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          corepack enable
+          cd GutTS
+          pnpm install --no-frozen-lockfile
+          pnpm typecheck
+          pnpm test
+          pnpm build
+          if grep -RInE 'node:|@aws-sdk/|googleapis|onnxruntime-node' src/browser.ts src/auth src/api src/semantic-input 2>/dev/null; then
+            echo "Forbidden server dependency found in GutTS browser surface."
+            exit 1
+          fi
+          node --input-type=module -e "const p=require('./package.json'); for (const key of ['.','./browser','./auth']) { if (!p.exports[key]) throw new Error('Missing GutTS export '+key) }"
+      - name: Verify FrnlTS browser boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          corepack enable
+          cd FrnlTS
+          pnpm install --no-frozen-lockfile
+          pnpm typecheck
+          pnpm test
+          pnpm build
+          if grep -RInE '@ultrst-armada/(kloks|krnl)|@dinilmusick/gutts/(server|storage)' src/runtime src/index.ts 2>/dev/null; then
+            echo "Forbidden backend dependency found in FrnlTS browser surface."
+            exit 1
+          fi
+
   repair-skipo:
     runs-on: ubuntu-latest
     timeout-minutes: 30

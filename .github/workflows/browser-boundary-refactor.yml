@@ -10,6 +10,65 @@ permissions:
   contents: read
 
 jobs:
+  repair-floks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CODING_REPO_TOKEN: ${{ secrets.CODING_REPO_TOKEN }}
+    steps:
+      - name: Checkout Floks boundary branch
+        uses: actions/checkout@v4
+        with:
+          repository: dinilmusick/Floks
+          ref: refactor/browser-server-boundary
+          token: ${{ secrets.CODING_REPO_TOKEN }}
+          fetch-depth: 0
+          persist-credentials: true
+      - name: Remove Kloks state-graph dependency from browser source
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          root = Path("packages/canvas-ui/src")
+          for path in root.rglob("*"):
+              if path.suffix not in {".ts", ".tsx"}:
+                  continue
+              text = path.read_text()
+              new = text.replace("@kloks/state-graph/browser/browser", "@floks/contracts")
+              new = new.replace("@kloks/state-graph/browser", "@floks/contracts")
+              new = new.replace("@ultrst-armada/kloks/state-graph", "@floks/contracts")
+              if new != text:
+                  path.write_text(new)
+          PY
+          if grep -RInE '@(ultrst-armada/)?kloks/state-graph|@ultrst-armada/kloks|@ultrst-armada/krnl' packages/canvas-ui/src; then
+            echo "Forbidden browser backend imports remain."
+            exit 1
+          fi
+      - name: Install and verify Floks
+        shell: bash
+        run: |
+          set -euo pipefail
+          corepack enable
+          pnpm install --no-frozen-lockfile
+          pnpm --filter @floks/contracts run typecheck
+          pnpm --filter @floks/canvas-ui run typecheck
+          pnpm --filter @floks/canvas-ui run build
+          pnpm test -- --run tests/browser-boundary.test.ts
+      - name: Commit and push repair
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "Agent Workspace 1"
+          git config user.email "agent-workspace-1@users.noreply.github.com"
+          git add packages/canvas-ui/src
+          if git diff --cached --quiet; then
+            echo "No source changes required."
+            exit 0
+          fi
+          git commit -m "fix: replace Kloks graph imports with Floks browser contracts"
+          git push origin HEAD:refactor/browser-server-boundary
+
   analyze:
     runs-on: ubuntu-latest
     timeout-minutes: 45

@@ -16,8 +16,13 @@ on:
         type: string
       workflow:
         description: "Workflow filename under .github/workflows"
-        required: true
+        required: false
         default: architecture-boundary.yml
+        type: string
+      command:
+        description: "Optional shell command to run directly in the cloned repository"
+        required: false
+        default: ""
         type: string
 
 permissions:
@@ -47,6 +52,7 @@ jobs:
           INPUT_REPOSITORY: ${{ inputs.repository }}
           INPUT_REF: ${{ inputs.ref }}
           INPUT_WORKFLOW: ${{ inputs.workflow }}
+          INPUT_COMMAND: ${{ inputs.command }}
           ISSUE_BODY: ${{ github.event.issue.body }}
         run: |
           set -euo pipefail
@@ -54,17 +60,24 @@ jobs:
             repository="$(python3 -c 'import json,os; print(json.loads(os.environ["ISSUE_BODY"])["repository"])')"
             ref="$(python3 -c 'import json,os; print(json.loads(os.environ["ISSUE_BODY"]).get("ref","main"))')"
             workflow="$(python3 -c 'import json,os; print(json.loads(os.environ["ISSUE_BODY"]).get("workflow","architecture-boundary.yml"))')"
+            command="$(python3 -c 'import json,os; print(json.loads(os.environ["ISSUE_BODY"]).get("command",""))')"
           else
             repository="$INPUT_REPOSITORY"
             ref="$INPUT_REF"
             workflow="$INPUT_WORKFLOW"
+            command="$INPUT_COMMAND"
           fi
           [[ "$repository" =~ ^[^/]+/[^/]+$ ]]
-          [[ "$workflow" =~ ^[^/]+\.ya?ml$ ]]
+          if [[ -z "$command" ]]; then
+            [[ "$workflow" =~ ^[^/]+\.ya?ml$ ]]
+          fi
           {
             echo "TARGET_REPOSITORY=$repository"
             echo "TARGET_REF=$ref"
             echo "TARGET_WORKFLOW=$workflow"
+            echo "TARGET_COMMAND<<EOF"
+            echo "$command"
+            echo "EOF"
           } >> "$GITHUB_ENV"
           test -n "$CODING_REPO_TOKEN"
 
@@ -93,12 +106,14 @@ jobs:
           act --version
 
       - name: Validate requested workflow
+        if: env.TARGET_COMMAND == ''
         run: |
           set -euo pipefail
           test -f "${CLONED_REPO}/.github/workflows/${TARGET_WORKFLOW}"
           grep -Eq '^[[:space:]]*jobs:' "${CLONED_REPO}/.github/workflows/${TARGET_WORKFLOW}"
 
       - name: Execute target workflow with Agent Workspace runner
+        if: env.TARGET_COMMAND == ''
         env:
           ACT_GITHUB_TOKEN: ${{ secrets.CODING_REPO_TOKEN }}
         run: |
@@ -107,9 +122,17 @@ jobs:
           mkdir -p /tmp/agent-workspace-artifacts
           act push \
             -W ".github/workflows/${TARGET_WORKFLOW}" \
-            --platform "ubuntu-24.04=catthehacker/ubuntu:full-26.04" \
+            --platform "ubuntu-latest=catthehacker/ubuntu:full-26.04" \
             --artifact-server-path /tmp/agent-workspace-artifacts \
             --secret "GITHUB_TOKEN=$ACT_GITHUB_TOKEN" | tee "$GITHUB_WORKSPACE/target-workflow.log"
+
+      - name: Execute direct repository command
+        if: env.TARGET_COMMAND != ''
+        run: |
+          set -euo pipefail
+          cd "$CLONED_REPO"
+          mkdir -p /tmp/agent-workspace-artifacts
+          bash -lc "$TARGET_COMMAND" | tee "$GITHUB_WORKSPACE/target-workflow.log"
 
       - name: Upload runner evidence
         if: always()

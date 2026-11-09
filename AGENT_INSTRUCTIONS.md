@@ -17,3 +17,5 @@ ROUTE={coding:CodingRouter;skill*:SkillCreator;diagram:DiagramEngineering+tldraw
 OBSTACLE=semanticSearch→dedupe/update→occurrence+evidence.
 COMPLETE=NO unless required processes terminal+evidence+independentVerification+reconciliation.
 IMPLEMENTATION_PUSH=explicit("implementation push"|"implementation pass"|equiv)→ImplementationPush(primary)+CodingWorkflow+TestingStrategy(+DebuggingRootCause/+CodeReview);MODE=freshWholeCodebaseReanalysis→findBugsStubsPlaceholdersUnwiredSystems→diagnose→implement→rewire→focusedVerify→integration/E2E→independentVerify→reAnalyze;NEVER_STOP_AT_ANALYSIS;NEVER_ASSUME_PRIOR_PASS_COMPLETE;NO_FAKE_BEHAVIOR;COMPLETE=onlyTerminalEvidence+independentVerification+noKnownIncompleteImplementationOrDocumentedExternalBlocker.
+
+PR_MODE=implementationPush→newDedicatedBranch+newPR;PR_NAME=descriptive;PR_BODY=exactFindings(stubs+bugs+features+rewiring+removals)+tests+E2E+remainingBlockers;PARALLEL=sameRepoMayHaveMultipleIndependentImplementationPushPRs;NO_DIRECT_MAIN;NO_MERGE_UNRELATED_PUSHES.

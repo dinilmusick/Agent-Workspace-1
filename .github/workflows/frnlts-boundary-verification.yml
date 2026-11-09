@@ -1,0 +1,60 @@
+name: FrnlTS Boundary Verification
+
+on:
+  push:
+    paths:
+      - ".github/workflows/frnlts-boundary-verification.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout FrnlTS
+        uses: actions/checkout@v4
+        with:
+          repository: dinilmusick/FrnlTS
+          ref: main
+          path: target/FrnlTS
+          fetch-depth: 0
+      - name: Checkout GutTS boundary branch
+        uses: actions/checkout@v4
+        with:
+          repository: dinilmusick/GutTS
+          ref: refactor/browser-server-boundary-complete
+          path: target/GutTS
+          fetch-depth: 0
+      - name: Setup pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@10.33.0 --activate
+      - name: Verify FrnlTS against GutTS browser branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd target/GutTS
+          pnpm install --no-frozen-lockfile
+          pnpm build
+          cd ../FrnlTS
+          pnpm install --no-frozen-lockfile
+          pnpm link ../GutTS
+          pnpm build
+          pnpm typecheck
+          pnpm test
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import path from 'node:path';
+          const root=process.cwd();
+          const built=fs.readFileSync(path.join(root,'dist/index.js'),'utf8');
+          for (const re of [/@aws-sdk\//,/googleapis/,/onnxruntime-node/,/node:/,@ultrst-armada\/kloks/,/@ultrst-armada\/krnl/]) {
+            if (re.test(built)) throw new Error('Forbidden browser dependency reference: '+re);
+          }
+          const source=fs.readFileSync(path.join(root,'src/index.ts'),'utf8');
+          if (!source.includes('@dinilmusick/gutts/browser')) throw new Error('FrnlTS root is not using GutTS browser surface');
+          if (/from ['"]@dinilmusick\/gutts['"]/.test(source)) throw new Error('FrnlTS root imports unsafe GutTS root');
+          console.log('FrnlTS browser boundary verification passed');
+          NODE

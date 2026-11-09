@@ -1,0 +1,102 @@
+name: Browser Boundary Refactor Workspace
+
+on:
+  push:
+    paths:
+      - ".github/workflows/browser-boundary-refactor.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      CODING_REPO_TOKEN: ${{ secrets.CODING_REPO_TOKEN }}
+    steps:
+      - name: Checkout Agent Workspace
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af49
+        with:
+          persist-credentials: false
+
+      - name: Checkout GutTS
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af49
+        with:
+          repository: dinilmusick/GutTS
+          ref: main
+          token: ${{ secrets.CODING_REPO_TOKEN }}
+          path: target/GutTS
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Checkout FrnlTS
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af49
+        with:
+          repository: dinilmusick/FrnlTS
+          ref: main
+          token: ${{ secrets.CODING_REPO_TOKEN }}
+          path: target/FrnlTS
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Checkout Floks
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af49
+        with:
+          repository: dinilmusick/Floks
+          ref: refactor/browser-server-boundary
+          token: ${{ secrets.CODING_REPO_TOKEN }}
+          path: target/Floks
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Checkout Skipo
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af49
+        with:
+          repository: dinilmusick/Skipo
+          ref: main
+          token: ${{ secrets.CODING_REPO_TOKEN }}
+          path: target/Skipo
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Analyze dependency boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p results
+          {
+            echo "=== COMMITS ==="
+            for r in GutTS FrnlTS Floks Skipo; do
+              echo "--- $r ---"
+              git -C "target/$r" log -5 --oneline
+              git -C "target/$r" status --short --branch
+            done
+            echo
+            echo "=== PACKAGE MANIFESTS ==="
+            for f in target/GutTS/package.json target/FrnlTS/package.json target/Floks/package.json target/Floks/packages/ui/package.json target/Floks/packages/canvas-ui/package.json target/Skipo/package.json; do
+              echo "--- $f ---"
+              cat "$f"
+            done
+            echo
+            echo "=== GUTTS BROWSER CLOSURE CANDIDATES ==="
+            grep -RInE 'from ["'\''](\.|@aws-sdk|googleapis|node:|cactus-needle|@huggingface)' target/GutTS/src/browser.ts target/GutTS/src/api target/GutTS/src/models target/GutTS/src/semantic-input target/GutTS/src/auth 2>/dev/null || true
+            echo
+            echo "=== FLOKS BACKEND IMPORTS ==="
+            grep -RInE '@ultrst-armada/(kloks|krnl)|@kloks/' target/Floks/packages target/Floks/src 2>/dev/null || true
+            echo
+            echo "=== SKIPO FRONTEND BACKEND IMPORTS ==="
+            grep -RInE '@ultrst-armada/(kloks|krnl)|@dinilmusick/gutts/(server|storage|models|semantic-input)|node:' target/Skipo/frontend target/Skipo/src target/Skipo/app target/Skipo 2>/dev/null | head -500 || true
+            echo
+            echo "=== EXISTING BOUNDARY TESTS ==="
+            find target/GutTS target/FrnlTS target/Floks target/Skipo -type f \( -name '*boundary*' -o -name '*import*direction*' -o -name '*package*export*' \) -print
+          } | tee results/browser-boundary-analysis.txt
+
+      - name: Upload analysis
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: browser-boundary-analysis-${{ github.run_id }}
+          path: results/browser-boundary-analysis.txt
+          retention-days: 7

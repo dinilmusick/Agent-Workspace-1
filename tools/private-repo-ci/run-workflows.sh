@@ -7,7 +7,10 @@ EVENT="${CI_EVENT:-push}"
 REF="${TARGET_REF:-}"
 WORKFLOW="${CI_WORKFLOW:-}"
 ACT_BIN="${ACT_BIN:-act}"
-ACT_PLATFORM="${ACT_PLATFORM:-ubuntu-latest=catthehacker/ubuntu:act-latest}"
+# Loky CI currently targets ubuntu-24.04. Map that GitHub runner label to the
+# pinned act image so the workspace executes the workflow instead of silently
+# skipping an unsupported platform. Callers can override this explicitly.
+ACT_PLATFORM="${ACT_PLATFORM:-ubuntu-24.04=catthehacker/ubuntu:act-latest}"
 ACT_GITHUB_TOKEN="${ACT_GITHUB_TOKEN:-}"
 ACT_SECRET_ARGS=()
 

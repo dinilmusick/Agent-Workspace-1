@@ -20,7 +20,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: dinilmusick/GutTS
-          ref: refactor/browser-server-boundary-complete
+          ref: e1649f918abcb8446a7fb99f4569e8cef7d46d25
           token: __DOLLAR__{{ secrets.CODING_REPO_TOKEN }}
           path: target/GutTS
           fetch-depth: 0

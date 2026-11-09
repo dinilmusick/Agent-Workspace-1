@@ -189,6 +189,14 @@ jobs:
           export interface UIAuthoringValidation{valid:boolean;errors:string[];warnings:string[];[key:string]:unknown}
           EOF
 
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('packages/contracts/src/state-graph.ts')
+          s=p.read_text()
+          s=s.replace(chr(92)+chr(96), chr(96)).replace(chr(92)+chr(36)+chr(123), chr(36)+chr(123))
+          p.write_text(s)
+          PY
+
           node <<'NODE'
           const fs=require('fs');
           const p='packages/contracts/package.json';

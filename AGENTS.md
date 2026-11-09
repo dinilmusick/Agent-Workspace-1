@@ -154,3 +154,7 @@ The implementation-push agent must:
 - record evidence and require independent verification before declaring completion.
 
 A green build or test suite is not sufficient proof of an implementation push. Source presence is not proof of wiring, and analysis is not completion.
+
+
+### Implementation Push PR rule
+Every implementation push is a new dedicated branch and PR. The PR must have a descriptive name and enumerate exact stubs, bugs, incomplete features, wiring changes, removals, tests/E2E results, and remaining blockers. Multiple implementation-push PRs may run concurrently against the same repository; keep each push independently reviewable.

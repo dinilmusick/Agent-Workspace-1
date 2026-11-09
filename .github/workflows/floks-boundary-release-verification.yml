@@ -1,0 +1,47 @@
+name: Floks Boundary Release Verification
+
+on:
+  push:
+    paths:
+      - ".github/workflows/floks-boundary-release-verification.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout Floks boundary PR
+        uses: actions/checkout@v4
+        with:
+          repository: dinilmusick/Floks
+          ref: refactor/browser-server-boundary
+          path: target/Floks
+          fetch-depth: 0
+      - name: Setup pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@10.33.0 --activate
+      - name: Verify against released GutTS
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd target/Floks
+          pnpm update @dinilmusick/gutts@2.0.1 --no-save --no-frozen-lockfile
+          pnpm install --no-frozen-lockfile
+          pnpm build
+          pnpm typecheck
+          pnpm test
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import path from 'node:path';
+          const root=process.cwd();
+          const forbidden=['@ultrst-armada/kloks','@ultrst-armada/krnl','@kloks/','node:fs','node:path','@aws-sdk/','googleapis','onnxruntime-node'];
+          const files=fs.readdirSync(path.join(root,'packages'),{recursive:true}).filter(f=>String(f).endsWith('.js')).map(f=>path.join(root,'packages',String(f)));
+          const built=files.map(f=>fs.readFileSync(f,'utf8')).join('\n');
+          for(const marker of forbidden){if(built.includes(marker)) throw new Error('Forbidden browser marker in built Floks package: '+marker);}
+          console.log('Floks release verification passed against GutTS 2.0.1');
+          NODE

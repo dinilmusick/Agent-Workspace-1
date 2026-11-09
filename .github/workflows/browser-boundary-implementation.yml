@@ -239,7 +239,7 @@ jobs:
           ---
           Remove backend package coupling from browser UI packages and move the browser node-graph contract/runtime helpers into Floks contracts.
           EOF
-          pnpm install --lockfile-only
+          pnpm install --no-frozen-lockfile
           pnpm typecheck
           pnpm test
           pnpm build

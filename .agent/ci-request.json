@@ -1,8 +1,8 @@
 {
   "repository": "dinilmusick/Loky-Engine",
-  "ref": "main",
+  "ref": "agent/loky-portable-runtime-20261109",
   "event": "push",
   "workflow": "ci.yml",
   "token_mode": "workflow",
-  "nonce": "baseline-1794206848614"
+  "nonce": "typecheck-fix-1794207237383"
 }

@@ -122,7 +122,7 @@ jobs:
           mkdir -p /tmp/agent-workspace-artifacts
           act push \
             -W ".github/workflows/${TARGET_WORKFLOW}" \
-            --platform "ubuntu-latest=catthehacker/ubuntu:full-26.04" \
+            -P "ubuntu-latest=catthehacker/ubuntu:full-26.04" \
             --artifact-server-path /tmp/agent-workspace-artifacts \
             --secret "GITHUB_TOKEN=$ACT_GITHUB_TOKEN" | tee "$GITHUB_WORKSPACE/target-workflow.log"
 

@@ -34,6 +34,8 @@ jobs:
         working-directory: kone
         run: |
           set -euo pipefail
+          printf '%s\n' '--- revision ---'
+          git rev-parse HEAD
           printf '%s\n' '--- package ---'
           cat package.json
           printf '%s\n' '--- suspicious markers ---'

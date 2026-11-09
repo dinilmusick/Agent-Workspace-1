@@ -4,5 +4,5 @@
   "event": "push",
   "workflow": "ci.yml",
   "token_mode": "workflow",
-  "nonce": "kone-implementation-push-post-merge-20261109-1"
+  "nonce": "kone-implementation-push-baseline-20261109-2"
 }

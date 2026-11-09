@@ -11,7 +11,7 @@
     ],
     "exportedAt": "2026-11-05T00:00:00.000Z"
   },
-  "count": 36,
+  "count": 37,
   "skills": [
     {
       "id": 1,
@@ -402,6 +402,40 @@
           "usage": "Run executable verification and integration checks; use Agent-Workspace-1 for broader repository/CI/ecosystem verification."
         }
       ]
+    },
+    {
+      "id": 33,
+      "name": "Platform Development Adapters",
+      "path": "skills/platform-adapters/SKILL.md",
+      "slug": "platform-adapters",
+      "tools": [
+        {
+          "slug": "platform-adapters",
+          "type": "cli",
+          "usage": "Run the shared provider adapter interface and persist sanitized local/preview evidence.",
+          "required": true
+        },
+        {
+          "slug": "cloudflare-workers",
+          "type": "cli",
+          "usage": "Execute Worker tests in local workerd/Miniflare with Wrangler bindings, Vitest and Vite peer dependencies.",
+          "required": false
+        },
+        {
+          "slug": "vercel-cli",
+          "type": "cli",
+          "usage": "Build locally with preview environment and inspect only explicitly verified preview deployments.",
+          "required": false
+        },
+        {
+          "slug": "supabase-cli",
+          "type": "cli",
+          "usage": "Run local-only Supabase migrations and pgTAP integration tests.",
+          "required": false
+        }
+      ],
+      "status": "active",
+      "version": "1.0.3"
     }
   ],
   "toolBindingsPath": "skills/tool-bindings.json",

@@ -85,7 +85,7 @@ jobs:
           ---
           Harden the explicit browser surface by isolating model runtimes as optional runtime peers and removing model, semantic-input, and API runtime exports from the browser entrypoint.
           EOF
-          pnpm install --lockfile-only
+          pnpm install --no-frozen-lockfile
           pnpm typecheck
           pnpm test
           pnpm build

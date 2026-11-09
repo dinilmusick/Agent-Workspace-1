@@ -82,6 +82,37 @@ jobs:
           git commit -m "fix: replace Kloks graph imports with Floks browser contracts"
           git push origin HEAD:refactor/browser-server-boundary
 
+  repair-skipo:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CODING_REPO_TOKEN: ${{ secrets.CODING_REPO_TOKEN }}
+    steps:
+      - name: Checkout Skipo boundary branch
+        uses: actions/checkout@v4
+        with:
+          repository: dinilmusick/Skipo
+          ref: refactor/browser-server-boundary
+          token: ${{ secrets.CODING_REPO_TOKEN }}
+          fetch-depth: 0
+          persist-credentials: true
+      - name: Verify and push Skipo governance repair
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m pytest -q --import-mode=importlib tests/import_direction_governance.test.py
+          python3 checklists/22_import_direction_governance.py .
+          python3 -m pytest -q --import-mode=importlib tests/import_direction_governance.test.py tests/mandatory_modules_scaffold.test.py tests/authentication_scaffold.test.py
+          git config user.name "Agent Workspace 1"
+          git config user.email "agent-workspace-1@users.noreply.github.com"
+          git add checklists/22_import_direction_governance.py tests/import_direction_governance.test.py
+          if git diff --cached --quiet; then
+            echo "No Skipo changes required."
+            exit 0
+          fi
+          git commit -m "feat: enforce browser server dependency boundary"
+          git push origin HEAD:refactor/browser-server-boundary
+
   analyze:
     runs-on: ubuntu-latest
     timeout-minutes: 45

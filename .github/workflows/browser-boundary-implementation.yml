@@ -122,6 +122,8 @@ jobs:
           pnpm install --no-frozen-lockfile
           pnpm --filter @floks/contracts build
           pnpm --filter @floks/ui build
+          echo "=== BUILT PACKAGE OUTPUTS ==="
+          find packages/contracts/dist packages/ui/dist -maxdepth 2 -type f | head -80
           pnpm typecheck
           pnpm test
           pnpm build
@@ -228,12 +230,11 @@ jobs:
           if p.exists():
               d=json.loads(p.read_text()); paths=d.get('compilerOptions',{}).get('paths',{})
               paths.pop('@kloks/state-graph',None); paths.pop('@kloks/audio-midi',None)
-              paths['@floks/contracts']=['../contracts/dist/index.d.ts']; paths['@floks/contracts/state-graph']=['../contracts/dist/state-graph.d.ts']; paths['@floks/ui']=['../ui/dist/index.d.ts']
               p.write_text(json.dumps(d,indent=2)+'\n')
           p=Path('packages/ui/tsconfig.json')
           if p.exists():
               d=json.loads(p.read_text()); paths=d.get('compilerOptions',{}).get('paths',{})
-              paths.pop('@kloks/state-graph',None); paths.pop('@kloks/audio-midi',None); paths['@floks/ui']=['../ui/dist/index.d.ts']; paths['@floks/contracts']=['../contracts/dist/index.d.ts']; paths['@floks/contracts/state-graph']=['../contracts/dist/state-graph.d.ts']
+              paths.pop('@kloks/state-graph',None); paths.pop('@kloks/audio-midi',None)
               p.write_text(json.dumps(d,indent=2)+'\n')
           p=Path('packages/ui/tsconfig.json')
           if p.exists():

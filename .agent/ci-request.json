@@ -1,8 +1,8 @@
 {
-  "repository": "dinilmusick/Aiko",
-  "ref": "implementation/aiko-fod-workflow-migration",
+  "repository": "dinilmusick/GutTS",
+  "ref": "main",
   "event": "push",
-  "workflow": "",
+  "workflow": "architecture-boundary.yml",
   "token_mode": "workflow",
-  "nonce": "aiko-fod-migration-20261109"
+  "nonce": "ecosystem-boundary-20261109-gutts"
 }

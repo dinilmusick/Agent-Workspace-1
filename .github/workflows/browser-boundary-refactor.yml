@@ -278,3 +278,5 @@ jobs:
 # auth scaffold test refresh
 
 # GutTS manifest verification refresh
+
+# FrnlTS typecheck dependency-order refresh

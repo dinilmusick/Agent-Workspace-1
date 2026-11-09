@@ -30,7 +30,7 @@ jobs:
         run: |
           set -euo pipefail
           cd target/Floks
-          pnpm update @dinilmusick/gutts@2.0.1 --no-save --no-frozen-lockfile
+          pnpm update @dinilmusick/gutts@2.0.1 --no-save
           pnpm install --no-frozen-lockfile
           pnpm build
           pnpm typecheck

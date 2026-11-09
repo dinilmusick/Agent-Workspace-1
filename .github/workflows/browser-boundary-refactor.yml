@@ -51,6 +51,16 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
+      - name: Checkout Kloks
+        uses: actions/checkout@v4
+        with:
+          repository: dinilmusick/Kloks
+          ref: main
+          token: ${{ secrets.CODING_REPO_TOKEN }}
+          path: target/Kloks
+          fetch-depth: 0
+          persist-credentials: false
+
       - name: Checkout Skipo
         uses: actions/checkout@v4
         with:
@@ -85,6 +95,12 @@ jobs:
             echo
             echo "=== FLOKS BACKEND IMPORTS ==="
             grep -RInE '@ultrst-armada/(kloks|krnl)|@kloks/' target/Floks/packages target/Floks/src 2>/dev/null || true
+            echo
+            echo "=== FLOKS STATE GRAPH IMPORTS ==="
+            grep -RInE '@(ultrst-armada/)?kloks/state-graph|@kloks/' target/Floks/packages/canvas-ui target/Floks/packages/contracts 2>/dev/null | head -500 || true
+            echo
+            echo "=== KLOKS STATE GRAPH PUBLIC EXPORTS ==="
+            sed -n '1,260p' target/Kloks/packages/state-graph/src/index.ts
             echo
             echo "=== SKIPO FRONTEND BACKEND IMPORTS ==="
             grep -RInE '@ultrst-armada/(kloks|krnl)|@dinilmusick/gutts/(server|storage|models|semantic-input)|node:' target/Skipo/frontend target/Skipo/src target/Skipo/app target/Skipo 2>/dev/null | head -500 || true

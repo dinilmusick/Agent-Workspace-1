@@ -13,6 +13,7 @@
     "platform-adapters": "1.0.3",
     "private-repo-ci-workspace-runner": "1.0.0",
     "github-development-workspace": "1.0.0",
-    "implementation-push": "1.0.0"
+    "implementation-push": "1.0.0",
+    "reconciliation-pass": "1.0.0"
   }
 }

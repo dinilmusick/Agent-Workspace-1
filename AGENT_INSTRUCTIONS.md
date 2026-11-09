@@ -13,9 +13,11 @@ SCRIPT_LOOP=changedUnit→Container→focusedTests→run→debug→retest→veri
 INTEGRATION=unitsPass→Agent-Workspace-1→codebase/crossRepo/CI/deployment.
 VERIFY=unit→Container;integration→Agent-Workspace-1;never return unverified changes.
 CREATE→goal_ledger_create_omni_hierarchical;Vision→tldraw.
-ROUTE={coding:CodingRouter;skill*:SkillCreator;diagram:DiagramEngineering+tldrawAgent;other:closestActive}.
+ROUTE={coding:CodingRouter;skill*:SkillCreator;diagram:DiagramEngineering+tldrawAgent;reconciliation:ReconciliationPass;other:closestActive}.
 OBSTACLE=semanticSearch→dedupe/update→occurrence+evidence.
 COMPLETE=NO unless required processes terminal+evidence+independentVerification+reconciliation.
 IMPLEMENTATION_PUSH=explicit("implementation push"|"implementation pass"|equiv)→ImplementationPush(primary)+CodingWorkflow+TestingStrategy(+DebuggingRootCause/+CodeReview);MODE=freshWholeCodebaseReanalysis→findBugsStubsPlaceholdersUnwiredSystems→diagnose→implement→rewire→focusedVerify→integration/E2E→independentVerify→reAnalyze;NEVER_STOP_AT_ANALYSIS;NEVER_ASSUME_PRIOR_PASS_COMPLETE;NO_FAKE_BEHAVIOR;COMPLETE=onlyTerminalEvidence+independentVerification+noKnownIncompleteImplementationOrDocumentedExternalBlocker.
 
 PR_MODE=implementationPush→newDedicatedBranch+newPR;PR_NAME=descriptive;PR_BODY=exactFindings(stubs+bugs+features+rewiring+removals)+tests+E2E+remainingBlockers;PARALLEL=sameRepoMayHaveMultipleIndependentImplementationPushPRs;NO_DIRECT_MAIN;NO_MERGE_UNRELATED_PUSHES.
+
+RECONCILIATION_PASS=explicit("reconciliation pass"|"reconcile the repo"|"reconcile all PRs"|"do a reconciliation"|equiv)→ReconciliationPass(primary)+GitHubDevelopmentWorkspace+CodingWorkflow+TestingStrategy(+CodeReview/+DebuggingRootCause);MODE=resolveRepo→enumerateALLOpenPRs→inspectDiffsReviewsCI→classifyIndependentOverlapDuplicateSupersededDependentConflict→precedence=newerOnlyWhenMoreCompleteCorrectTestedArchitecturallyCurrent→inspectSupersededForUniqueValue→synthesize→mergeInPrecedenceOrder→reverifyAfterEachMerge→finalVerification→closeMergedOrSuperseded→reEnumerate;NO_BLIND_MERGE;NO_LOST_VALUE;NO_OPEN_RECONCILED_PRS;COMPLETE=allOriginalPRsTerminal+finalStateVerified+independentVerification+evidence.

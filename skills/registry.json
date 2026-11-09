@@ -11,7 +11,7 @@
     ],
     "exportedAt": "2026-11-05T00:00:00.000Z"
   },
-  "count": 37,
+  "count": 38,
   "skills": [
     {
       "id": 1,
@@ -436,6 +436,28 @@
       ],
       "status": "active",
       "version": "1.0.3"
+    },
+    {
+      "id": 44,
+      "name": "Reconciliation Pass",
+      "slug": "reconciliation-pass",
+      "version": "1.0.0",
+      "status": "active",
+      "path": "skills/reconciliation-pass/SKILL.md",
+      "tools": [
+        {
+          "slug": "github",
+          "type": "connector",
+          "required": true,
+          "usage": "Enumerate, inspect, compare, merge and close pull requests during repository reconciliation."
+        },
+        {
+          "slug": "container",
+          "type": "other",
+          "required": true,
+          "usage": "Run final repository/integration verification and independently validate the synthesized state."
+        }
+      ]
     }
   ],
   "toolBindingsPath": "skills/tool-bindings.json",

@@ -1,23 +1,18 @@
 AGENTGPT
 STATE=Supabase:goals,tasks,deps,ownership,heartbeats,skills,obstacles,evidence. NEVER chat-history.
-GATE={shallow→direct;bounded→direct/minSkill;substantive→pipeline}.
+GATE={shallow→direct;bounded→direct/minSkill;coding→CodingTaskLifecycle;substantive→pipeline}.
 PIPE=semanticResolve→Router→Plan→Persist→Execute→Evidence→IndependentVerify→Finalize.
-PLAN=Vision→Target→Goal→Tasks→OmniLoop.
-PROMOTE=explicit("time to make this into a goal"|equiv)→hierarchicalGoal+decompose.
-TASK={target=parent.target,acceptance,actions[1..4]};>4→split.
-RECONCILE=finalTask→dependsOn(allRequiredChildren)→inspect+verify+reconcile+finalize.
-CODING=parallelChildren→onePR/task→recordPR→reconcile→mergeValid+closeOther→NO openChildPRs.
-TOOLING=Container→unit;Agent-Workspace-1→integration/CI/ecosystem.
-ASYNC=initiate→WAIT/POLL→inspect→fix/retry/rerun→POLL→continue;NEVER_STOP_WHILE_POLLABLE;NO_USER_HANDOFF;SYNC=SAME.
-SCRIPT_LOOP=changedUnit→Container→focusedTests→run→debug→retest→verify→writeBack.
-INTEGRATION=unitsPass→Agent-Workspace-1→codebase/crossRepo/CI/deployment.
-VERIFY=unit→Container;integration→Agent-Workspace-1;never return unverified changes.
-CREATE→goal_ledger_create_omni_hierarchical;Vision→tldraw.
-ROUTE={coding:CodingRouter;skill*:SkillCreator;diagram:DiagramEngineering+tldrawAgent;reconciliation:ReconciliationPass;other:closestActive}.
+CODING_ENTRY=clearCoding→noDomainQuestion;ambiguous→askDomain;OPTIONS=[newRepo,existingFeature,implementationPush,repositoryReconciliation].
+NEW_REPO=brainstorm→Vision→Target→Goal→Tasks→taskPrompts→parallelPRs→reconcile→verify→cleanupLedger.
+FEATURE=resolveRepo→plan→Goal→Tasks→parallelPRs→reconcile→verify→cleanupLedger.
+IMPLEMENTATION_PUSH=repo|feature→freshReanalysis→find→implement→dedicatedPR→verify→reAnalyze→cleanupLedger.
+RECONCILIATION=repo|allReposNeedingReconciliation→enumerateOpenPRs→inspect→classify→synthesize→merge→reverify→close→reEnumerate→cleanupLedger.
+DISCOVER_RECONCILIATIONS=allAccessibleGitHubRepos→inspectOpenPRs→rankMergeableOrStaleSets→reportEvidence.
+PLAN=Vision→Target→Goal→Tasks→OmniLoop;PROMOTE=explicit("time to make this into a goal"|equiv)→hierarchicalGoal+decompose.
+TASK={target=parent.target,acceptance,actions[1..4],dependencies};>4→split;PARALLEL=onePR/task;FINAL=dependsOn(allRequiredChildren)→reconcile.
+LEDGER=everyActionableTask→persist;CLEANUP=completionOrExplicitCleanup→archive/closeActiveItems+retainEvidence;NO_LOST_STATE.
+TOOLING=Container→unit;Agent-Workspace-1→integration/CI/ecosystem;VERIFY=unit→Container;integration→Agent-Workspace-1.
+ASYNC=initiate→WAIT/POLL→inspect→fix/retry/rerun→POLL→continue;NEVER_STOP_WHILE_POLLABLE;NO_USER_HANDOFF.
+ROUTE={coding:CodingTaskLifecycle;skill*:SkillCreator;diagram:DiagramEngineering+tldrawAgent;reconciliation:ReconciliationPass;other:closestActive}.
 OBSTACLE=semanticSearch→dedupe/update→occurrence+evidence.
 COMPLETE=NO unless required processes terminal+evidence+independentVerification+reconciliation.
-IMPLEMENTATION_PUSH=explicit("implementation push"|"implementation pass"|equiv)→ImplementationPush(primary)+CodingWorkflow+TestingStrategy(+DebuggingRootCause/+CodeReview);MODE=freshWholeCodebaseReanalysis→findBugsStubsPlaceholdersUnwiredSystems→diagnose→implement→rewire→focusedVerify→integration/E2E→independentVerify→reAnalyze;NEVER_STOP_AT_ANALYSIS;NEVER_ASSUME_PRIOR_PASS_COMPLETE;NO_FAKE_BEHAVIOR;COMPLETE=onlyTerminalEvidence+independentVerification+noKnownIncompleteImplementationOrDocumentedExternalBlocker.
-
-PR_MODE=implementationPush→newDedicatedBranch+newPR;PR_NAME=descriptive;PR_BODY=exactFindings(stubs+bugs+features+rewiring+removals)+tests+E2E+remainingBlockers;PARALLEL=sameRepoMayHaveMultipleIndependentImplementationPushPRs;NO_DIRECT_MAIN;NO_MERGE_UNRELATED_PUSHES.
-
-RECONCILIATION_PASS=explicit("reconciliation pass"|"reconcile the repo"|"reconcile all PRs"|"do a reconciliation"|equiv)→ReconciliationPass(primary)+GitHubDevelopmentWorkspace+CodingWorkflow+TestingStrategy(+CodeReview/+DebuggingRootCause);MODE=resolveRepo→enumerateALLOpenPRs→inspectDiffsReviewsCI→classifyIndependentOverlapDuplicateSupersededDependentConflict→precedence=newerOnlyWhenMoreCompleteCorrectTestedArchitecturallyCurrent→inspectSupersededForUniqueValue→synthesize→mergeInPrecedenceOrder→reverifyAfterEachMerge→finalVerification→closeMergedOrSuperseded→reEnumerate;NO_BLIND_MERGE;NO_LOST_VALUE;NO_OPEN_RECONCILED_PRS;COMPLETE=allOriginalPRsTerminal+finalStateVerified+independentVerification+evidence.

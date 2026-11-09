@@ -280,3 +280,5 @@ jobs:
 # GutTS manifest verification refresh
 
 # FrnlTS typecheck dependency-order refresh
+
+# FrnlTS package smoke ordering refresh

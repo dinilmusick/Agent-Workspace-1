@@ -17,12 +17,12 @@ jobs:
       CODING_REPO_TOKEN: ${{ secrets.CODING_REPO_TOKEN }}
     steps:
       - name: Checkout Agent Workspace
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af49
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
 
       - name: Checkout GutTS
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af49
+        uses: actions/checkout@v4
         with:
           repository: dinilmusick/GutTS
           ref: main
@@ -32,7 +32,7 @@ jobs:
           persist-credentials: false
 
       - name: Checkout FrnlTS
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af49
+        uses: actions/checkout@v4
         with:
           repository: dinilmusick/FrnlTS
           ref: main
@@ -42,7 +42,7 @@ jobs:
           persist-credentials: false
 
       - name: Checkout Floks
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af49
+        uses: actions/checkout@v4
         with:
           repository: dinilmusick/Floks
           ref: refactor/browser-server-boundary
@@ -52,7 +52,7 @@ jobs:
           persist-credentials: false
 
       - name: Checkout Skipo
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af49
+        uses: actions/checkout@v4
         with:
           repository: dinilmusick/Skipo
           ref: main
@@ -95,7 +95,7 @@ jobs:
 
       - name: Upload analysis
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        uses: actions/upload-artifact@v4
         with:
           name: browser-boundary-analysis-${{ github.run_id }}
           path: results/browser-boundary-analysis.txt

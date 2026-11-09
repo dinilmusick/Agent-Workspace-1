@@ -64,6 +64,7 @@ jobs:
           pnpm --filter @floks/contracts run build
           pnpm --filter @floks/contracts run typecheck
           pnpm --filter @floks/ui run build
+          pnpm --filter @floks/ui run build:types
           pnpm --filter @floks/canvas-ui run typecheck
           pnpm --filter @floks/canvas-ui run build
           pnpm test -- --run tests/browser-boundary.test.ts

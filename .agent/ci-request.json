@@ -4,5 +4,5 @@
   "event": "push",
   "workflow": "ci.yml",
   "token_mode": "workflow",
-  "nonce": "registry-isolation-1794207553367"
+  "nonce": "health-grace-1794207751752"
 }

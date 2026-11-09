@@ -60,7 +60,7 @@ jobs:
           REQUEST_TOKEN_MODE: ${{ inputs.token_mode }}
         run: |
           set -euo pipefail
-          if [[ "${{ github.event_name }}" == "push" ]]; then
+          if [[ -f ".agent/ci-request.json" ]]; then
             request=".agent/ci-request.json"
             test -f "$request"
             repository="$(jq -er '.repository' "$request")"

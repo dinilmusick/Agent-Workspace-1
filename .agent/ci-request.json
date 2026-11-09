@@ -1,8 +1,8 @@
 {
-  "repository": "dinilmusick/Kone",
-  "ref": "main",
+  "repository": "dinilmusick/Aiko",
+  "ref": "implementation/aiko-fod-workflow-migration",
   "event": "push",
-  "workflow": "ci.yml",
+  "workflow": "",
   "token_mode": "workflow",
-  "nonce": "kone-reconciliation-post-merge-20261109"
+  "nonce": "aiko-fod-migration-20261109"
 }

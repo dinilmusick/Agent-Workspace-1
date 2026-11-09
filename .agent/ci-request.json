@@ -4,5 +4,5 @@
   "event": "push",
   "workflow": "architecture-boundary.yml",
   "token_mode": "workflow",
-  "nonce": "ecosystem-boundary-20261109-gutts"
+  "nonce": "ecosystem-boundary-pr-test"
 }

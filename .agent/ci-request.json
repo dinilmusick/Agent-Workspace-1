@@ -4,5 +4,5 @@
   "event": "push",
   "workflow": "ci.yml",
   "token_mode": "workflow",
-  "nonce": "artifact-test-fix-1794207383061"
+  "nonce": "registry-isolation-1794207553367"
 }

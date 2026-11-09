@@ -38,6 +38,8 @@ jobs:
               new = text.replace("@kloks/state-graph/browser/browser", "@floks/contracts")
               new = new.replace("@kloks/state-graph/browser", "@floks/contracts")
               new = new.replace("@ultrst-armada/kloks/state-graph", "@floks/contracts")
+              new = new.replace("@ultrst-armada/kloks/contracts", "@floks/contracts")
+              new = new.replace("@kloks/state-graph", "@floks/contracts")
               if new != text:
                   path.write_text(new)
           PY

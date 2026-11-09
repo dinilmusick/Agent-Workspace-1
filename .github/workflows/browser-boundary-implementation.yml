@@ -260,8 +260,8 @@ jobs:
           echo "=== BUILT PACKAGE OUTPUTS ==="
           find packages/contracts/dist packages/ui/dist -maxdepth 2 -type f | head -80
           pnpm typecheck
-          pnpm test
           pnpm build
+          pnpm test
           git add -A
           git config user.name "Krusbl Agent"
           git config user.email "155351357+dinilmusick@users.noreply.github.com"

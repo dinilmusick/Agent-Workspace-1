@@ -1,8 +1,8 @@
 {
   "repository": "dinilmusick/Kone",
-  "ref": "implementation-push/kone/complete-persistence-and-runtime",
+  "ref": "main",
   "event": "push",
   "workflow": "ci.yml",
   "token_mode": "clone-only",
-  "nonce": "kone-impl-20261109-2-retry-3"
+  "nonce": "kone-final-main-reconciliation-20261109"
 }

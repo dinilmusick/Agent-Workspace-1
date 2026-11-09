@@ -104,3 +104,7 @@ Routing pattern:
 privateRepo + CIUnavailable/Exhausted/Blocked → private-repo-ci-workspace-runner → Agent-Workspace-1 → clone → validate → act → evidence → cleanup
 
 Do not let private CI availability become a dead end. Prefer the fallback when it can produce the required evidence. Keep write/deployment credentials out of target workflows.
+
+
+## Implementation Push PR requirement
+When routing an implementation push, the execution unit is a fresh dedicated branch + GitHub PR. Parallel pushes for the same repository are valid and must remain isolated. The PR description is mandatory evidence and must enumerate exact findings and changes rather than generic summaries.

@@ -113,3 +113,46 @@ If the work exceeds four actions, split it into additional tasks without losing 
 ## Routing
 
 Explicit phrases such as "implementation push", "do an implementation push", "implementation pass", "completion pass", or "make the implementation more complete" should select this skill as the primary coding specialist. Supporting skills normally include Coding Workflow and Testing Strategy, with Debugging/Root-Cause and Code Review added when findings require them.
+
+
+## Mandatory PR workflow
+
+Every implementation push is an independent change unit and **MUST use a new dedicated GitHub PR**.
+
+### PR isolation
+
+- Never perform an implementation push directly on `main`.
+- Never fold two implementation pushes into the same PR.
+- Multiple implementation pushes for the same repository are intentionally allowed to run in parallel; each gets its own branch and PR.
+- Keep the push's scope isolated so its findings, fixes, tests and verification can be reviewed independently.
+- Resolve/reconcile conflicts only within the normal repository workflow; do not collapse parallel pushes merely because they target the same base.
+
+### Branch and PR naming
+
+Use a deterministic, descriptive name such as:
+
+`implementation-push/<repo-or-scope>/<short-descriptor>`
+
+The PR title should identify the implementation-push scope, for example:
+
+`implementation-push: <repo-or-scope> — <short descriptor>`
+
+### Mandatory PR description
+
+The PR body MUST explicitly enumerate what this particular implementation push found and changed. At minimum record:
+
+1. **Exact stubs/placeholders** completed or removed.
+2. **Exact bugs** diagnosed and fixed.
+3. **Exact incomplete features** fleshed out.
+4. **Exact wiring/integration changes** made.
+5. **Exact behavior/configuration/code removed**, if anything was removed.
+6. **Tests and end-to-end workflows** executed and their results.
+7. **Remaining gaps/blockers**, if any, with the concrete reason.
+
+Do not use vague descriptions such as "fixed various bugs" or "completed implementation." Findings must be concrete enough for a reviewer to understand exactly what changed without reconstructing the entire investigation.
+
+### PR lifecycle
+
+`create dedicated branch → fresh re-analysis → implement/fix → focused verification → integration/E2E verification → write exact PR findings → independent verification → PR ready for review`
+
+The implementation push is not complete merely because the PR exists. The PR is the evidence container for that push and must contain the concrete findings, implementation work and verification evidence.

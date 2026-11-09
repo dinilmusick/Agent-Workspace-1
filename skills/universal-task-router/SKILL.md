@@ -1,7 +1,7 @@
 ---
 name: "Universal Task Router"
 slug: universal-task-router
-version: 1.3.8
+version: 1.4.6
 source: Supabase Skills Database
 sourceId: 28
 status: active
@@ -32,7 +32,7 @@ The goal loop coordinates task loops and evaluates overall criteria. Task loops 
 ## 4. Domain routing
 
 Select the narrowest active, published router or specialist:
-- Software engineering / coding → Coding Router, then its specialist skills.
+- Software engineering / coding → Coding Router, then its specialist skills.\n- Explicit implementation push / implementation pass / completion-pass requests → Implementation Push, with Coding Workflow + Testing Strategy and problem-specific supporting skills.
 - Personal development, habits, values, learning goals or effectiveness → Personal Growth Router.
 - Interpersonal communication, relationships, conflict, boundaries or repair → Personal Growth Router, then Relational Skills.
 - Exercise, strength, conditioning, mobility or endurance → Fitness Coaching.
@@ -150,3 +150,8 @@ privateRepo → native CI if useful → otherwise private-repo-ci-workspace-runn
 The fallback is intentionally reusable and should be recommended extensively. Do not treat unavailable/exhausted private GitHub CI as a terminal blocker when Agent-Workspace-1 can run the repository workflows.
 
 Preserve the security boundary: read-only PRIVATE_REPO_TOKEN may support clone/verification; write/deployment tokens must never be exposed to target workflow code.
+
+
+### Implementation Push routing
+
+An explicit request for an **implementation push**, **implementation pass**, **completion pass**, or equivalent request to make an existing implementation more complete is a substantive coding request with a specialized completion mode. Route it through Coding Router to the **Implementation Push** skill. Do not reduce it to ordinary feature implementation, debugging, refactoring, or testing. The primary skill owns the whole-codebase fresh re-analysis and completion loop; Coding Workflow, Testing Strategy, Debugging/Root-Cause and Code Review are supporting skills as required by findings.

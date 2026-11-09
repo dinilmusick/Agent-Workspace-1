@@ -21,7 +21,6 @@ jobs:
         with:
           repository: dinilmusick/GutTS
           ref: e1649f918abcb8446a7fb99f4569e8cef7d46d25
-          token: __DOLLAR__{{ secrets.CODING_REPO_TOKEN }}
           path: target/GutTS
           fetch-depth: 0
           persist-credentials: false
@@ -30,7 +29,6 @@ jobs:
         with:
           repository: dinilmusick/Floks
           ref: refactor/browser-server-boundary
-          token: __DOLLAR__{{ secrets.CODING_REPO_TOKEN }}
           path: target/Floks
           fetch-depth: 0
           persist-credentials: false
@@ -209,6 +207,7 @@ jobs:
           git config user.name "Krusbl Agent"
           git config user.email "155351357+dinilmusick@users.noreply.github.com"
           git commit -m "refactor: enforce browser-owned Floks graph boundary" || true
+          git remote set-url origin https://x-access-token:__DOLLAR__{CODING_REPO_TOKEN}@github.com/dinilmusick/Floks.git
           git push origin HEAD:refactor/browser-server-boundary
 
       - name: Push GutTS
@@ -220,4 +219,5 @@ jobs:
           git config user.name "Krusbl Agent"
           git config user.email "155351357+dinilmusick@users.noreply.github.com"
           git commit -m "refactor: harden browser dependency boundary" || true
+          git remote set-url origin https://x-access-token:__DOLLAR__{CODING_REPO_TOKEN}@github.com/dinilmusick/GutTS.git
           git push origin HEAD:refactor/browser-server-boundary-complete

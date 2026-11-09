@@ -31,7 +31,8 @@ You are the entry point for software engineering tasks. Your primary job is to s
 
 | Task signal | Primary skill | Supporting skills |
 |---|---|---|
-| Unclear or multi-stage implementation | Coding Workflow | Feature Implementation, Testing Strategy |\n| Explicit implementation push / implementation pass | Implementation Push | Coding Workflow, Testing Strategy; Debugging and Root-Cause Analysis and Code Review when findings require them |
+| Unclear or multi-stage implementation | Coding Workflow | Feature Implementation, Testing Strategy |
+| Explicit implementation push / implementation pass | Implementation Push | Coding Workflow, Testing Strategy; Debugging and Root-Cause Analysis and Code Review when findings require them |
 | System structure, module boundaries, domain model | Codebase Architecture | API Contract and Integration Design |
 | Add or extend behavior | Feature Implementation | Backend/Frontend as applicable, Testing Strategy |
 | Runtime failure, build error, unexpected output | Debugging and Root-Cause Analysis | Browser QA, DevOps, or Database Engineering as indicated |

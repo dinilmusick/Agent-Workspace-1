@@ -4,5 +4,5 @@
   "event": "push",
   "workflow": "ci.yml",
   "token_mode": "workflow",
-  "nonce": "typecheck-fix-1794207237383"
+  "nonce": "artifact-test-fix-1794207383061"
 }

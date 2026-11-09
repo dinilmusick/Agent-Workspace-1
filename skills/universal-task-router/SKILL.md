@@ -32,7 +32,8 @@ The goal loop coordinates task loops and evaluates overall criteria. Task loops 
 ## 4. Domain routing
 
 Select the narrowest active, published router or specialist:
-- Software engineering / coding → Coding Router, then its specialist skills.\n- Explicit implementation push / implementation pass / completion-pass requests → Implementation Push, with Coding Workflow + Testing Strategy and problem-specific supporting skills.
+- Software engineering / coding → Coding Router, then its specialist skills.
+- Explicit implementation push / implementation pass / completion-pass requests → Implementation Push, with Coding Workflow + Testing Strategy and problem-specific supporting skills.
 - Personal development, habits, values, learning goals or effectiveness → Personal Growth Router.
 - Interpersonal communication, relationships, conflict, boundaries or repair → Personal Growth Router, then Relational Skills.
 - Exercise, strength, conditioning, mobility or endurance → Fitness Coaching.

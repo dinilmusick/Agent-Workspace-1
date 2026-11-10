@@ -42,6 +42,10 @@ has_script() {
 PM=""
 if [[ -f package.json ]]; then
   PM="$(node -p "require('./package.json').packageManager || ''" 2>/dev/null || true)"
+  # Repositories predating the packageManager field use the ecosystem CI baseline.
+  # Do not let Corepack silently select the newest pnpm major (which changes lockfile
+  # policy and build-script approval behavior).
+  if [[ -z "$PM" ]] && [[ -f pnpm-lock.yaml ]]; then PM="pnpm@10.33.0"; fi
   if [[ "$PM" == pnpm@* ]] || [[ -f pnpm-lock.yaml ]]; then
     corepack enable
     if [[ "$PM" == pnpm@* ]]; then corepack prepare "$PM" --activate; fi

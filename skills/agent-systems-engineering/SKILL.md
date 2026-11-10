@@ -54,3 +54,9 @@ Agents should use the reusable private-repo-ci-workspace-runner capability exten
 privateRepo → inspect native CI → fallback if needed → Agent-Workspace-1 → clone → act → evidence → cleanup
 
 Security boundary: PRIVATE_REPO_TOKEN is read-only clone/verification access. CODING_REPO_TOKEN and DEPLOYMENT_TOKEN remain under Agent-Workspace control and are never injected into arbitrary target workflow code.
+
+## Deterministic execution bootstrap
+
+For any substantive repository task, establish the execution substrate before editing: use a usable local container/runtime first; clone Agent-Workspace-1 into that runtime; use its tools/scripts; attempt the target repository directly; if a private target cannot be cloned directly, use the Agent-Workspace-1 private-repository tooling and dedicated clones bridge. Discover and run all repository-defined build, test, typecheck, lint and custom build scripts that participate in the real build. Use GitHub Actions only when local execution is unavailable, insufficient for the target environment, or remote evidence is explicitly required. Capture command results as evidence and require independent verification before completion.
+
+The canonical local preflight is `python tools/agent-bootstrap/bootstrap.py plan`; use `prepare` to establish the workspace and target checkout. Never place credentials in source, logs or task metadata.

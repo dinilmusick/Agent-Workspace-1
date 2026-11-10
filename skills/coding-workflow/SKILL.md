@@ -81,3 +81,9 @@ Required execution pattern:
 `whole-codebase re-analysis → completeness audit → reproduce/diagnose → implement/fix → rewire → focused verification → integration/runtime/E2E verification → independent verification → fresh re-analysis`
 
 The pass must search for and address bugs, stubs, placeholders, TODO-like incomplete behavior, disconnected interfaces, partial implementations, dead paths, broken contracts, missing error handling, missing persistence, and systems that are present in source but unreachable in the real execution flow. Continue the loop until no known implementable incompleteness remains. A report of findings without implementing the available fixes is not an implementation push completion.
+
+## Deterministic execution bootstrap
+
+For any substantive repository task, establish the execution substrate before editing: use a usable local container/runtime first; clone Agent-Workspace-1 into that runtime; use its tools/scripts; attempt the target repository directly; if a private target cannot be cloned directly, use the Agent-Workspace-1 private-repository tooling and dedicated clones bridge. Discover and run all repository-defined build, test, typecheck, lint and custom build scripts that participate in the real build. Use GitHub Actions only when local execution is unavailable, insufficient for the target environment, or remote evidence is explicitly required. Capture command results as evidence and require independent verification before completion.
+
+The canonical local preflight is `python tools/agent-bootstrap/bootstrap.py plan`; use `prepare` to establish the workspace and target checkout. Never place credentials in source, logs or task metadata.

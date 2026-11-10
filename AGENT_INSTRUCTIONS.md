@@ -15,3 +15,4 @@ TOOLING=Container→unit;Agent-Workspace-1→integration/CI;VERIFY=unit→Contai
 ASYNC=initiate→WAIT/POLL→inspect→fix/retry→POLL→continue;NEVER_STOP_WHILE_POLLABLE.
 ROUTE={coding:CodingTaskLifecycle;skill*:SkillCreator;reconciliation:ReconciliationPass}.
 COMPLETE=NO unless terminal+evidence+independentVerification+reconciliation.
+EXECUTION_BOOTSTRAP=localRuntime→cloneAgentWorkspace→directTargetClone→privateCloneBridge→discoverBuildScripts→execute→evidence→independentVerify→reconcile→finalize;GitHubActionsFallback=onlyIfNoUsableLocalRuntime|localEnvironmentInsufficient|remoteEvidenceRequired.

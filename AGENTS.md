@@ -158,3 +158,9 @@ A green build or test suite is not sufficient proof of an implementation push. S
 
 ### Implementation Push PR rule
 Every implementation push is a new dedicated branch and PR. The PR must have a descriptive name and enumerate exact stubs, bugs, incomplete features, wiring changes, removals, tests/E2E results, and remaining blockers. Multiple implementation-push PRs may run concurrently against the same repository; keep each push independently reviewable.
+
+## Deterministic execution bootstrap
+
+For any substantive repository task, establish the execution substrate before editing: use a usable local container/runtime first; clone Agent-Workspace-1 into that runtime; use its tools/scripts; attempt the target repository directly; if a private target cannot be cloned directly, use the Agent-Workspace-1 private-repository tooling and dedicated clones bridge. Discover and run all repository-defined build, test, typecheck, lint and custom build scripts that participate in the real build. Use GitHub Actions only when local execution is unavailable, insufficient for the target environment, or remote evidence is explicitly required. Capture command results as evidence and require independent verification before completion.
+
+The canonical local preflight is `python tools/agent-bootstrap/bootstrap.py plan`; use `prepare` to establish the workspace and target checkout. Never place credentials in source, logs or task metadata.

@@ -20,10 +20,13 @@ jobs:
           persist-credentials: false
 
       - name: Validate Python syntax
-        run: python -m compileall -q runner examples
+        run: python -m compileall -q runner examples tools/supabase-agent-client
 
       - name: Multi-service runtime regression tests
         run: python -m unittest discover -s runner -p "test_*.py" -v
+
+      - name: Supabase agent client unit tests
+        run: python tools/supabase-agent-client/run_tests.py
 
       - name: Agent compute runtime self-test
         run: |

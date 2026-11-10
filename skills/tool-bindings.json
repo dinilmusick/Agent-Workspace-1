@@ -165,6 +165,19 @@
       ]
     },
     {
+      "slug": "supabase-agent-client",
+      "type": "cli",
+      "path": "tools/supabase-agent-client/supabase_client.py",
+      "skills": [
+        "task-ledger",
+        "loop-generator",
+        "universal-task-router",
+        "agent-systems-engineering",
+        "database-engineering"
+      ],
+      "usage": "Provide connector-less Supabase PostgREST/RPC access for Agent Workspace runtimes; prefer semantic ledger and skill operations."
+    },
+    {
       "slug": "supabase",
       "type": "connector",
       "skills": [

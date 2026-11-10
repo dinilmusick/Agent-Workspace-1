@@ -40,3 +40,5 @@ The quality runner executes a check only when the target repository has its corr
 ## Safety
 
 Target code is untrusted. The public workflow uses read-only repository permissions, disables persisted checkout credentials, passes no secrets to target code, and uploads execution evidence separately. Never put model credentials in this public repository. Pin versions and inspect upstream licenses before vendoring source.
+
+- **Supabase Agent Client** — dependency-free PostgREST/RPC client for connector-less agent runtimes; exposes canonical AgentGPT ledger RPCs and skill registry access from `tools/supabase-agent-client/supabase_client.py`.

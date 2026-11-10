@@ -39,6 +39,12 @@ These backends are optional because each requires separate model access and auth
 
 The pinned toolchain is in `tools/react-typescript-fullstack/package.json`. The quality runner executes tools only when the target repository has the corresponding configuration.
 
+## Agent execution bootstrap
+
+- `tools/agent-bootstrap/bootstrap.py`: deterministic local-runtime preflight/prepare; clones Agent-Workspace-1 first, attempts direct target clone, identifies private-repository fallback, and discovers repository build/quality commands.
+
+Use it before substantive repository execution when a local runtime is available.
+
 ## Safety
 
 Target code is untrusted. The public workflow uses read-only repository permissions, disables persisted checkout credentials, passes no secrets to target code, and uploads execution evidence separately. Never place model credentials in this public repository. Pin tool versions and inspect upstream licenses before vendoring source.

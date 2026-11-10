@@ -7,7 +7,7 @@ import argparse
 import json
 import os
 import sys
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 from urllib.error import HTTPError, URLError
 from urllib.parse import quote, urlencode
@@ -21,7 +21,7 @@ class SupabaseClientError(RuntimeError):
 @dataclass(frozen=True)
 class SupabaseConfig:
     url: str
-    key: str
+    key: str = field(repr=False)
 
     @classmethod
     def from_environment(cls) -> "SupabaseConfig":

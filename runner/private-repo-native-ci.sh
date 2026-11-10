@@ -36,7 +36,7 @@ run_check() {
 }
 
 has_script() {
-  node -e 'const p=require(process.argv[1]); process.exit(p.scripts && p.scripts[process.argv[2]] ? 0 : 1)' "$TARGET_DIR/package.json" "$1" >/dev/null 2>&1
+  node -e 'const p=require("./package.json"); process.exit(p.scripts && p.scripts[process.argv[1]] ? 0 : 1)' "$1" >/dev/null 2>&1
 }
 
 PM=""

@@ -37,6 +37,7 @@ test('uses service-role auth and executes a semantic ledger RPC', async () => {
   assert.deepEqual(result, { goals: [] });
   assert.equal(calls[0].options.headers.apikey, 'secret');
   assert.equal(calls[0].options.headers.Authorization, 'Bearer secret');
+  await assert.rejects(() => client.rpc('bad-name', {}), /simple identifier/);
 });
 
 test('provides skill search and rejects arbitrary tables', async () => {

@@ -93,7 +93,7 @@ def main():
     common.add_argument("--target-path")
     for name, func in (("plan", plan), ("prepare", prepare)):
         p = sub.add_parser(name, parents=[common]); p.set_defaults(func=func)
-    return parser.parse_args().func(parser.parse_args())
+    args = parser.parse_args()\n    return args.func(args)
 
 if __name__ == "__main__":
     raise SystemExit(main())

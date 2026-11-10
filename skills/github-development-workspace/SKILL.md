@@ -124,3 +124,9 @@ Supabase is the canonical persistence layer for goals, tasks, ownership, leases 
 - Never expose deployment credentials to coding commands.
 - Never print tokens or commit secrets.
 - Only execute arbitrary commands against trusted repositories.
+
+## Deterministic execution bootstrap
+
+For any substantive repository task, establish the execution substrate before editing: use a usable local container/runtime first; clone Agent-Workspace-1 into that runtime; use its tools/scripts; attempt the target repository directly; if a private target cannot be cloned directly, use the Agent-Workspace-1 private-repository tooling and dedicated clones bridge. Discover and run all repository-defined build, test, typecheck, lint and custom build scripts that participate in the real build. Use GitHub Actions only when local execution is unavailable, insufficient for the target environment, or remote evidence is explicitly required. Capture command results as evidence and require independent verification before completion.
+
+The canonical local preflight is `python tools/agent-bootstrap/bootstrap.py plan`; use `prepare` to establish the workspace and target checkout. Never place credentials in source, logs or task metadata.

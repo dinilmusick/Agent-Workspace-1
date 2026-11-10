@@ -28,8 +28,9 @@ Use for substantive software implementation spanning more than a trivial edit.
 4. Search for existing libraries, utilities, patterns, and open-source implementations before inventing replacements. Prefer the repository's established conventions.
 5. Produce a short ordered implementation plan internally. Split work into independently verifiable changes; preserve user changes and avoid unrelated cleanup.
 6. Implement the smallest coherent change. Keep interfaces explicit, errors observable, and behavior deterministic. Do not introduce placeholders, fake data, or silent fallbacks.
-7. Add or update tests at the narrowest useful level, then run relevant tests, type checks, lint, and build. Expand verification to integration or browser-level checks when behavior crosses boundaries.
-8. Inspect the actual runtime result when UI, deployment, networking, or integration behavior is involved. Source correctness is not proof of rendered/runtime correctness.
+7. Add or update tests at the narrowest useful level. If a local container/runtime is accessible, clone Agent-Workspace-1 into it and use its tools/scripts as the primary execution substrate. Attempt the target repository directly; for private-repository clone failures, use Agent-Workspace-1's private-repository tooling and dedicated `clones/` workspace as the bridge. Run the target's relevant tests, type checks, lint, and **every repository-defined build script/custom build command that participates in the real build** locally before falling back to GitHub Actions.
+8. Use GitHub Actions as the fallback when no usable local runtime exists, the local environment cannot reproduce the required platform, or remote-runner evidence is explicitly required. Do not skip verification merely because private CI is unavailable; use the Agent-Workspace private-repo CI fallback.
+9. Inspect the actual runtime result when UI, deployment, networking, or integration behavior is involved. Source correctness is not proof of rendered/runtime correctness.
 9. Diagnose failures from logs and reproduction. Fix root causes rather than suppressing errors.
 10. Report changed files, behavior, commands/tests run, verified outcomes, and remaining limitations. Never claim a check passed unless it ran and passed.
 

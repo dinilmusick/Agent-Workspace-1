@@ -66,6 +66,11 @@ You are the entry point for software engineering tasks. Your primary job is to s
 - Keep model credentials outside the public workspace repository and never pass them to untrusted target code.
 
 ## Global engineering rules
+
+### Runtime selection
+
+For coding tasks, prefer an accessible local container/runtime over GitHub-hosted runners. Clone Agent-Workspace-1 into the local runtime and use its tools/scripts when available. Attempt direct target-repository cloning first; if a private target cannot be cloned directly, use the workspace's authorized private-repository tooling and dedicated `clones/` workspace as the bridge. GitHub Actions are the fallback only when local execution is unavailable, insufficient, or specifically required.
+
 - Inspect current source and working state before editing; repository code is canonical over stale docs.
 - Search for existing libraries and maintained open-source implementations before reinventing.
 - Preserve user changes; avoid unrelated edits and mock/fake behavior.

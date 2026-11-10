@@ -106,7 +106,7 @@ fi
 
 if [[ -f package.json ]]; then
   if [[ "$PM" == pnpm@* ]] || [[ -f pnpm-lock.yaml ]]; then PKG=(pnpm run); else PKG=(npm run); fi
-  for name in lint typecheck build test validate boundary boundary:clean-room boundary:relative architecture:check test:public-exports test:published test:architecture-boundary; do
+  for name in build lint typecheck test validate boundary boundary:clean-room boundary:relative architecture:check test:public-exports test:published test:architecture-boundary; do
     if has_script "$name"; then
       run_check "script-$name" "${PKG[@]}" "$name"
     else

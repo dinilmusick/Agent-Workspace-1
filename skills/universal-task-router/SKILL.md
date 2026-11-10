@@ -156,3 +156,10 @@ Preserve the security boundary: read-only PRIVATE_REPO_TOKEN may support clone/v
 ### Implementation Push routing
 
 An explicit request for an **implementation push**, **implementation pass**, **completion pass**, or equivalent request to make an existing implementation more complete is a substantive coding request with a specialized completion mode. Route it through Coding Router to the **Implementation Push** skill. Do not reduce it to ordinary feature implementation, debugging, refactoring, or testing. The primary skill owns the whole-codebase fresh re-analysis and completion loop; Coding Workflow, Testing Strategy, Debugging/Root-Cause and Code Review are supporting skills as required by findings.
+
+
+## Deterministic routing matrix
+
+Before selecting a skill, inspect `public.skill_routing_matrix`. A skill with `routable=false` is ineligible. Resolve ties in this exact order: trigger strength → `routing_priority` → stable skill ID. Never use chat chronology, agent preference, or creation time as a routing signal.
+
+When asked what remains, query `public.agent_state_matrix` and classify rows as terminal, dependency_blocked, blocked, running, waiting, or ready. Do not report a raw task dump as project state. Augment repository work with live GitHub PR/CI state when available.

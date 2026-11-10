@@ -23,6 +23,21 @@ Use GitHub itself as the development substrate. This capability does not require
 - Commit and push verified changes when explicitly requested.
 - Preserve logs as workflow artifacts.
 
+## Local Runtime First
+
+When a local container, shell, or other code-execution runtime is available, **use it as the primary execution environment**. This is preferred over GitHub Actions because it is faster and exposes direct test/build output.
+
+Before working on a target repository:
+
+1. Clone **Agent-Workspace-1** into the accessible local runtime when it is not already present.
+2. Use the Agent-Workspace tools and scripts from that checkout rather than recreating their behavior manually.
+3. Attempt to clone the target repository directly into the local runtime.
+4. If the target is private and direct cloning fails, use Agent-Workspace-1's GitHub/private-repository workspace tooling to materialize the authorized private repository in the workspace's dedicated `clones/` area. Then use the public Agent-Workspace-1 checkout as the accessible bridge for running the workspace tooling and scripts against that materialized target.
+5. Prefer local execution for install, lint, format, typecheck, tests, integration checks, build scripts and application validators whenever the runtime permits.
+6. Use GitHub Actions only when the local runtime is unavailable, cannot reproduce the required environment, or the task specifically requires remote-runner evidence.
+
+Never weaken repository access controls to make a private clone work. Never expose repository credentials in source, logs or prompts.
+
 ## Mandatory obstacle reflex
 
 Obstacle recording is part of normal repository development, not an optional documentation step.

@@ -42,7 +42,7 @@ class SupabaseAgentClientTests(unittest.TestCase):
             {"SUPABASE_URL": "https://example.supabase.co"},
             clear=True,
         ):
-            with self.assertRaisesRegex(SupabaseClientError, "key"):
+            with self.assertRaisesRegex(SupabaseClientError, "required"):
                 SupabaseConfig.from_environment()
 
     @patch("supabase_client.urlopen")

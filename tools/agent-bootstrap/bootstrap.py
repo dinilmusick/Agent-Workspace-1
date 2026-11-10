@@ -33,18 +33,19 @@ def build_commands(root):
     return commands
 
 def plan(args):
-    root = repo_root(Path.cwd())
+    detected_root = repo_root(Path.cwd())
+    root = detected_root or Path.cwd()
     workspace = Path(args.workspace).expanduser().resolve()
     result = {
         "workspace_repo": "dinilmusick/Agent-Workspace-1",
         "workspace_path": str(workspace),
         "workspace_present": workspace.exists(),
-        "current_repository": str(root) if root else None,
+        "current_repository": str(detected_root) if detected_root else None,
         "git_available": command_exists("git"),
         "target_repository": args.repository,
         "target_ref": args.ref,
         "local_runtime": True,
-        "build_commands": build_commands(root) if root else [],
+        "build_commands": build_commands(root),
         "next": []
     }
     if not result["git_available"]:

@@ -72,8 +72,20 @@ if [[ -f package.json ]]; then
   fi
   install_status=${checks[0]##*:}
   if [[ "$install_status" != "0" ]]; then
-    echo "::error::Dependency installation failed; downstream checks cannot be trusted."
-    exit 1
+    echo "::warning::Frozen dependency installation failed. Attempting a non-frozen diagnostic install in this disposable clone; the original lockfile failure remains a failing gate."
+    if [[ "$PM" == pnpm@* ]] || [[ -f pnpm-lock.yaml ]]; then
+      run_check "diagnostic-install-nonfrozen" pnpm install --no-frozen-lockfile
+    elif [[ "$PM" == yarn@* ]] || [[ -f yarn.lock ]]; then
+      run_check "diagnostic-install-nonfrozen" yarn install
+    else
+      run_check "diagnostic-install-nonfrozen" npm install
+    fi
+    last_index=$(("${#checks[@]}" - 1))
+    diagnostic_status=${checks[$last_index]##*:}
+    if [[ "$diagnostic_status" != "0" ]]; then
+      echo "::error::Diagnostic dependency installation also failed; downstream checks cannot be trusted."
+      exit 1
+    fi
   fi
 fi
 

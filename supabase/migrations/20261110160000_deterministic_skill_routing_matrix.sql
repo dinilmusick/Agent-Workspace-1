@@ -45,11 +45,17 @@ where s.slug='skill-creator'
 and not exists(select 1 from public.skill_triggers t where t.skill_id=s.id and t.trigger_type=v.trigger_type and t.value=v.value);
 
 insert into public.skill_dependencies(skill_id,depends_on_skill_id,dependency_type)
-select s.id,d.depends_on_skill_id,'required'
+select s.id,dep.id,'required'
 from public.skills s
-cross join (values (17),(7),(4),(25)) d(depends_on_skill_id)
+cross join (values
+ ('coding-router'),
+ ('task-ledger'),
+ ('loop-generator'),
+ ('testing-strategy')
+) d(dep_slug)
+join public.skills dep on dep.slug=d.dep_slug
 where s.slug='coding-task-lifecycle'
-and not exists(select 1 from public.skill_dependencies x where x.skill_id=s.id and x.depends_on_skill_id=d.depends_on_skill_id);
+and not exists(select 1 from public.skill_dependencies x where x.skill_id=s.id and x.depends_on_skill_id=dep.id);
 
 drop view if exists public.skill_routing_matrix;
 create view public.skill_routing_matrix with (security_invoker=true) as

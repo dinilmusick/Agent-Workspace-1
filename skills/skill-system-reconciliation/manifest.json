@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "slug": "skill-system-reconciliation",
+  "name": "Skill System Reconciliation",
+  "version": "1.0.0",
+  "status": "active",
+  "path": "skills/skill-system-reconciliation/SKILL.md",
+  "canonicalState": "supabase",
+  "requiredTools": ["github", "supabase"],
+  "matrix": "docs/skill-system/reconciliation-matrix.md"
+}

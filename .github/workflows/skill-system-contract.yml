@@ -1,0 +1,24 @@
+name: Skill System Contract
+
+on:
+  push:
+    paths:
+      - "skills/skill-system-reconciliation/**"
+      - "docs/skill-system/**"
+      - "tools/validate_skill_system.py"
+      - ".github/workflows/skill-system-contract.yml"
+  pull_request:
+    paths:
+      - "skills/skill-system-reconciliation/**"
+      - "docs/skill-system/**"
+      - "tools/validate_skill_system.py"
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - run: python3 tools/validate_skill_system.py

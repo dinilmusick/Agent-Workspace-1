@@ -63,7 +63,7 @@ export function createSupabaseClient({
 
   const api = {
     async rpc(functionName, args = {}) {
-      if (!/^\\w+$/.test(functionName)) throw new Error('RPC function name must be a simple identifier.');
+      if (!/^\w+$/.test(functionName)) throw new Error('RPC function name must be a simple identifier.');
       return request(`/rest/v1/rpc/${encodeURIComponent(functionName)}`, {
         method: 'POST',
         body: JSON.stringify(args)
@@ -79,9 +79,7 @@ export function createSupabaseClient({
     },
 
     async insert(table, rows, { returning = 'representation' } = {}) {
-      if (!Array.isArray(rows) || rows.length === 0) {
-        throw new Error('insert requires a non-empty array of rows.');
-      }
+      if (!Array.isArray(rows) || rows.length === 0) throw new Error('insert requires a non-empty array of rows.');
       return request(`/rest/v1/${tableName(table)}`, {
         method: 'POST',
         headers: { Prefer: `return=${returning}` },
@@ -90,9 +88,7 @@ export function createSupabaseClient({
     },
 
     async update(table, filters, patch, { returning = 'representation' } = {}) {
-      if (!patch || typeof patch !== 'object' || Array.isArray(patch)) {
-        throw new Error('update requires an object patch.');
-      }
+      if (!patch || typeof patch !== 'object' || Array.isArray(patch)) throw new Error('update requires an object patch.');
       const query = encodeQuery(filters);
       return request(`/rest/v1/${tableName(table)}?${query}`, {
         method: 'PATCH',
@@ -124,12 +120,11 @@ export function createSupabaseClient({
     skills: {
       list: (options = {}) => api.select('skills', options),
       getByName: (name) => api.select('skills', { filters: { name }, limit: 1 }),
-      search: (term, { limit = 20 } = {}) =>
-        api.select('skills', {
-          filters: { name: { op: 'ilike', value: `%${term}%` } },
-          limit,
-          order: 'name.asc'
-        }),
+      search: (term, { limit = 20 } = {}) => api.select('skills', {
+        filters: { name: { op: 'ilike', value: `%${term}%` } },
+        limit,
+        order: 'name.asc'
+      }),
       versions: (options = {}) => api.select('skill_versions', options),
       tools: (options = {}) => api.select('skill_tools', options),
       links: (options = {}) => api.select('skill_tool_links', options)

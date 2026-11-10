@@ -1,0 +1,169 @@
+name: Ecosystem Native Verification
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Optional ref override for every target (blank uses the matrix ref)"
+        required: false
+        default: ""
+        type: string
+  push:
+    paths:
+      - ".agent/ecosystem-native-ci-request.json"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ecosystem-native-verification-${{ github.run_id }}
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    name: ${{ matrix.id }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      max-parallel: 13
+      matrix:
+        include:
+          - id: Krusbl-Engine
+            repository: dinilmusick/Krusbl-Engine
+            private: true
+            ref: main
+          - id: GutTS
+            repository: dinilmusick/GutTS
+            private: false
+            ref: main
+          - id: KrnlTS
+            repository: dinilmusick/KrnlTS
+            private: false
+            ref: main
+          - id: FrnlTS
+            repository: dinilmusick/FrnlTS
+            private: false
+            ref: main
+          - id: Kloks
+            repository: dinilmusick/Kloks
+            private: false
+            ref: main
+          - id: Floks
+            repository: dinilmusick/Floks
+            private: false
+            ref: main
+          - id: Skipo
+            repository: dinilmusick/Skipo
+            private: true
+            ref: main
+          - id: Luth
+            repository: dinilmusick/Luth
+            private: true
+            ref: main
+          - id: Srkl-Engine
+            repository: dinilmusick/Srkl-Engine
+            private: true
+            ref: main
+          - id: Loky-Engine
+            repository: dinilmusick/Loky-Engine
+            private: true
+            ref: main
+          - id: Kult-Engine
+            repository: dinilmusick/Kult-Engine
+            private: false
+            ref: main
+          - id: Kelt-Engine
+            repository: dinilmusick/Kelt-Engine
+            private: true
+            ref: main
+          - id: Aiko-main
+            repository: dinilmusick/Aiko
+            private: true
+            ref: main
+          - id: Aiko-pr13
+            repository: dinilmusick/Aiko
+            private: true
+            ref: 69377498dff86fcd7357c700d5c095dc5dcb3c02
+    steps:
+      - name: Checkout public Agent Workspace controller
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: main
+          path: control
+          persist-credentials: false
+
+      - name: Resolve target ref
+        id: target
+        shell: bash
+        env:
+          INPUT_REF: ${{ inputs.ref }}
+          MATRIX_REF: ${{ matrix.ref }}
+          REPO_ID: ${{ matrix.id }}
+        run: |
+          set -euo pipefail
+          ref="${INPUT_REF:-$MATRIX_REF}"
+          if [[ "$GITHUB_EVENT_NAME" == "push" && -f control/.agent/ecosystem-native-ci-request.json ]]; then
+            requested="$(jq -r --arg id "$REPO_ID" '.refs[$id] // .default_ref // empty' control/.agent/ecosystem-native-ci-request.json)"
+            if [[ -n "$requested" ]]; then ref="$requested"; fi
+          fi
+          [[ -n "$ref" ]]
+          echo "ref=$ref" >> "$GITHUB_OUTPUT"
+
+      - name: Require read-only private repository token
+        if: matrix.private
+        shell: bash
+        env:
+          PRIVATE_REPO_TOKEN: ${{ secrets.PRIVATE_REPO_TOKEN }}
+        run: |
+          set -euo pipefail
+          test -n "$PRIVATE_REPO_TOKEN" || {
+            echo "::error::Configure PRIVATE_REPO_TOKEN with read-only Contents access to all private target repositories."
+            exit 1
+          }
+
+      - name: Checkout target repository into temporary clones directory
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          repository: ${{ matrix.repository }}
+          ref: ${{ steps.target.outputs.ref }}
+          token: ${{ matrix.private && secrets.PRIVATE_REPO_TOKEN || github.token }}
+          path: clones/${{ matrix.id }}
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run native install, lint, typecheck, build, tests and boundary checks
+        shell: bash
+        env:
+          TARGET_REPOSITORY: ${{ matrix.repository }}
+          TARGET_REF: ${{ steps.target.outputs.ref }}
+        run: |
+          set -euo pipefail
+          mkdir -p control/evidence
+          bash control/runner/private-repo-native-ci.sh \
+            "clones/${{ matrix.id }}" \
+            "control/evidence/${{ matrix.id }}.log"
+
+      - name: Upload verification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ecosystem-native-${{ matrix.id }}-${{ github.run_id }}
+          path: control/evidence/${{ matrix.id }}.log
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Remove private/public source clone
+        if: always()
+        shell: bash
+        run: rm -rf "clones/${{ matrix.id }}"

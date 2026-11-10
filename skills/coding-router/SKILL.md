@@ -108,3 +108,8 @@ Do not let private CI availability become a dead end. Prefer the fallback when i
 
 ## Implementation Push PR requirement
 When routing an implementation push, the execution unit is a fresh dedicated branch + GitHub PR. Parallel pushes for the same repository are valid and must remain isolated. The PR description is mandatory evidence and must enumerate exact findings and changes rather than generic summaries.
+
+
+## Deterministic routing matrix
+
+Inspect `public.skill_routing_matrix` before specialist selection; `routable=false` is a hard exclusion. For coding lifecycle selection use explicit request signals first, then trigger weight, then `routing_priority`, then stable skill ID. The four lifecycle modes are `newRepo`, `feature`, `implementationPush`, and `reconciliation`. Do not use creation time, previous chat, or agent preference as tie-breaks.

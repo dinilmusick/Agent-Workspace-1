@@ -61,7 +61,7 @@ jobs:
     timeout-minutes: 45
     steps:
       - name: Checkout Agent Workspace control files
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af49 # v4.2.2
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           persist-credentials: false
 
@@ -82,7 +82,7 @@ jobs:
         run: python3 runner/resolve-development-request.py
 
       - name: Checkout target repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af49 # v4.2.2
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           repository: ${{ steps.request.outputs.repository }}
           ref: ${{ steps.request.outputs.ref }}

@@ -507,10 +507,27 @@ test("honors cancellation for an active execution", async () => {
 TS
 
 npm ci
-npm run lint
-npm test
-npm run build:api
-npm run build
+
+set +e
+failed_scoped=0
+run_check() {
+  label="$1"; shift
+  log="/tmp/aiko-engine-${label}.log"
+  echo "===== START ${label} ====="
+  "$@" >"$log" 2>&1
+  code=$?
+  echo "===== EXIT ${label}: ${code} ====="
+  if [ "$code" -eq 0 ]; then tail -12 "$log"; else tail -50 "$log"; fi
+  case "$label" in
+    focused-tests|scoped-types) [ "$code" -eq 0 ] || failed_scoped=1 ;;
+  esac
+}
+run_check focused-tests node --import tsx --test src/backend/workflows/engine.test.ts
+run_check scoped-types npx tsc --noEmit --skipLibCheck --target ES2022 --module NodeNext --moduleResolution NodeNext src/backend/workflows/engine.test.ts
+run_check full-lint npm run lint
+run_check full-tests npm test
+run_check api-build npm run build:api
+run_check app-build npm run build
 
 python3 - <<'PY'
 from pathlib import Path
@@ -526,3 +543,4 @@ if hits:
     raise SystemExit("Engine boundary violations:\n" + "\n".join(hits))
 print(f"Engine boundary scan passed ({sum(1 for _ in root.rglob('*.ts'))} TypeScript files).")
 PY
+[ "$failed_scoped" -eq 0 ]

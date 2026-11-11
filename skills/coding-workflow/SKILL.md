@@ -87,3 +87,16 @@ The pass must search for and address bugs, stubs, placeholders, TODO-like incomp
 For any substantive repository task, establish the execution substrate before editing: use a usable local container/runtime first; clone Agent-Workspace-1 into that runtime; use its tools/scripts; attempt the target repository directly; if a private target cannot be cloned directly, use the Agent-Workspace-1 private-repository tooling and dedicated clones bridge. Discover and run all repository-defined build, test, typecheck, lint and custom build scripts that participate in the real build. Use GitHub Actions only when local execution is unavailable, insufficient for the target environment, or remote evidence is explicitly required. Capture command results as evidence and require independent verification before completion.
 
 The canonical local preflight is `python tools/agent-bootstrap/bootstrap.py plan`; use `prepare` to establish the workspace and target checkout. Never place credentials in source, logs or task metadata.
+
+
+## GitHub Issue worker protocol
+
+For parallel coding work, the GitHub Issue is the canonical execution record for the coding task. Create exactly one Issue per independent task and link exactly one dedicated PR.
+
+Worker loop: read Issue → execute → update Current Implementation State → verify → update evidence/PR → continue or wait.
+
+If blocked, write the blocker, exact question, attempted resolution and resume point into the Issue, then poll for the orchestrator response. Never report a blocker only in conversation and stop.
+
+Orchestrator loop: poll Issues → inspect PRs/CI → resolve blockers in Issues → continue polling → reconcile.
+
+Global continue/proceed is safe to send to all workers. Each worker must reread its Issue and take action only if its Issue says actionable. Terminal workers perform no unrelated work.

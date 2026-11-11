@@ -184,3 +184,12 @@ Use the same structural decomposition for coding, learning, research, design, cr
 ```
 
 The `general_pattern` is mandatory for substantive coding tasks and must be surfaced in user-facing progress/result reporting.
+
+
+## Coding execution boundary: GitHub Issues
+
+Task Ledger remains the canonical Supabase coordination layer for goals, dependencies, leases, non-coding tasks and durable cross-task evidence. It is not the detailed coding execution queue.
+
+For coding tasks, persist the parent task and GitHub identifiers in Supabase, then create a GitHub Issue as the authoritative execution record. Mirror only stable linkage/state needed for orchestration: repository, issue_number, issue_url, pr_number, pr_url, worker identity and terminal summary. Do not maintain a second detailed coding state machine in Supabase.
+
+Workers must read/update their Issue, not chat history, for detailed coding state. Orchestrators poll Issues/PRs/CI and write decisions back to Issues. This makes worker recovery and bulk continue deterministic.

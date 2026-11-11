@@ -1,7 +1,7 @@
 ---
 name: "Persistent Multi-Agent Execution"
 slug: persistent-multi-agent-execution
-version: 1.0.0
+version: 1.1.0
 source: Supabase Skills Database
 sourceId: 46
 status: active

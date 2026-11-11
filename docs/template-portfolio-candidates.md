@@ -14,7 +14,7 @@ This register captures the first ten priority candidates. It is **not a legal cl
 | CRM | [krayin/laravel-crm](https://github.com/krayin/laravel-crm) | `tpl-crm-krayin` | `2.2` | MIT | `LICENSE` | `ed6deebfcb8c616eaf352c893a10a6d8e666fc6e` | REJECTED (current runtime dependency set) |
 | ERP | [aureuserp/aureuserp](https://github.com/aureuserp/aureuserp) | `tpl-erp-aureuserp` | `master` | MIT | `LICENSE` | `c31a0db21e00fa436c4949eb4f60ceef81e116ec` | REJECTED (current runtime dependency set) |
 | Python API starter | [fastapi/full-stack-fastapi-template](https://github.com/fastapi/full-stack-fastapi-template) | `tpl-backend-fastapi` | `master` | MIT | `LICENSE` | `aabb90126964a164e02aff39e7c385bb0598236d` | REJECTED (runtime dependency licenses) |
-| RAG | [arc53/DocsGPT](https://github.com/arc53/DocsGPT) | `tpl-ai-docsgpt` | `main` | MIT | `LICENSE` | `d1506d977d0c2036a07e7b464fa05479fab8d973` | CONDITIONAL |
+| RAG | [arc53/DocsGPT](https://github.com/arc53/DocsGPT) | `tpl-ai-docsgpt` | `main` | MIT | `LICENSE` | `d1506d977d0c2036a07e7b464fa05479fab8d973` | REJECTED (runtime LGPL dependency) |
 | AI workspace | [Mintplex-Labs/anything-llm](https://github.com/Mintplex-Labs/anything-llm) | `tpl-ai-anythingllm` | `master` | MIT | `LICENSE` | `e8434c07c3d385411aec28e8f9758dfd073565ec` | CONDITIONAL |
 | Self-hosted PaaS | [coollabsio/coolify](https://github.com/coollabsio/coolify) | `tpl-deployment-coolify` | `main` | Apache-2.0 | `LICENSE` | `d9ab3d1e8bea98215ed19a27f2f4ac1abd2fa40f` | REJECTED (current runtime dependency set) |
 | Inventory | [inventree/InvenTree](https://github.com/inventree/InvenTree) | `tpl-inventory-inventree` | `master` | MIT | `LICENSE` | `16309370ba0e4b4a088516ae06c0a681e5315348` | REJECTED (runtime LGPL dependencies) |
@@ -72,10 +72,10 @@ The four rejected candidates above are not replaced automatically. These alterna
 - The runtime LGPL and other non-allowlisted components disqualify this exact revision. Do not acquire unless those dependencies are removed/replaced and both lockfiles are regenerated and fully re-audited.
 - ScanCode source-tree scanning was attempted but the runner's release configuration failed; no source-level ScanCode results are claimed. Asset review remains outstanding.
 
-### DocsGPT
-- Root `LICENSE` and `pyproject.toml` identify MIT.
-- The Python manifest declares a substantial runtime dependency set, including model/runtime and document-processing integrations.
-- Still required: audit the complete resolved Python dependency graph, optional extras, downloaded models, document-conversion components, frontend dependencies and bundled assets.
+### DocsGPT — REJECTED as-is
+- Root `LICENSE` and `pyproject.toml` identify MIT. The exact source revision has multiple lock/requirements files for core, document parsing, vector stores, decision models, tests and docs.
+- The core `pyproject.toml` directly declares `psycopg[binary,pool]>=3.1,<4` as a runtime dependency; the pinned `docsgpt/requirements.txt` contains `psycopg==3.3.8` and `psycopg-binary==3.3.8`. PyPI identifies Psycopg 3.3.8 as `LGPL-3.0-only`, which violates the user's explicit no-LGPL rule. <https://pypi.org/project/psycopg/>
+- This direct runtime blocker is sufficient to reject the current revision. The full lock includes optional Docling/Milvus/decision-model extras and multiple npm lockfiles; their dependency, model and asset reviews remain outstanding. Do not acquire unless the PostgreSQL driver is replaced with an allowlisted alternative and every supported configuration is re-locked and re-audited.
 
 ### AnythingLLM
 - Root `LICENSE` and root `package.json` identify MIT.

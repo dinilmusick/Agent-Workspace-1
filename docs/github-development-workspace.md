@@ -14,6 +14,8 @@ Create an issue in `dinilmusick/Agent-Workspace-1`:
 {
   "repository": "dinilmusick/Aiko",
   "ref": "main",
+  "source_repository": "dinilmusick/Fod-Engine",
+  "source_ref": "main",
   "commands": [
     "npm ci",
     "npm run typecheck",
@@ -29,14 +31,14 @@ Create an issue in `dinilmusick/Agent-Workspace-1`:
 }
 ```
 
-The minimum request is `repository`, `ref`, and non-empty `commands`. Commands may be a string or an array of strings. A maximum of 100 command lines and 20,000 characters is enforced.
+The minimum request is `repository`, `ref`, and non-empty `commands`. Optional `source_repository` and `source_ref` check out a private source repository into `$GITHUB_WORKSPACE/source` using the workspace credential in a dedicated checkout action. The credential is not passed to command execution and checkout credential persistence is disabled. Commands may be a string or an array of strings. A maximum of 100 command lines and 20,000 characters is enforced.
 
 Set `push` to false (or omit it) to run checks without writing to the target repository. To push changes, set `push: true` and provide a new `branch`; the runner creates a commit and pushes that branch. Set `create_pr: true` to open a pull request against `ref` after the push. PR creation requires push.
 
 ## Security boundaries
 
 - Only issue requests from repository owners, members, or collaborators are accepted.
-- The target repository is checked out with `CODING_REPO_TOKEN`, with credential persistence disabled.
+- The target and optional source repositories are checked out with `CODING_REPO_TOKEN`, with credential persistence disabled.
 - Target commands do not receive repository, deployment, or workflow secrets.
 - The write token is only exposed to the isolated push/PR steps after command execution.
 - The workflow's own `GITHUB_TOKEN` has read-only contents/issue permissions.

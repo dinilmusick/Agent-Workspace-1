@@ -152,7 +152,7 @@ jobs:
           echo "Verified: all refs match; the verification clone has no configured remotes after removing its temporary origin."
           echo "Destination is a separately created repository, not a GitHub fork."
 
-      - name: Preserve acquisition provenance and license notice
+      - name: Emit acquisition provenance record
         env:
           GH_TOKEN: ${{ secrets.CODING_REPO_TOKEN }}
           TARGET: dinilmusick/${{ steps.request.outputs.target }}
@@ -174,11 +174,13 @@ jobs:
           TARGET: dinilmusick/${{ steps.request.outputs.target }}
           SOURCE: ${{ steps.request.outputs.source }}
           LICENSE_ID: ${{ steps.request.outputs.license }}
+          DEFAULT_BRANCH: ${{ steps.default.outputs.branch }}
         shell: bash
         run: |
           set -euo pipefail
           if [[ "$JOB_STATUS" == "success" ]]; then
-            body="Repository mirror created and refs verified: https://github.com/$TARGET\n\nSource: https://github.com/$SOURCE\nDetected root SPDX license: $LICENSE_ID\n\nNote: dependency, bundled asset, model, font, and trademark clearance remains a separate gate."
+            source_sha="$(git -C source.git rev-parse "refs/heads/$DEFAULT_BRANCH")"
+            body="Repository mirror created and refs verified: https://github.com/$TARGET\n\nSource: https://github.com/$SOURCE\nSource commit: $source_sha\nSPDX metadata: $LICENSE_ID\nDefault branch: $DEFAULT_BRANCH\n\nNote: dependency, bundled asset, model, font, and trademark clearance remains a separate gate."
           else
             body="Acquisition workflow failed. Inspect the Actions run for the exact validation or mirror error. No successful acquisition is claimed."
           fi

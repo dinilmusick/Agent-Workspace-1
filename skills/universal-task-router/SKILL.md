@@ -163,3 +163,10 @@ An explicit request for an **implementation push**, **implementation pass**, **c
 Before selecting a skill, inspect `public.skill_routing_matrix`. A skill with `routable=false` is ineligible. Resolve ties in this exact order: trigger strength → `routing_priority` → stable skill ID. Never use chat chronology, agent preference, or creation time as a routing signal.
 
 When asked what remains, query `public.agent_state_matrix` and classify rows as terminal, dependency_blocked, blocked, running, waiting, or ready. Do not report a raw task dump as project state. Augment repository work with live GitHub PR/CI state when available.
+
+
+## Persistent coding execution routing
+
+When coding work is parallelized, activate Persistent Multi-Agent Execution alongside the coding specialist. Route each independent coding task to one GitHub Issue and one worker/PR. Supabase remains the parent goal/task coordination layer; GitHub Issue state is canonical for detailed coding execution.
+
+The orchestrator must poll Issues, linked PRs and CI, write blocker resolutions into Issues, and remain in the loop while actionable work exists. Workers must persist blockers and resume points in Issues and poll for responses. continue/proceed is a global resume signal; workers reread their own Issue and do not treat it as permission for unrelated work.

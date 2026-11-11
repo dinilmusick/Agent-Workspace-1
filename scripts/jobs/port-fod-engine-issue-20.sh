@@ -677,7 +677,7 @@ test("propagates verified principal and cancellation signal through the runtime 
       service: {
         async spawn(input) {
           received = { input };
-          return { id: "runtime-1", workspaceId: "workspace-1" };
+          return { id: "runtime-1", workspaceId: "workspace-1" } as any;
         },
         async execute() { throw new Error("unused"); },
         async status() { throw new Error("unused"); },

@@ -30,12 +30,14 @@ begin
   task_definition := jsonb_build_object(
     'name','Recovery test parent',
     'actions',jsonb_build_array('Inspect the recovery claim path','Create a parent and leaf fixture','Verify stale-lease recovery'),
+    'general_pattern','inspect → create fixture → verify recovery',
     'description','Parent task for recovery integration test',
     'acceptance_criteria',jsonb_build_array('Child is independently recoverable'),
     'loop',loop_contract,
     'subtasks',jsonb_build_array(jsonb_build_object(
       'name','Recovery test leaf',
       'actions',jsonb_build_array('Claim the leaf task','Simulate stale heartbeat','Verify token rotation and recovery evidence'),
+      'general_pattern','claim → simulate stale state → verify recovery',
       'description','A leaf task used to test stale worker recovery',
       'acceptance_criteria',jsonb_build_array('A second worker can atomically reclaim this task'),
       'required_capabilities',jsonb_build_array('recovery-test'),

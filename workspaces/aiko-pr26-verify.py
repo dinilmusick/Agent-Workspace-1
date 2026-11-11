@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import base64
 import json
 import os
 import subprocess
@@ -14,11 +15,11 @@ REF = "test/fod-absorption-regression-gates"
 REPO = "https://github.com/dinilmusick/Aiko.git"
 report = {"repository": "dinilmusick/Aiko", "ref": REF, "started_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), "checks": []}
 
-def run(name, command, cwd=TARGET, timeout=1200):
+def run(name, command, cwd=TARGET, timeout=1200, env=None):
     started = time.time()
     print("\n===== " + name + " =====", flush=True)
     try:
-        p = subprocess.run(command, cwd=cwd, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=timeout)
+        p = subprocess.run(command, cwd=cwd, env=env, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=timeout)
         output = p.stdout
         code = p.returncode
     except subprocess.TimeoutExpired as e:
@@ -31,12 +32,21 @@ def run(name, command, cwd=TARGET, timeout=1200):
     print("RESULT " + json.dumps(item), flush=True)
     return code
 
-clone_code = run("clone_target", ["git", "clone", "--depth", "1", "--branch", REF, REPO, str(TARGET)], cwd=ROOT, timeout=300)
+token = os.environ.pop("PRIVATE_REPO_TOKEN", None)
+clone_env = os.environ.copy()
+if token:
+    basic = base64.b64encode(("x-access-token:" + token).encode("utf-8")).decode("ascii")
+    clone_env["GIT_CONFIG_COUNT"] = "1"
+    clone_env["GIT_CONFIG_KEY_0"] = "http.https://github.com/.extraheader"
+    clone_env["GIT_CONFIG_VALUE_0"] = "AUTHORIZATION: basic " + basic
+clone_code = run("clone_target", ["git", "clone", "--depth", "1", "--branch", REF, REPO, str(TARGET)], cwd=ROOT, timeout=300, env=clone_env)
+token = None
+clone_env.clear()
 if clone_code == 0:
     report["head_sha"] = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=TARGET, text=True).strip()
     package = json.loads((TARGET / "package.json").read_text())
     report["package_scripts"] = package.get("scripts", {})
-    install_cmd = ["npm", "ci", "--include=optional"] if (TARGET / "package-lock.json").exists() else ["npm", "install", "--include=optional"]
+    install_cmd = ["npm", "install", "--include=optional"]
     install_code = run("dependency_install", install_cmd, timeout=1200)
     if install_code == 0:
         commands = [

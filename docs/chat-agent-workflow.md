@@ -63,3 +63,14 @@ Supabase stores state and performs atomic database coordination. GitHub Actions 
 A new agent must query `goal_ledger_overview(null)` before answering what goals need completion. Show every visible unfinished goal and its task status, running agent/heartbeat, blockers, dependencies and verification. The overview is global; never assume the previous chat's selected goal is the only goal.
 
 When a clear missing work item is discovered, the agent proposes it rather than inserting it silently. It asks **“Should I add this as a task?”** and presents the target goal, title, scope, acceptance criteria, dependencies and proposed readable ID. Only after user confirmation does it call the task-tree creation RPC. The database returns the canonical `task_key`; the agent repeats that exact key. New IDs follow `task-<descriptive-kebab-case>-<8-hex-suffix>`. Existing IDs are preserved.
+
+
+## Persistent GitHub-Issue-backed coding workers
+
+For coding goals with parallel workers, the user should not be the scheduler. The orchestrator creates one Issue per independent coding task and one dedicated PR per worker, then continuously polls Issues, PRs and CI.
+
+Each worker reads its complete Issue before acting and maintains a Current Implementation State with status, completed work, current work, next action, blockers, questions, orchestrator response, resume point and evidence. A blocker is written to the Issue and the worker waits/polls for a response. The orchestrator answers by updating the Issue, preserving the decision for recovery.
+
+A global continue or proceed prompt is safe to send to every worker. Each worker rereads its own Issue: terminal workers do nothing; resolved blockers resume; unresolved blockers remain waiting; active work continues. The user therefore does not need to track which agents are finished or blocked.
+
+Supabase remains the durable goal/non-coding coordination layer. GitHub Issues are the detailed coding execution ledger; PRs are implementation artifacts; CI is verification evidence.

@@ -2,7 +2,7 @@
 name: "Loop Generator"
 slug: loop-generator
 supabaseSkillId: 4
-version: 1.2.1
+version: 1.4.0
 status: active
 tools:
   - looper
@@ -100,3 +100,8 @@ Use the same complete contract for both levels. In the Supabase schema the contr
 A goal iteration evaluates the current state of all child task loops and selects the next action. It may pass only when every descendant task is completed and independently verified, all goal acceptance criteria are satisfied, and the goal iteration includes non-empty evidence. A task loop may pass only against its own criteria and evidence; task submission and independent verification are separate gates.
 
 Keep both loop histories independently resumable. Never infer that the goal loop passed merely because all tasks submitted results, and never infer that a task passed merely because the goal loop advanced.
+
+
+## Persistent multi-agent execution
+
+When a loop delegates coding work to parallel workers, the worker's GitHub Issue is the durable execution state. The loop must poll active Issues/PRs/CI rather than stopping because a worker conversation paused. Worker blockers are persisted with question and resume point. A global continue/proceed signal causes each worker to reread its Issue and resume only if actionable; terminal workers no-op.

@@ -139,7 +139,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          expected="https://github.com/$TARGET_REPOSITORY.git"
+          expected="https://github.com/$TARGET_REPOSITORY"
           actual="$(git remote get-url origin)"
           push_url="$(git remote get-url --push origin)"
           [[ "$actual" == "$expected" && "$push_url" == "$expected" ]] || { echo "Refusing to push: origin remote was changed by target commands." >&2; exit 1; }

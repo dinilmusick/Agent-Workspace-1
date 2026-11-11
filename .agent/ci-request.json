@@ -1,8 +1,8 @@
 {
   "repository": "dinilmusick/Aiko",
-  "ref": "main",
+  "ref": "reconcile/fod-absorption-final",
   "event": "push",
   "workflow": "validate.yml",
   "token_mode": "workflow",
-  "request_id": "aiko-issue-21-main-baseline-2026-11-11"
+  "request_id": "aiko-fod-absorption-final-2026-11-11"
 }

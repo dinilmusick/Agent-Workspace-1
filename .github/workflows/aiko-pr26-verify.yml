@@ -1,6 +1,8 @@
 name: Aiko PR 26 Verification
 
 on:
+  issues:
+    types: [opened]
   pull_request:
     branches: [main]
     paths:
@@ -9,15 +11,25 @@ on:
 
 permissions:
   contents: read
+  issues: write
 
 jobs:
   verify:
+    if: github.event_name == 'pull_request' || (github.event_name == 'issues' && startsWith(github.event.issue.title, '[aiko-verify]'))
     runs-on: ubuntu-latest
     timeout-minutes: 40
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Checkout workspace control files
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: main
+          path: control
+          persist-credentials: false
+      - name: Checkout verification runner
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: run/aiko-pr26-private-ci-20261111
+          path: runner
           persist-credentials: false
       - uses: actions/setup-node@1e60f620b9541d13c3f8b45e8f10e21d6b45f6e3
         with:
@@ -26,12 +38,41 @@ jobs:
         with:
           python-version: "3.12"
       - name: Execute Aiko verification matrix
-        run: python workspaces/aiko-pr26-verify.py
+        id: verify
+        continue-on-error: true
+        working-directory: control
+        run: python ../runner/workspaces/aiko-pr26-verify.py
       - name: Upload complete verification evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: aiko-pr26-verification
-          path: results/
+          path: control/results/
           if-no-files-found: warn
           retention-days: 7
+      - name: Publish verification summary to request issue
+        if: always()
+        uses: actions/github-script@v7
+        env:
+          VERIFY_OUTCOME: ${{ steps.verify.outcome }}
+        with:
+          script: |
+            const fs = require('fs');
+            const reportPath = 'control/results/verification-report.json';
+            let body;
+            if (fs.existsSync(reportPath)) {
+              const report = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
+              const rows = report.checks.map(c => '- ' + c.name + ': ' + (c.exit_code === 0 ? 'PASS' : c.exit_code === null ? 'SKIPPED' : 'FAIL (' + c.exit_code + ')')).join('\n');
+              body = '## Aiko PR #26 verification result\n\n' +
+                '**Overall:** ' + report.overall + '\n' +
+                '**Target:** `dinilmusick/Aiko@' + report.head_sha + '`\n\n' +
+                rows + '\n\nFull command logs and JSON report are attached as the `aiko-pr26-verification` workflow artifact.';
+            } else {
+              body = '## Aiko PR #26 verification failed to initialize\n\nNo verification report was produced. Workflow outcome: ' + process.env.VERIFY_OUTCOME;
+            }
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body
+            });

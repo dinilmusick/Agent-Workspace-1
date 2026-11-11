@@ -1,0 +1,46 @@
+name: Aiko Direct Verification
+on:
+  push:
+    paths:
+      - .agent/aiko-direct-verify.yml
+      - .agent/ci-request.json
+permissions:
+  contents: write
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Clone Aiko
+        env:
+          TOKEN: ${{ secrets.PRIVATE_REPO_TOKEN }}
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/aiko
+          git clone --depth 1 --branch reconcile/fod-absorption-final https://x-access-token:${TOKEN}@github.com/dinilmusick/Aiko.git /tmp/aiko
+      - name: Verify
+        run: |
+          set +e
+          cd /tmp/aiko
+          : > /tmp/aiko-result.log
+          run() { echo "===== $1 =====" | tee -a /tmp/aiko-result.log; shift; "$@" 2>&1 | tee -a /tmp/aiko-result.log; code=${PIPESTATUS[0]}; echo "EXIT=$code" | tee -a /tmp/aiko-result.log; return $code; }
+          npm install --include=optional
+          run LINT npm run lint
+          run ENVIRONMENT npm run test:system-env
+          run INTEGRATION npm run test:integration
+          run ARCHITECTURE npm run test:architecture
+          run FULLSTACK npm run build:fullstack
+          run API npm run build:api
+          run DEPLOYMENT python3 checklists/aiko_skipo_validator.py .
+          cp /tmp/aiko-result.log /tmp/agent-aiko-result.log
+      - name: Publish result
+        if: always()
+        run: |
+          mkdir -p .agent/results
+          cp /tmp/agent-aiko-result.log .agent/results/aiko-direct-verification.log 2>/dev/null || true
+          git config user.name "Agent Workspace CI"
+          git config user.email "agent-workspace-ci@users.noreply.github.com"
+          git add .agent/results/aiko-direct-verification.log
+          git commit -m "ci: publish Aiko direct verification result" || true
+          git push || true

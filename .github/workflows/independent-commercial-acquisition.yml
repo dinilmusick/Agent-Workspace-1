@@ -107,10 +107,27 @@ jobs:
           export GIT_TERMINAL_PROMPT=0
           auth="$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
           git -c "http.extraheader=AUTHORIZATION: basic $auth" clone --mirror "https://github.com/$SOURCE.git" source.git
+          # GitHub-managed pull-request and merge-queue refs are not writable.
+          while IFS= read -r ref; do
+            [[ -z "$ref" ]] || git -C source.git update-ref -d "$ref"
+          done < <(git -C source.git for-each-ref --format="%(refname)" refs/pull refs/merge-queue)
           git -C source.git remote add destination "https://github.com/$TARGET.git"
           git -C source.git -c "http.extraheader=AUTHORIZATION: basic $auth" push --mirror destination
-          git -C source.git remote remove origin || true
-          git -C source.git remote -v
+          git -C source.git remote remove origin
+          test "$(git -C source.git remote)" = "destination"
+
+      - name: Set destination default branch
+        env:
+          GH_TOKEN: ${{ secrets.CODING_REPO_TOKEN }}
+          TARGET: dinilmusick/${{ steps.request.outputs.target }}
+          SOURCE: ${{ steps.request.outputs.source }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          default_branch="$(curl --fail-with-body -sS -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" "https://api.github.com/repos/$SOURCE" | python3 -c "import json,sys; print(json.load(sys.stdin)[\"default_branch\"])")"
+          payload="$(python3 -c "import json,os; print(json.dumps({\"default_branch\":os.environ[\"DEFAULT_BRANCH\"]}))" DEFAULT_BRANCH="$default_branch")"
+          curl --fail-with-body -sS -X PATCH -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" -H "Content-Type: application/json" "https://api.github.com/repos/$TARGET" -d "$payload" >/dev/null
+          echo "Destination default branch set to $default_branch"
 
       - name: Verify independent destination
         env:

@@ -1,7 +1,7 @@
 ---
 name: "Implementation Push"
 slug: implementation-push
-version: 1.0.0
+version: 2.0.1
 source: Supabase Skills Database
 sourceId: 42
 status: active

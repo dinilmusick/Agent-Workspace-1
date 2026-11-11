@@ -117,6 +117,7 @@ jobs:
           test "$(git -C source.git remote)" = "destination"
 
       - name: Set destination default branch
+        id: default
         env:
           GH_TOKEN: ${{ secrets.CODING_REPO_TOKEN }}
           TARGET: dinilmusick/${{ steps.request.outputs.target }}
@@ -125,15 +126,17 @@ jobs:
         run: |
           set -euo pipefail
           default_branch="$(curl --fail-with-body -sS -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" "https://api.github.com/repos/$SOURCE" | python3 -c "import json,sys; print(json.load(sys.stdin)[\"default_branch\"])")"
-          payload="$(python3 -c "import json,os; print(json.dumps({\"default_branch\":os.environ[\"DEFAULT_BRANCH\"]}))" DEFAULT_BRANCH="$default_branch")"
+          payload="{\"default_branch\":\"$default_branch\"}"
           curl --fail-with-body -sS -X PATCH -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" -H "Content-Type: application/json" "https://api.github.com/repos/$TARGET" -d "$payload" >/dev/null
           echo "Destination default branch set to $default_branch"
+          echo "branch=$default_branch" >> "$GITHUB_OUTPUT"
 
       - name: Verify independent destination
         env:
           GH_TOKEN: ${{ secrets.CODING_REPO_TOKEN }}
           SOURCE: ${{ steps.request.outputs.source }}
           TARGET: dinilmusick/${{ steps.request.outputs.target }}
+          DEFAULT_BRANCH: ${{ steps.default.outputs.branch }}
         shell: bash
         run: |
           set -euo pipefail

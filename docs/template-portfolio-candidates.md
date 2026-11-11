@@ -20,6 +20,26 @@ This register captures the first ten priority candidates. It is **not a legal cl
 | Inventory | [inventree/InvenTree](https://github.com/inventree/InvenTree) | `tpl-inventory-inventree` | `master` | MIT | `LICENSE` | `16309370ba0e4b4a088516ae06c0a681e5315348` | CONDITIONAL |
 | Healthcare platform | [medplum/medplum](https://github.com/medplum/medplum) | `tpl-health-medplum` | `main` | Apache-2.0 | `LICENSE.txt` | `cfd9d414ce458eb802f36d41318c7dc031b511a3` | CONDITIONAL |
 
+## Replacement candidates under review
+
+The four rejected candidates above are not replaced automatically. These alternatives have a permissive root license and better category alignment, but their full dependency and asset audits are still pending.
+
+| Category | Candidate | Proposed destination | Default branch | Root SPDX | Exact source commit | Status |
+|---|---|---|---|---|---|---|
+| CRM | [Django-CRM/Django-CRM (BottleCRM)](https://github.com/Django-CRM/Django-CRM) | `tpl-crm-bottlecrm` | `master` | MIT | `f63fe8cf22bd818cea45427b48ef59da24206ff1` | CONDITIONAL |
+| E-commerce | [saleor/saleor](https://github.com/saleor/saleor) | `tpl-commerce-saleor` | `main` | BSD-3-Clause | `ea4a69fa6faa22de77a30eaee0447dd7dacaadb3` | CONDITIONAL |
+| PaaS | [dokku/dokku](https://github.com/dokku/dokku) | `tpl-deployment-dokku` | `master` | MIT | `bf03afb9810caea112f2ea2e203b21da4f84c382` | CONDITIONAL |
+| ERP | [apache/ofbiz-framework](https://github.com/apache/ofbiz-framework) | `tpl-erp-ofbiz` | `trunk` | Apache-2.0 | `e641b3a61866d591e192b9bc585d4349e4821c95` | CONDITIONAL |
+
+### Replacement notes
+
+- **BottleCRM:** root `LICENSE` is MIT and the repository has a backend `uv.lock` plus frontend `pnpm-lock.yaml`. It is a newer multi-part CRM with web/mobile claims; verify all runtime and mobile components, package assets and dependencies before selection.
+- **Saleor:** root `LICENSE` is BSD-3-Clause. The source tree has a Python `uv.lock` and a frontend `package-lock.json`; both complete dependency graphs and all assets need scanning. It is a mature commerce platform candidate, but no licensing approval is implied.
+- **Dokku:** root `LICENSE` is MIT. It contains many independent Go modules across plugins; the tree also includes an Apache-2.0 nested `helmdiff` license and an MIT Scala test fixture license. Every production Go module and bundled helper must be scanned, and all notices retained.
+- **Apache OFBiz:** root `LICENSE` is Apache-2.0 and root `NOTICE` identifies Apache Software Foundation copyright. The project bundles a large Java/Gradle ecosystem; inspect all bundled JARs and Gradle-resolved dependencies before any approval.
+- **Medusa:** not selected as the commerce replacement. Its README identifies an open-core model and an `ENTERPRISE-LICENSE.md` governing RBAC-based Enterprise Edition materials under a separate commercial agreement. The entire repository therefore does not meet the requested unrestricted-permissive acquisition rule.
+- **Frappe CRM:** rejected as a CRM replacement because the repository is AGPL-3.0.
+
 ## Evidence and outstanding checks
 
 ### Payload CMS

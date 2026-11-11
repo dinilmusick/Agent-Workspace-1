@@ -1,7 +1,7 @@
 ---
 name: "AI Agent and Tooling Engineering"
 slug: agent-systems-engineering
-version: 1.0.0
+version: 2.0.1
 source: Supabase Skills Database
 sourceId: 23
 status: active

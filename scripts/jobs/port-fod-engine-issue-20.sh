@@ -449,20 +449,20 @@ p.write_text(content)
 p = root / "scheduler/index.ts"
 content = p.read_text()
 content = content.replace(
-    "      if (isPureNode) {\\n        return !isConnectedToActiveFlow(nodeId);\\n      }",
-    "      if (isPureNode) {\\n        return hasAnyExecEdges && !isConnectedToActiveFlow(nodeId);\\n      }"
+    "      if (isPureNode) {\n        return !isConnectedToActiveFlow(nodeId);\n      }",
+    "      if (isPureNode) {\n        return hasAnyExecEdges && !isConnectedToActiveFlow(nodeId);\n      }"
 )
 content = content.replace(
-    "        } catch (err: any) {\\n          nodeState[bodyNodeId] = \"failed\";",
-    "        } catch (err: any) {\\n          memory.setError(bodyNodeId, err instanceof Error ? err.message : String(err));\\n          nodeState[bodyNodeId] = \"failed\";"
+    "        } catch (err: any) {\n          nodeState[bodyNodeId] = \"failed\";",
+    "        } catch (err: any) {\n          memory.setError(bodyNodeId, err instanceof Error ? err.message : String(err));\n          nodeState[bodyNodeId] = \"failed\";"
 )
 content = content.replace(
-    "        } catch (err: any) {\\n          nodeState[nodeId] = \"failed\";",
-    "        } catch (err: any) {\\n          memory.setError(nodeId, err instanceof Error ? err.message : String(err));\\n          nodeState[nodeId] = \"failed\";"
+    "        } catch (err: any) {\n          nodeState[nodeId] = \"failed\";",
+    "        } catch (err: any) {\n          memory.setError(nodeId, err instanceof Error ? err.message : String(err));\n          nodeState[nodeId] = \"failed\";"
 )
 content = content.replace(
-    "      } catch (err: any) {\\n        nodeState[nodeId] = \"failed\";",
-    "      } catch (err: any) {\\n        memory.setError(nodeId, err instanceof Error ? err.message : String(err));\\n        nodeState[nodeId] = \"failed\";"
+    "      } catch (err: any) {\n        nodeState[nodeId] = \"failed\";",
+    "      } catch (err: any) {\n        memory.setError(nodeId, err instanceof Error ? err.message : String(err));\n        nodeState[nodeId] = \"failed\";"
 )
 p.write_text(content)
 

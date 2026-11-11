@@ -22,7 +22,7 @@ A GitHub SPDX badge or root LICENSE file alone is not sufficient. Missing, ambig
 - REJECTED: incompatible or restricted license.
 - UNVERIFIED: evidence is insufficient.
 
-Only APPROVED candidates may be submitted to the independent acquisition workflow. The workflow's SPDX allowlist is a second guardrail, not legal clearance and not a dependency audit.
+Only APPROVED candidates may be submitted to the independent acquisition workflow. The workflow's SPDX allowlist is a second guardrail, not legal clearance and not a dependency audit. Every request must include the exact 40-character source commit currently at the source default branch head and a link to the workspace approval evidence. The workflow rejects requests without both fields or when the source branch has moved.
 
 ## Independent copy semantics
 
@@ -31,7 +31,7 @@ For an approved candidate:
 1. Create a new private repository under dinilmusick; never create a GitHub fork.
 2. Clone the source using `git clone --mirror`.
 3. Mirror all advertised, writable source refs and history to the destination using `git push --mirror`. Exclude GitHub-managed refs such as `refs/pull/*` and `refs/merge-queue/*`, which are not writable destination refs.
-4. Set the destination default branch to the source default branch, then independently verify every mirrored ref and the default-branch head resolve to identical object IDs.
+4. Pin the acquisition to the approved source commit, require that it is still the source default branch head, set the destination default branch to that source branch, then independently verify every mirrored ref and that the destination default-branch head equals the approved commit.
 5. Preserve the original LICENSE, copyright and third-party notices.
 6. Do not add an upstream remote. Development clones should use only the new dinilmusick repository as origin.
 7. Record source URL, exact source commit, SPDX identifier, license evidence, dependency audit evidence and acquisition timestamp.

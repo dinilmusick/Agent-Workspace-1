@@ -30,8 +30,8 @@ For an approved candidate:
 
 1. Create a new private repository under dinilmusick; never create a GitHub fork.
 2. Clone the source using `git clone --mirror`.
-3. Push all refs and history to the newly created destination using `git push --mirror`.
-4. Verify source and destination refs resolve to identical object IDs.
+3. Mirror all advertised, writable source refs and history to the destination using `git push --mirror`. Exclude GitHub-managed refs such as `refs/pull/*` and `refs/merge-queue/*`, which are not writable destination refs.
+4. Set the destination default branch to the source default branch, then independently verify every mirrored ref and the default-branch head resolve to identical object IDs.
 5. Preserve the original LICENSE, copyright and third-party notices.
 6. Do not add an upstream remote. Development clones should use only the new dinilmusick repository as origin.
 7. Record source URL, exact source commit, SPDX identifier, license evidence, dependency audit evidence and acquisition timestamp.

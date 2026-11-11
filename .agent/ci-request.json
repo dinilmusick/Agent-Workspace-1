@@ -4,5 +4,5 @@
   "event": "push",
   "workflow": "fod-absorption-verification.yml",
   "token_mode": "clone-only",
-  "nonce": "aiko-pr26-full-matrix-retry2-20261111"
+  "nonce": "aiko-pr26-full-matrix-fullubuntu-20261111"
 }

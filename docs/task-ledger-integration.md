@@ -72,3 +72,8 @@ See [architecture](architecture.md), [chat worker protocol](chat-agent-workflow.
 The connected project currently has no rows in `auth.users`. ChatGPT browser conversations therefore use unique `agent_id` and `session_id` values within one project-scoped workspace where `owner_user_id` is null. A different conversation can independently verify and finalize; the database rejects self-verification and finalization by a task worker.
 
 This is suitable for the current single-owner project. It is not multi-tenant isolation. If the project is shared with other human owners, provision Supabase Auth users, bind goals to `owner_user_id`, and enforce JWT/RLS owner boundaries before enabling shared access.
+
+
+## Goal prerequisites and phase unlocking
+
+Use `public.goal_dependencies` to persist dependencies between goals. Each row means `goal_id` depends on `depends_on_goal_id`. Choose `blocking` when the dependent goal must remain locked; choose `advisory` for a non-blocking recommendation. Blocking edges are cycle-safe and must remain within one Vision when either goal is Vision-linked. Database triggers guard every transition of a task into `running` and every goal transition into `completed`, checking that prerequisite goals and all descendant tasks are independently verified. A prompt-level status label is not an enforcement mechanism. Use blocking edges to encode phase sequences such as research → acquisition → absorption.

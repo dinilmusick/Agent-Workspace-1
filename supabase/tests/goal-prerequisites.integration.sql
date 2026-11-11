@@ -1,13 +1,15 @@
 -- Rollback-only integration coverage for goal prerequisites. Run with the trusted database test role.
 begin;
 do $test$
-declare a uuid; b uuid; c uuid; claim_denied boolean:=false; cycle_denied boolean:=false; unlock_succeeded boolean:=false;
+declare a uuid; b uuid; c uuid; claim_denied boolean:=false; cycle_denied boolean:=false; unlock_succeeded boolean:=false; readiness_state text;
 begin
   insert into public.goals(name,created_by_agent_id,status) values ('__ledger_gate_a','ledger-test','ready') returning id into a;
   insert into public.goals(name,created_by_agent_id,status) values ('__ledger_gate_b','ledger-test','ready') returning id into b;
   insert into public.goals(name,created_by_agent_id,status) values ('__ledger_gate_c','ledger-test','ready') returning id into c;
   insert into public.goal_dependencies(goal_id,depends_on_goal_id,dependency_type) values (a,b,'blocking');
   insert into public.goal_dependencies(goal_id,depends_on_goal_id,dependency_type) values (c,b,'advisory');
+  select readiness into readiness_state from public.agent_state_matrix where resource_type='goal' and resource_id=(select goal_key from public.goals where id=a);
+  if readiness_state<>'dependency_blocked' then raise exception 'TEST FAILED: goal readiness did not expose prerequisite lock'; end if;
   begin
     insert into public.tasks(agent_id,agent_name,task_name,status,goal_id) values ('ledger-test','ledger-test','__blocked_claim','running',a);
   exception when others then if sqlerrm like 'task claim denied:%' then claim_denied:=true; else raise; end if; end;
@@ -17,11 +19,13 @@ begin
   if not claim_denied then raise exception 'TEST FAILED: blocking prerequisite did not deny task claim'; end if;
   if not cycle_denied then raise exception 'TEST FAILED: blocking cycle was not rejected'; end if;
   update public.goals set status='completed' where id=b;
+  select readiness into readiness_state from public.agent_state_matrix where resource_type='goal' and resource_id=(select goal_key from public.goals where id=a);
+  if readiness_state<>'active' then raise exception 'TEST FAILED: goal readiness did not unlock after prerequisite completion'; end if;
   begin
     insert into public.tasks(agent_id,agent_name,task_name,status,goal_id) values ('ledger-test','ledger-test','__unblocked_claim','running',a);
     unlock_succeeded:=true;
   exception when others then raise exception 'TEST FAILED: prerequisite completion did not unlock task: %',sqlerrm; end;
   if not unlock_succeeded then raise exception 'TEST FAILED: prerequisite completion did not unlock task'; end if;
-  raise notice 'PASS: blocking claim gate; cycle rejection; advisory edge accepted; verified prerequisite completion unlocks dependent goal';
+  raise notice 'PASS: blocking claim gate; cycle rejection; advisory edge accepted; readiness lock/unlock; prerequisite completion unlocks dependent goal';
 end $test$;
 rollback;

@@ -1,8 +1,8 @@
 {
-  "repository": "dinilmusick/GutTS",
-  "ref": "main",
+  "repository": "dinilmusick/Aiko",
+  "ref": "test/fod-absorption-regression-gates",
   "event": "push",
-  "workflow": "architecture-boundary.yml",
-  "token_mode": "workflow",
-  "nonce": "ecosystem-boundary-20261109-gutts"
+  "workflow": "validate.yml",
+  "token_mode": "clone-only",
+  "nonce": "aiko-pr26-verification-20261111"
 }

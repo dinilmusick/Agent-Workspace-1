@@ -295,6 +295,24 @@ if a >= 0 and b > a:
 """ + s[b:]
 p.write_text(s)
 
+# A connected input must take precedence over a node's saved/default parameter value.
+p = root / "executor/index.ts"
+s = p.read_text()
+old = """    if (node.data[key] !== undefined) {
+      resolvedInputs[key] = node.data[key];
+    } else if (inputDef.defaultValue !== undefined) {
+      resolvedInputs[key] = inputDef.defaultValue;
+    }"""
+new = """    if (resolvedInputs[key] !== undefined) return;
+    if (node.data[key] !== undefined) {
+      resolvedInputs[key] = node.data[key];
+    } else if (inputDef.defaultValue !== undefined) {
+      resolvedInputs[key] = inputDef.defaultValue;
+    }"""
+if old not in s:
+    raise SystemExit("Could not locate executor input-precedence block.")
+p.write_text(s.replace(old, new))
+
 p = root / "scheduler/index.ts"
 s = p.read_text()
 s = s.replace('import { ExecutionContext } from "../executor/context";',

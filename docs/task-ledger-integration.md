@@ -112,4 +112,4 @@ Add edges from the later goal to its prerequisite (dependent → prerequisite). 
 
 ### Verification
 
-Run the rollback-only regression script in `supabase/tests/task-ledger-goal-dependencies.sql` against the trusted Supabase connector. It proves that blocking prerequisites prevent goal activation and task claims, blocking cycles are rejected, and advisory edges remain non-blocking. The script rolls back its fixtures. Also inspect the database triggers on `goals`, `tasks` and `goal_dependencies` after schema changes.
+Run the rollback-only regression script in `supabase/tests/task-ledger-goal-dependencies.integration.sql` against the trusted Supabase connector. It proves that blocking prerequisites prevent goal activation and task claims, blocking cycles are rejected, and advisory edges remain non-blocking. The script rolls back its fixtures. Also inspect the database triggers on `goals`, `tasks` and `goal_dependencies` after schema changes.

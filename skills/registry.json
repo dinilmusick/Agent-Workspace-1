@@ -173,7 +173,7 @@
       "id": 17,
       "name": "Coding Router",
       "slug": "coding-router",
-      "version": "2.0.0",
+      "version": "2.0.1",
       "status": "active",
       "path": "skills/coding-router/SKILL.md",
       "tools": []
@@ -191,7 +191,7 @@
       "id": 19,
       "name": "Feature Implementation",
       "slug": "feature-implementation",
-      "version": "1.0.0",
+      "version": "2.0.1",
       "status": "active",
       "path": "skills/feature-implementation/SKILL.md",
       "tools": []

@@ -17,7 +17,7 @@ This register captures the first ten priority candidates. It is **not a legal cl
 | RAG | [arc53/DocsGPT](https://github.com/arc53/DocsGPT) | `tpl-ai-docsgpt` | `main` | MIT | `LICENSE` | `d1506d977d0c2036a07e7b464fa05479fab8d973` | CONDITIONAL |
 | AI workspace | [Mintplex-Labs/anything-llm](https://github.com/Mintplex-Labs/anything-llm) | `tpl-ai-anythingllm` | `master` | MIT | `LICENSE` | `e8434c07c3d385411aec28e8f9758dfd073565ec` | CONDITIONAL |
 | Self-hosted PaaS | [coollabsio/coolify](https://github.com/coollabsio/coolify) | `tpl-deployment-coolify` | `main` | Apache-2.0 | `LICENSE` | `d9ab3d1e8bea98215ed19a27f2f4ac1abd2fa40f` | REJECTED (current runtime dependency set) |
-| Inventory | [inventree/InvenTree](https://github.com/inventree/InvenTree) | `tpl-inventory-inventree` | `master` | MIT | `LICENSE` | `16309370ba0e4b4a088516ae06c0a681e5315348` | CONDITIONAL |
+| Inventory | [inventree/InvenTree](https://github.com/inventree/InvenTree) | `tpl-inventory-inventree` | `master` | MIT | `LICENSE` | `16309370ba0e4b4a088516ae06c0a681e5315348` | REJECTED (runtime LGPL dependencies) |
 | Healthcare platform | [medplum/medplum](https://github.com/medplum/medplum) | `tpl-health-medplum` | `main` | Apache-2.0 | `LICENSE.txt` | `cfd9d414ce458eb802f36d41318c7dc031b511a3` | CONDITIONAL |
 
 ## Replacement candidates under review
@@ -88,11 +88,11 @@ The four rejected candidates above are not replaced automatically. These alterna
 - The runtime GPL/LGPL dependencies violate the user's permissive-only policy. Do not acquire this revision unless they are removed/replaced and the complete graph is re-audited.
 - The repository also contains third-party deployment templates (including an EMQX Enterprise template); a template does not grant rights to redistribute the third-party image or its branding.
 
-### InvenTree — CONDITIONAL
+### InvenTree — REJECTED as-is
 - Root `LICENSE`, `docs/LICENSE` and `src/frontend/LICENSE` state MIT. The nested Tabler Icons license is MIT and must be retained.
-- The frontend manifest includes `@fortawesome/free-solid-svg-icons` and `@fortawesome/free-regular-svg-icons`. Font Awesome Free separates licenses: SVG/JS icons are CC BY 4.0, font files are SIL OFL 1.1, and non-font/non-icon code is MIT. Both CC BY and OFL permit commercial distribution subject to their attribution/notice and font-specific terms, but they are outside the preferred SPDX allowlist. Keep all embedded attribution comments and notices; do not treat the entire Font Awesome package as MIT.
-- Official licensing evidence: Font Awesome's project README and license text describe these distinct grants and attribution requirements. The complete Python/frontend dependency scan is still pending; the current metadata audit run has not completed.
-- Operational checks, plugins, fonts/images and any other third-party assets also remain to be cleared. Do not acquire until the complete graph is reviewed and the attribution-only asset licenses are explicitly accepted under the portfolio policy.
+- At the exact commit in the table, the pinned backend `requirements.txt` contains 154 Python packages. PyPI metadata review identified runtime dependencies `jwcrypto` (`LGPL-3.0-or-later`) and `paramiko` (`LGPL-2.1`), plus `docutils` metadata offering GPL and `dulwich` metadata offering Apache-2.0 OR GPL-2.0-or-later. The two LGPL runtime dependencies alone violate the user's exclusion rule. The backend scan also found 51 ambiguous/non-allowlisted metadata entries and 2 metadata fetch failures.
+- The frontend manifest includes `@fortawesome/free-solid-svg-icons` and `@fortawesome/free-regular-svg-icons`. Font Awesome Free separates licenses: SVG/JS icons are CC BY 4.0, font files are SIL OFL 1.1, and non-font/non-icon code is MIT. CC BY and OFL permit commercial distribution subject to attribution/notice and font-specific terms, but these are additional obligations; preserve all embedded attribution comments and notices. Do not treat the entire Font Awesome package as MIT. Official licensing evidence: Font Awesome's project README and license text describe these distinct grants and attribution requirements.
+- A second full frontend registry audit is incomplete; a parallel broad scan is still running. This does not change the rejection because the backend LGPL runtime dependencies are already sufficient. Do not acquire this revision unless those dependencies are removed/replaced, the backend lock is regenerated, and the full Python/frontend dependency and asset graphs are re-audited.
 
 ### Medplum
 - Root `LICENSE.txt` states Apache-2.0. The repository also contains a `NOTICE` file identifying Medplum as a registered trademark of Orangebot, Inc.

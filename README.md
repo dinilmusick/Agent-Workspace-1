@@ -71,7 +71,7 @@ Use:
 - `.github/workflows/github-public-compute-matrix.yml` — verify across standard Linux, Windows and macOS public runners.
 - `.github/workflows/private-repo-ci.yml` — execute private-repository workflows through Agent Workspace when native private CI is unavailable.
 - `skills/github-development-workspace/SKILL.md` — reusable agent instructions.
-- `tools/github/` — repository creation and Skipo scaffolding tools.
+- `tools/github/` — repository creation and Skipo scaffolding tools.\n- `.github/workflows/independent-commercial-acquisition.yml` — owner-triggered, private, non-fork Git mirror acquisition for license-qualified projects.\n- `docs/commercial-acquisition-policy.md` — mandatory commercial-use, redistribution and dependency clearance gate.
 
 GitHub Actions standard runners for public repositories are currently free and unlimited. Standard runner labels include Linux `ubuntu-latest`, Windows `windows-latest`, and macOS `macos-latest`; concurrency and runner-specific limits still apply.
 

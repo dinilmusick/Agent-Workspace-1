@@ -504,6 +504,121 @@ for path in root.rglob("*.ts"):
     content = re.sub(r'(["\'])(\.{1,2}/[^"\']+)(["\'])', fix_specifier, content)
     path.write_text(content)
 
+# Reuse Aiko's existing workflow and runtime contracts rather than defining parallel ones.
+p = root / "types/graph.ts"
+content = p.read_text()
+content = content.replace(
+    "export interface GraphJSON {",
+    'import type { FodGraph } from "../../types.js";\nexport interface GraphJSON extends FodGraph {'
+)
+p.write_text(content)
+
+p = root / "executor/context.ts"
+content = p.read_text()
+content = content.replace(
+    'import { ErrorCollector } from "../error/index.js";',
+    'import { ErrorCollector } from "../error/index.js";\nimport type { WorkflowExecutionContext } from "../../types.js";\nimport type { RuntimeService } from "../../../runtime/RuntimeService.js";'
+)
+content = content.replace(
+    "export interface VerifiedLuthPrincipal {",
+    "export interface VerifiedLuthPrincipal extends WorkflowExecutionContext {"
+)
+start = content.index("export interface RuntimeNodeServices {")
+end = content.index("export interface GraphExecutionServices {", start)
+content = content[:start] + """export type RuntimeNodeOperation = "spawn" | "execute" | "status" | "terminate";
+export interface RuntimeServiceAccess {
+  readonly service: Pick<RuntimeService, "spawn" | "execute" | "status" | "terminate" | "cleanupTransient">;
+  authorize(
+    principal: VerifiedLuthPrincipal,
+    operation: RuntimeNodeOperation,
+    resource: { workspaceId: string; providerId?: string; accountId?: string; runtimeId?: string },
+    signal?: AbortSignal
+  ): Promise<void>;
+}
+""" + content[end:]
+content = content.replace("readonly runtime?: RuntimeNodeServices;", "readonly runtime?: RuntimeServiceAccess;")
+p.write_text(content)
+
+p = root / "nodes/runtime.ts"
+content = p.read_text()
+content = content.replace(
+    "  return { workspaceId: context.workspaceId, principal: context.principal, runtime: context.services.runtime, signal: context.signal };",
+    '  if (context.signal.aborted) throw new Error("Runtime operation was cancelled.");\n  return { workspaceId: context.workspaceId, principal: context.principal, runtime: context.services.runtime, signal: context.signal };'
+)
+content = content.replace(
+"""      const runtime = await s.runtime.spawn({
+        workspaceId: s.workspaceId, executionId: context!.executionId,
+        providerId: String(inputs.providerId || ""), accountId: String(inputs.accountId || ""),
+        configuration: (inputs.configuration || {}) as Record<string, unknown>,
+        source: (inputs.source || {}) as Record<string, unknown>,
+        injectedInputs: (inputs.injectedInputs || {}) as Record<string, unknown>,
+        persistence: inputs.persistence === "persistent" ? "persistent" : "transient"
+      }, s.principal, s.signal);""",
+"""      const providerId = String(inputs.providerId || "");
+      const accountId = String(inputs.accountId || "");
+      await s.runtime.authorize(s.principal, "spawn", { workspaceId: s.workspaceId, providerId, accountId }, s.signal);
+      const runtime = await s.runtime.service.spawn({
+        workspaceId: s.workspaceId, executionId: context!.executionId, providerId, accountId,
+        configuration: (inputs.configuration || {}) as Record<string, unknown>,
+        source: (inputs.source || {}) as Record<string, unknown>,
+        injectedInputs: (inputs.injectedInputs || {}) as Record<string, unknown>,
+        persistence: inputs.persistence === "persistent" ? "persistent" : "transient"
+      });"""
+)
+content = content.replace(
+"""      const result = await s.runtime.execute({
+        workspaceId: s.workspaceId, runtimeId: handle.id, command: String(inputs.command || ""),
+        ...(typeof inputs.workingDirectory === "string" ? { workingDirectory: inputs.workingDirectory } : {}),
+        ...(typeof inputs.timeoutMs === "number" ? { timeoutMs: inputs.timeoutMs } : {}),
+        environment: (inputs.environment || {}) as Record<string, string>
+      }, s.principal, s.signal);""",
+"""      await s.runtime.authorize(s.principal, "execute", { workspaceId: s.workspaceId, runtimeId: handle.id }, s.signal);
+      const result = await s.runtime.service.execute(s.workspaceId, handle.id, {
+        command: String(inputs.command || ""),
+        ...(typeof inputs.workingDirectory === "string" ? { workingDirectory: inputs.workingDirectory } : {}),
+        ...(typeof inputs.timeoutMs === "number" ? { timeoutMs: inputs.timeoutMs } : {}),
+        environment: (inputs.environment || {}) as Record<string, string>
+      });"""
+)
+content = content.replace(
+"""      const runtime = await s.runtime.status({ workspaceId: s.workspaceId, runtimeId: handle.id }, s.principal, s.signal);
+      return { runtime, status: String((runtime as any)?.lifecycle || "unknown") };""",
+"""      await s.runtime.authorize(s.principal, "status", { workspaceId: s.workspaceId, runtimeId: handle.id }, s.signal);
+      const runtime = await s.runtime.service.status(s.workspaceId, handle.id);
+      return { runtime, status: String((runtime as any)?.lifecycle || "unknown") };"""
+)
+content = content.replace(
+"""      return { runtime: await s.runtime.destroy({ workspaceId: s.workspaceId, runtimeId: handle.id }, s.principal, s.signal) };""",
+"""      await s.runtime.authorize(s.principal, "terminate", { workspaceId: s.workspaceId, runtimeId: handle.id }, s.signal);
+      return { runtime: await s.runtime.service.terminate(s.workspaceId, handle.id) };"""
+)
+p.write_text(content)
+
+p = root / "index.ts"
+content = p.read_text()
+content = content.replace("VerifiedLuthPrincipal, RuntimeNodeServices", "VerifiedLuthPrincipal, RuntimeServiceAccess")
+content = content.replace(
+"""      try {
+        await options.services?.runtime?.cleanupExecution({ workspaceId: options.workspaceId, executionId }, options.principal);
+      } finally {""",
+"""      try {
+        const runtimeAccess = options.services?.runtime;
+        if (runtimeAccess) {
+          await runtimeAccess.authorize(options.principal, "terminate", { workspaceId: options.workspaceId });
+          const cleanup = await runtimeAccess.service.cleanupTransient(options.workspaceId, executionId);
+          const failures = cleanup.filter(item => !item.success);
+          if (failures.length) throw new Error("Transient runtime cleanup failed for " + failures.length + " handle(s).");
+        }
+      } finally {"""
+)
+p.write_text(content)
+
+p = Path("src/backend/workflows/index.ts")
+content = p.read_text()
+if "engine/index.js" not in content:
+    content += "export * from './engine/index.js';\n"
+p.write_text(content)
+
 # Remove the source repository's test, which exercised the deleted FOD HTTP bridge.
 (root / "nodes/runtime.test.ts").unlink(missing_ok=True)
 PY
@@ -553,6 +668,7 @@ test("propagates verified principal and cancellation signal through the runtime 
   const controller = new AbortController();
   let received: any;
   let cleanupCalls = 0;
+  const authorizedOps: string[] = [];
   const result = await new GraphEngine().execute(graph([node("spawn", "runtime/spawn", {
     providerId: "mock", accountId: "account-1", configuration: {}, persistence: "transient"
   })]), {
@@ -574,7 +690,8 @@ test("propagates verified principal and cancellation signal through the runtime 
     } }
   });
   assert.equal(result.success, true);
-  assert.equal(received.verifiedPrincipal.userId, "user-1");
+  assert.ok(authorizedOps.includes("spawn"));
+  assert.ok(authorizedOps.includes("terminate"));
   assert.equal(received.input.executionId, result.executionId);
   assert.equal(received.signal.aborted, false);
   assert.equal("token" in received.verifiedPrincipal, false);

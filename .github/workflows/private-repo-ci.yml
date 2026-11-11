@@ -33,10 +33,6 @@ on:
   push:
     paths:
       - ".agent/ci-request.json"
-  pull_request:
-    branches: [main]
-    paths:
-      - ".agent/ci-request.json"
 
 permissions:
   contents: read

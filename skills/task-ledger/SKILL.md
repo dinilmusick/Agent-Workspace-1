@@ -1,7 +1,7 @@
 ---
 name: "Task Ledger"
 slug: task-ledger
-version: 2.0.0
+version: 2.1.0
 source: Supabase Skills Database
 sourceId: 7
 status: active
@@ -193,3 +193,13 @@ Task Ledger remains the canonical Supabase coordination layer for goals, depende
 For coding tasks, persist the parent task and GitHub identifiers in Supabase, then create a GitHub Issue as the authoritative execution record. Mirror only stable linkage/state needed for orchestration: repository, issue_number, issue_url, pr_number, pr_url, worker identity and terminal summary. Do not maintain a second detailed coding state machine in Supabase.
 
 Workers must read/update their Issue, not chat history, for detailed coding state. Orchestrators poll Issues/PRs/CI and write decisions back to Issues. This makes worker recovery and bulk continue deterministic.
+
+
+## Goal-level prerequisite dependencies (database enforced)
+
+- `public.goal_dependencies` stores directed edges from a dependent goal (`goal_id`) to its prerequisite (`depends_on_goal_id`). `dependency_type='blocking'` gates execution; `advisory` records a non-blocking relationship.
+- Add edges only through the trusted ledger/database context. Self-edges and duplicate edges are rejected. Blocking cycles are rejected recursively. If either goal is linked to a Vision target, both must be linked to targets in the same Vision.
+- Every task transition into `running` is guarded by a database trigger. A task cannot start until every blocking prerequisite goal is `completed` and all of its descendant tasks are completed with `verified` or `not_required` verification status. This trigger protects every claim RPC and direct status-update path uniformly.
+- A goal cannot transition to `completed` while any blocking prerequisite remains incomplete or has unverified descendant tasks. Existing goal-loop evidence and task verification gates remain in force.
+- Advisory edges never block claims or completion. A queued task in a goal with unresolved blocking prerequisites is not claimable, regardless of which claim RPC is used.
+- For a sequential Vision, create all goals and connect them with blocking edges: research → repository acquisition → capability absorption. Each later goal remains locked until its prerequisite is completed and independently verified.

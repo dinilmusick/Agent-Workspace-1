@@ -10,7 +10,7 @@ ACT_BIN="${ACT_BIN:-act}"
 # Loky CI currently targets ubuntu-24.04. Map that GitHub runner label to the
 # pinned act image so the workspace executes the workflow instead of silently
 # skipping an unsupported platform. Callers can override this explicitly.
-ACT_PLATFORM="${ACT_PLATFORM:-ubuntu-24.04=catthehacker/ubuntu:act-latest}"
+ACT_PLATFORM="${ACT_PLATFORM:-ubuntu-latest=catthehacker/ubuntu:full-22.04}"
 ACT_GITHUB_TOKEN="${ACT_GITHUB_TOKEN:-}"
 ACT_SECRET_ARGS=()
 

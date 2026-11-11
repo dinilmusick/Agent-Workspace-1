@@ -48,5 +48,5 @@ console.log('validator positive fixture: PASS');
 fs.writeFileSync(path.join(temp, 'Depm-Engine', 'legacy.ts'), 'DEPM_GATEWAY_DOMAIN');
 const negative = spawnSync(process.execPath, [script, temp], { encoding: 'utf8' });
 assert.notEqual(negative.status, 0, negative.stdout + negative.stderr);
-assert.match(negative.stdout, /DEPM_GATEWAY_DOMAIN/);
+assert.match(negative.stdout, /forbidden legacy DEPM gateway variable/);
 console.log('validator negative fixture: PASS');

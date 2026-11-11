@@ -72,3 +72,44 @@ See [architecture](architecture.md), [chat worker protocol](chat-agent-workflow.
 The connected project currently has no rows in `auth.users`. ChatGPT browser conversations therefore use unique `agent_id` and `session_id` values within one project-scoped workspace where `owner_user_id` is null. A different conversation can independently verify and finalize; the database rejects self-verification and finalization by a task worker.
 
 This is suitable for the current single-owner project. It is not multi-tenant isolation. If the project is shared with other human owners, provision Supabase Auth users, bind goals to `owner_user_id`, and enforce JWT/RLS owner boundaries before enabling shared access.
+
+
+## Goal-level prerequisite dependencies (blocking gates)
+
+Goals may depend on other goals through `public.goal_dependencies`:
+
+- `goal_id` is the dependent goal; `depends_on_goal_id` is its prerequisite.
+- `dependency_type='blocking'` prevents the dependent goal from becoming active/completed and prevents every task in that goal from transitioning to `running` until every blocking prerequisite has status `completed` and all of its descendant tasks are verified (or explicitly `not_required`).
+- `dependency_type='advisory'` is recorded and shown to agents but never blocks activation, claims or completion.
+- Self-dependencies, duplicate edges and blocking cycles are rejected. Graph writes are serialized with a transaction-scoped advisory lock so concurrent edge insertions cannot create a cycle.
+- A dependency may not cross Vision boundaries: if either goal is attached to a Vision, both must be attached to the same Vision.
+- Goal completion is independently guarded by the database, even when an agent bypasses the normal finalize RPC.
+
+Use the trusted Supabase service-role database connector for dependency mutations. The canonical helper is:
+
+```sql
+select * from public.goal_ledger_add_dependency(
+  '<dependent-goal-key>',
+  '<prerequisite-goal-key>',
+  'blocking', -- or 'advisory'
+  '<agent-id>'
+);
+```
+
+The helper validates both readable goal keys, persists the edge and appends a goal event. Do not grant this operation to anon/authenticated API roles: `goal_dependencies` is a service-controlled coordination table. Never rely on prompts or client-side checks for enforcement.
+
+### Required multi-phase planning pattern
+
+For sequential project phases, create all goals first, then add explicit blocking edges before any worker starts:
+
+```text
+Research goal
+  └─ verified completion unlocks Repository acquisition goal
+       └─ verified completion unlocks Ecosystem absorption goal
+```
+
+Add edges from the later goal to its prerequisite (dependent → prerequisite). Parallel work within a phase remains parallel; only later phases are gated. Advisory edges express useful context without serializing execution.
+
+### Verification
+
+Run the rollback-only regression script in `supabase/tests/task-ledger-goal-dependencies.sql` against the trusted Supabase connector. It proves that blocking prerequisites prevent goal activation and task claims, blocking cycles are rejected, and advisory edges remain non-blocking. The script rolls back its fixtures. Also inspect the database triggers on `goals`, `tasks` and `goal_dependencies` after schema changes.

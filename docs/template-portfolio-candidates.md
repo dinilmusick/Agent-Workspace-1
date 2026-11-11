@@ -13,7 +13,7 @@ This register captures the first ten priority candidates. It is **not a legal cl
 | E-commerce | [bagisto/bagisto](https://github.com/bagisto/bagisto) | `tpl-commerce-bagisto` | `2.5` | MIT | `LICENSE` | `add2920a8ecdb8e892b9abeec31520a62c2090e8` | REJECTED (current runtime dependency set) |
 | CRM | [krayin/laravel-crm](https://github.com/krayin/laravel-crm) | `tpl-crm-krayin` | `2.2` | MIT | `LICENSE` | `ed6deebfcb8c616eaf352c893a10a6d8e666fc6e` | REJECTED (current runtime dependency set) |
 | ERP | [aureuserp/aureuserp](https://github.com/aureuserp/aureuserp) | `tpl-erp-aureuserp` | `master` | MIT | `LICENSE` | `c31a0db21e00fa436c4949eb4f60ceef81e116ec` | REJECTED (current runtime dependency set) |
-| Python API starter | [fastapi/full-stack-fastapi-template](https://github.com/fastapi/full-stack-fastapi-template) | `tpl-backend-fastapi` | `master` | MIT | `LICENSE` | `aabb90126964a164e02aff39e7c385bb0598236d` | CONDITIONAL |
+| Python API starter | [fastapi/full-stack-fastapi-template](https://github.com/fastapi/full-stack-fastapi-template) | `tpl-backend-fastapi` | `master` | MIT | `LICENSE` | `aabb90126964a164e02aff39e7c385bb0598236d` | REJECTED (runtime dependency licenses) |
 | RAG | [arc53/DocsGPT](https://github.com/arc53/DocsGPT) | `tpl-ai-docsgpt` | `main` | MIT | `LICENSE` | `d1506d977d0c2036a07e7b464fa05479fab8d973` | CONDITIONAL |
 | AI workspace | [Mintplex-Labs/anything-llm](https://github.com/Mintplex-Labs/anything-llm) | `tpl-ai-anythingllm` | `master` | MIT | `LICENSE` | `e8434c07c3d385411aec28e8f9758dfd073565ec` | CONDITIONAL |
 | Self-hosted PaaS | [coollabsio/coolify](https://github.com/coollabsio/coolify) | `tpl-deployment-coolify` | `main` | Apache-2.0 | `LICENSE` | `d9ab3d1e8bea98215ed19a27f2f4ac1abd2fa40f` | REJECTED (current runtime dependency set) |
@@ -65,9 +65,12 @@ The four rejected candidates above are not replaced automatically. These alterna
 - The runtime LGPL dependencies violate the user's permissive-only policy. Do not acquire this revision unless these dependencies are removed/replaced and the merged plugin graph is re-audited.
 - Operational maturity and bundled asset review also remain outstanding.
 
-### FastAPI full-stack template
-- Root `LICENSE` states MIT. The repository uses a uv workspace with a backend member and lockfiles.
-- Still required: resolve and audit all Python and frontend dependencies from the lockfiles; inspect bundled images, fonts and other assets.
+### FastAPI full-stack template — REJECTED as-is
+- Root `LICENSE` states MIT. The exact source commit contains `uv.lock` and `bun.lock`; the uv lock declares Python `>=3.14` and contains a 672-package combined lock inventory across Python and frontend dependency sets.
+- Queried the PyPI JSON and npm registry metadata for every resolved package/version in both locks (669 successful metadata responses; 3 fetch errors). Results: 537 MIT, 37 Apache-2.0, 15 BSD-3-Clause, 9 BSD-2-Clause, 15 ISC, 2 0BSD, plus 54 unresolved/non-allowlisted entries and 3 fetch errors.
+- Confirmed runtime packages `psycopg` and `psycopg-binary` are `LGPL-3.0-only`; the graph also contains `MPL-2.0` packages (including `certifi`, `pathspec`, `lightningcss`), `CC-BY-4.0` (`caniuse-lite`), and `BlueOak-1.0.0` (`glob`). `Unlicense`, `Python-2.0`, BSD-like and BSD-generic metadata also require separate review under the user's strict allowlist.
+- The runtime LGPL and other non-allowlisted components disqualify this exact revision. Do not acquire unless those dependencies are removed/replaced and both lockfiles are regenerated and fully re-audited.
+- ScanCode source-tree scanning was attempted but the runner's release configuration failed; no source-level ScanCode results are claimed. Asset review remains outstanding.
 
 ### DocsGPT
 - Root `LICENSE` and `pyproject.toml` identify MIT.

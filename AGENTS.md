@@ -188,4 +188,4 @@ The canonical local preflight is `python tools/agent-bootstrap/bootstrap.py plan
 - Reject self-edges, duplicate edges, blocking cycles and cross-Vision dependencies. The database serializes graph writes to prevent concurrent cycle races.
 - Add all phase edges before starting workers. Never launch a later phase merely because its tasks are queued; inspect the dependency gate and claimability.
 - Advisory dependencies never block execution. Preserve parallelism among tasks/goals that do not have blocking paths between them.
-- Regression coverage: `supabase/tests/task-ledger-goal-dependencies.sql` (rollback-only fixtures).
+- Regression coverage: `supabase/tests/task-ledger-goal-dependencies.integration.sql` (rollback-only fixtures).

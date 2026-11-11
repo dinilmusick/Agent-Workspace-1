@@ -68,9 +68,7 @@ jobs:
       - name: Resolve and validate request
         id: request
         env:
-          EVENT_NAME: ${{ github.event_name }}
-          ISSUE_TITLE: ${{ github.event.issue.title }}
-          ISSUE_BODY: ${{ github.event.issue.body }}
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
           INPUT_REPOSITORY: ${{ inputs.repository }}
           INPUT_REF: ${{ inputs.ref }}
           INPUT_COMMANDS: ${{ inputs.commands }}
@@ -81,79 +79,7 @@ jobs:
           INPUT_PR_TITLE: ${{ inputs.pr_title }}
           INPUT_PR_BODY: ${{ inputs.pr_body }}
         shell: bash
-        run: |
-          set -euo pipefail
-          python3 - <<'PY'
-          import json, os, re
-          from pathlib import Path
-
-          env = os.environ
-          if env["EVENT_NAME"] == "issues":
-              if not env.get("ISSUE_TITLE", "").startswith("[github-dev]"):
-                  raise SystemExit("Issue title must start with [github-dev].")
-              try:
-                  request = json.loads(env.get("ISSUE_BODY") or "")
-              except json.JSONDecodeError as exc:
-                  raise SystemExit(f"Issue body must be a JSON request: {exc}")
-              repository = request.get("repository", "")
-              ref = request.get("ref", "main")
-              commands = request.get("commands", [])
-              push = request.get("push", False)
-              branch = request.get("branch", "")
-              create_pr = request.get("create_pr", False)
-              commit_message = request.get("commit_message", "chore: agent workspace changes")
-              pr_title = request.get("pr_title", "")
-              pr_body = request.get("pr_body", "")
-          else:
-              repository = env.get("INPUT_REPOSITORY", "")
-              ref = env.get("INPUT_REF", "main")
-              commands = env.get("INPUT_COMMANDS", "")
-              push = env.get("INPUT_PUSH", "false").lower() == "true"
-              branch = env.get("INPUT_BRANCH", "")
-              create_pr = env.get("INPUT_CREATE_PR", "false").lower() == "true"
-              commit_message = env.get("INPUT_COMMIT_MESSAGE", "chore: agent workspace changes")
-              pr_title = env.get("INPUT_PR_TITLE", "")
-              pr_body = env.get("INPUT_PR_BODY", "")
-
-          if not isinstance(push, bool) or not isinstance(create_pr, bool):
-              raise SystemExit("push and create_pr must be booleans.")
-          if isinstance(commands, str):
-              command_text = commands.strip()
-          elif isinstance(commands, list) and all(isinstance(x, str) for x in commands):
-              command_text = "\\n".join(commands).strip()
-          else:
-              raise SystemExit("commands must be a string or an array of strings.")
-
-          if not re.fullmatch(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+", repository):
-              raise SystemExit("repository must use owner/name format.")
-          if not ref or len(ref) > 200 or ref.startswith("-") or ".." in ref or any(c in ref for c in " ~^:?*[\\\\"):
-              raise SystemExit("ref is invalid.")
-          if not command_text or len(command_text) > 20000:
-              raise SystemExit("commands must contain 1–20,000 characters.")
-          if push and (not isinstance(branch, str) or not branch or len(branch) > 200 or branch.startswith(("/", "-")) or ".." in branch or "@{" in branch or branch.endswith(("/", ".")) or any(c in branch for c in " ~^:?*[\\\\"):
-              raise SystemExit("A valid new branch is required when push=true.")
-          if create_pr and not push:
-              raise SystemExit("create_pr requires push=true.")
-          if len(command_text.splitlines()) > 100:
-              raise SystemExit("At most 100 command lines are allowed.")
-
-          for key, value in (("commit_message", commit_message), ("pr_title", pr_title), ("pr_body", pr_body)):
-              if not isinstance(value, str) or "\\n" in value or "\\r" in value:
-                  raise SystemExit(f"{key} must be a single-line string.")
-
-          temp = Path(os.environ["RUNNER_TEMP"]) / "agent-development-commands.sh"
-          temp.write_text("#!/usr/bin/env bash\\nset -euo pipefail\\n" + command_text + "\\n", encoding="utf-8")
-          temp.chmod(0o700)
-          outputs = {
-              "repository": repository, "ref": ref, "push": str(push).lower(),
-              "branch": branch, "create_pr": str(create_pr).lower(),
-              "commit_message": commit_message, "pr_title": pr_title, "pr_body": pr_body,
-              "command_file": str(temp)
-          }
-          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as stream:
-              for key, value in outputs.items():
-                  stream.write(f"{key}={value}\\n")
-          PY
+        run: python3 runner/resolve-development-request.py
 
       - name: Checkout target repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af49 # v4.2.2
@@ -209,11 +135,18 @@ jobs:
         env:
           CODING_REPO_TOKEN: ${{ secrets.CODING_REPO_TOKEN }}
           BRANCH: ${{ steps.request.outputs.branch }}
+          TARGET_REPOSITORY: ${{ steps.request.outputs.repository }}
         shell: bash
         run: |
           set -euo pipefail
-          auth="$(printf 'x-access-token:%s' "$CODING_REPO_TOKEN" | base64 -w0)"
-          git -c "http.extraheader=AUTHORIZATION: basic $auth" push origin "HEAD:$BRANCH"
+          expected="https://github.com/$TARGET_REPOSITORY.git"
+          actual="$(git remote get-url origin)"
+          push_url="$(git remote get-url --push origin)"
+          [[ "$actual" == "$expected" && "$push_url" == "$expected" ]] || { echo "Refusing to push: origin remote was changed by target commands." >&2; exit 1; }
+          export GIT_CONFIG_COUNT=1
+          export GIT_CONFIG_KEY_0=http.extraheader
+          export GIT_CONFIG_VALUE_0="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$CODING_REPO_TOKEN" | base64 -w0)"
+          git -c core.hooksPath=/dev/null push origin "HEAD:$BRANCH"
 
       - name: Open pull request
         if: steps.request.outputs.create_pr == 'true'

@@ -19,7 +19,7 @@ def _valid_git_ref(value: Any, label: str) -> str:
     if not isinstance(value, str) or not value or len(value) > 200 or value.startswith("-"):
         raise ValueError(f"{label} must be a non-empty Git ref of at most 200 characters.")
     result = subprocess.run(
-        ["git", "check-ref-format", "--branch", value],
+        ["git", "check-ref-format", "--allow-onelevel", value],
         capture_output=True,
         text=True,
         check=False,
@@ -80,7 +80,7 @@ def validate_request(request: dict[str, Any]) -> dict[str, Any]:
             request.get("commit_message", "chore: agent workspace changes"), "commit_message", required=push
         ),
         "pr_title": _single_line(request.get("pr_title", ""), "pr_title"),
-        "pr_body": request.get("pr_body", ""),
+        "pr_body": pr_body,
     }
 
 

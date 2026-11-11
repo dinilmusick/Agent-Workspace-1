@@ -1,0 +1,33 @@
+title = "Agent Workspace secret scanning configuration"
+
+[extend]
+useDefault = true
+
+# The upstream Forge snapshot contains a small number of generic-api-key
+# false positives. These allowlists require BOTH the exact path and the
+# exact non-secret line pattern, and apply only to generic-api-key.
+# Do not broaden these to whole-file or whole-commit exclusions.
+
+[[allowlists]]
+description = "SQL identifier deletion_receipt_r2_key is a column name, not a credential"
+targetRules = ["generic-api-key"]
+condition = "AND"
+regexTarget = "line"
+paths = ['''upstream/forge/migrations/core/0017_architecture_reset\.sql$''']
+regexes = ['''deletion_receipt_r2_key''']
+
+[[allowlists]]
+description = "Prompt-attempts fixture uses a clearly labeled test-only HMAC placeholder"
+targetRules = ["generic-api-key"]
+condition = "AND"
+regexTarget = "line"
+paths = ['''upstream/forge/worker/prompt-attempts\.test\.ts$''']
+regexes = ['''ACCOUNT_ERASURE_HMAC_SECRET:\s*"test-submission-attempt-secret-at-least-32-bytes"''']
+
+[[allowlists]]
+description = "Cloudflare Worker GITHUB_OAUTH_CLIENT_ID is a public OAuth client identifier, not a client secret"
+targetRules = ["generic-api-key"]
+condition = "AND"
+regexTarget = "line"
+paths = ['''upstream/forge/wrangler\.quick-production\.jsonc$''']
+regexes = ['''GITHUB_OAUTH_CLIENT_ID":\s*"Ov23limRaIiQdRQ3xoyd"''']

@@ -44,6 +44,8 @@ jobs:
           source = req.get("source_repository", "")
           target = req.get("target_repository", "")
           category = req.get("category", "")
+          source_commit = req.get("source_commit", "")
+          approval_record = req.get("approval_record", "")
           allowed = {"MIT", "Apache-2.0", "BSD-2-Clause", "BSD-3-Clause", "ISC", "0BSD", "Zlib", "PostgreSQL"}
           if not re.fullmatch(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+", source):
               raise SystemExit("Invalid source_repository")
@@ -51,6 +53,10 @@ jobs:
               raise SystemExit("target_repository must use tpl-kebab-case")
           if not category or len(category) > 100:
               raise SystemExit("A short category is required")
+          if not re.fullmatch(r"[0-9a-f]{40}", source_commit):
+              raise SystemExit("source_commit must be a full 40-character lowercase commit SHA")
+          if not approval_record.startswith("https://github.com/dinilmusick/Agent-Workspace-1/"):
+              raise SystemExit("approval_record must link to the workspace audit evidence")
           token = os.environ["GH_TOKEN"]
           headers = {"Accept":"application/vnd.github+json","Authorization":f"Bearer {token}","X-GitHub-Api-Version":"2022-11-28"}
           def api(url):
@@ -65,14 +71,20 @@ jobs:
               raise SystemExit(f"License not on permissive allowlist: {license_id!r}")
           if meta.get("disabled"):
               raise SystemExit("Disabled source repositories are not eligible")
+          commit_meta = api("https://api.github.com/repos/" + source + "/commits/" + source_commit)
+          branch_meta = api("https://api.github.com/repos/" + source + "/commits/" + meta["default_branch"])
+          if commit_meta.get("sha") != source_commit or branch_meta.get("sha") != source_commit:
+              raise SystemExit("source_commit must be the exact current head of the source default branch")
           out = os.environ["GITHUB_OUTPUT"]
           with open(out, "a") as f:
               f.write(f"source={source}\n")
               f.write(f"target={target}\n")
               f.write(f"category={category}\n")
               f.write(f"license={license_id}\n")
+              f.write(f"source_commit={source_commit}\n")
+              f.write(f"approval_record={approval_record}\n")
               f.write(f"description={category} independent commercial-use template; source: {source}\n")
-          print(json.dumps({"source":source,"target":target,"category":category,"spdx_license":license_id,"archived":False}, indent=2))
+          print(json.dumps({"source":source,"target":target,"category":category,"spdx_license":license_id,"source_commit":source_commit,"approval_record":approval_record,"archived":False}, indent=2))
           PY
 
       - name: Create private destination repository
@@ -137,6 +149,7 @@ jobs:
           SOURCE: ${{ steps.request.outputs.source }}
           TARGET: dinilmusick/${{ steps.request.outputs.target }}
           DEFAULT_BRANCH: ${{ steps.default.outputs.branch }}
+          SOURCE_COMMIT: ${{ steps.request.outputs.source_commit }}
         shell: bash
         run: |
           set -euo pipefail
@@ -145,25 +158,37 @@ jobs:
           source_refs="$(git -C source.git for-each-ref --format='%(refname) %(objectname)' | sort)"
           target_refs="$(git -C verify.git for-each-ref --format='%(refname) %(objectname)' | sort)"
           diff -u <(printf '%s\n' "$source_refs") <(printf '%s\n' "$target_refs")
-          test "$(git -C verify.git rev-parse "refs/heads/$DEFAULT_BRANCH")" = "$(git -C source.git rev-parse "refs/heads/$DEFAULT_BRANCH")"
-          test "$(git -C verify.git rev-parse "refs/heads/$DEFAULT_BRANCH")" = "$(git -C source.git rev-parse "refs/heads/$DEFAULT_BRANCH")"
+          test "$(git -C verify.git rev-parse "refs/heads/$DEFAULT_BRANCH")" = "$SOURCE_COMMIT"
+          destination_meta="$(curl --fail-with-body -sS -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" "https://api.github.com/repos/$TARGET")"
+          python3 -c 'import json,sys; d=json.loads(sys.argv[1]); assert d.get("private") is True, "destination must remain private"; assert d.get("fork") is False, "destination must not be a fork"' "$destination_meta"
           git -C verify.git remote remove origin
           test -z "$(git -C verify.git remote)"
-          echo "Verified: all refs match; the verification clone has no configured remotes after removing its temporary origin."
-          echo "Destination is a separately created repository, not a GitHub fork."
+          echo "Verified: all refs match; default branch equals the approved source commit; destination is private, not a fork, and the verification clone has no upstream remote."
 
       - name: Emit acquisition provenance record
         env:
-          GH_TOKEN: ${{ secrets.CODING_REPO_TOKEN }}
-          TARGET: dinilmusick/${{ steps.request.outputs.target }}
           SOURCE: ${{ steps.request.outputs.source }}
+          TARGET: dinilmusick/${{ steps.request.outputs.target }}
           LICENSE_ID: ${{ steps.request.outputs.license }}
           CATEGORY: ${{ steps.request.outputs.category }}
+          SOURCE_COMMIT: ${{ steps.request.outputs.source_commit }}
+          APPROVAL_RECORD: ${{ steps.request.outputs.approval_record }}
         shell: bash
         run: |
           set -euo pipefail
-          printf '\n\n---\n\n## Independent template acquisition\n\n- Category: %s\n- Original source: https://github.com/%s\n- Detected repository SPDX license: %s\n- Acquisition method: independent Git mirror; no fork relationship or upstream remote configured in the destination.\n\nThis metadata does not replace the original LICENSE, copyright notices, third-party notices, asset licenses, or dependency obligations. Commercial redistribution approval requires a separate dependency and bundled-asset audit.\n' "$CATEGORY" "$SOURCE" "$LICENSE_ID" > /tmp/acquisition-note.md
-          echo "Acquisition note generated. Original source license files and notices remain intact in the mirror."
+          {
+            echo "## Independent template acquisition"
+            echo
+            echo "- Category: $CATEGORY"
+            echo "- Original source: https://github.com/$SOURCE"
+            echo "- Exact source commit: $SOURCE_COMMIT"
+            echo "- Detected repository SPDX license: $LICENSE_ID"
+            echo "- Approval evidence: $APPROVAL_RECORD"
+            echo "- Destination: https://github.com/$TARGET"
+            echo "- Acquisition: independent mirror, private destination, no fork relationship."
+            echo
+            echo "Original license and third-party notices remain in the mirror. This record does not replace dependency, asset, font, model, extension or trademark obligations."
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Comment result on request
         if: always()
@@ -174,13 +199,14 @@ jobs:
           TARGET: dinilmusick/${{ steps.request.outputs.target }}
           SOURCE: ${{ steps.request.outputs.source }}
           LICENSE_ID: ${{ steps.request.outputs.license }}
+          SOURCE_COMMIT: ${{ steps.request.outputs.source_commit }}
+          APPROVAL_RECORD: ${{ steps.request.outputs.approval_record }}
           DEFAULT_BRANCH: ${{ steps.default.outputs.branch }}
         shell: bash
         run: |
           set -euo pipefail
           if [[ "$JOB_STATUS" == "success" ]]; then
-            source_sha="$(git -C source.git rev-parse "refs/heads/$DEFAULT_BRANCH")"
-            body="Repository mirror created and refs verified: https://github.com/$TARGET\n\nSource: https://github.com/$SOURCE\nSource commit: $source_sha\nSPDX metadata: $LICENSE_ID\nDefault branch: $DEFAULT_BRANCH\n\nNote: dependency, bundled asset, model, font, and trademark clearance remains a separate gate."
+            body="Repository mirror created and refs verified: https://github.com/$TARGET\n\nSource: https://github.com/$SOURCE\nSource commit: $SOURCE_COMMIT\nSPDX metadata: $LICENSE_ID\nDefault branch: $DEFAULT_BRANCH\nApproval evidence: $APPROVAL_RECORD\n\nDestination remains private. Original notices are preserved. Re-run dependency, asset, font, model, extension and trademark checks before redistribution."
           else
             body="Acquisition workflow failed. Inspect the Actions run for the exact validation or mirror error. No successful acquisition is claimed."
           fi

@@ -11,7 +11,7 @@
     ],
     "exportedAt": "2026-11-05T00:00:00.000Z"
   },
-  "count": 38,
+  "count": 39,
   "skills": [
     {
       "id": 1,
@@ -42,7 +42,7 @@
       "id": 4,
       "name": "Loop Generator",
       "slug": "loop-generator",
-      "version": "1.2.1",
+      "version": "1.4.0",
       "status": "active",
       "path": "skills/loop-generator/SKILL.md",
       "tools": [
@@ -76,7 +76,7 @@
       "id": 7,
       "name": "Task Ledger",
       "slug": "task-ledger",
-      "version": "1.7.8",
+      "version": "2.0.0",
       "status": "active",
       "path": "skills/task-ledger/SKILL.md",
       "tools": [
@@ -173,7 +173,7 @@
       "id": 17,
       "name": "Coding Router",
       "slug": "coding-router",
-      "version": "1.2.6",
+      "version": "2.0.0",
       "status": "active",
       "path": "skills/coding-router/SKILL.md",
       "tools": []
@@ -200,7 +200,7 @@
       "id": 20,
       "name": "Coding Workflow",
       "slug": "coding-workflow",
-      "version": "1.0.5",
+      "version": "2.0.1",
       "status": "active",
       "path": "skills/coding-workflow/SKILL.md",
       "tools": []
@@ -227,7 +227,7 @@
       "id": 23,
       "name": "AI Agent and Tooling Engineering",
       "slug": "agent-systems-engineering",
-      "version": "1.0.3",
+      "version": "2.0.1",
       "status": "active",
       "path": "skills/agent-systems-engineering/SKILL.md",
       "tools": []
@@ -272,7 +272,7 @@
       "id": 28,
       "name": "Universal Task Router",
       "slug": "universal-task-router",
-      "version": "1.4.5",
+      "version": "2.0.1",
       "status": "active",
       "path": "skills/universal-task-router/SKILL.md",
       "tools": []
@@ -385,7 +385,7 @@
       "id": 42,
       "name": "Implementation Push",
       "slug": "implementation-push",
-      "version": "1.0.0",
+      "version": "2.0.1",
       "status": "active",
       "path": "skills/implementation-push/SKILL.md",
       "tools": [
@@ -441,7 +441,7 @@
       "id": 44,
       "name": "Reconciliation Pass",
       "slug": "reconciliation-pass",
-      "version": "1.0.0",
+      "version": "2.0.1",
       "status": "active",
       "path": "skills/reconciliation-pass/SKILL.md",
       "tools": [
@@ -458,8 +458,30 @@
           "usage": "Run final repository/integration verification and independently validate the synthesized state."
         }
       ]
+    },
+    {
+      "id": 46,
+      "name": "Persistent Multi-Agent Execution",
+      "slug": "persistent-multi-agent-execution",
+      "version": "1.0.0",
+      "status": "active",
+      "path": "skills/persistent-multi-agent-execution/SKILL.md",
+      "tools": [
+        {
+          "slug": "github",
+          "type": "connector",
+          "required": true,
+          "usage": "Create/update worker Issues, inspect linked PRs and CI, and persist orchestrator responses."
+        },
+        {
+          "slug": "supabase",
+          "type": "connector",
+          "required": true,
+          "usage": "Persist parent goals/tasks and stable Issue/PR linkage."
+        }
+      ]
     }
   ],
   "toolBindingsPath": "skills/tool-bindings.json",
-  "exportedAt": "2026-11-09"
+  "exportedAt": "2026-11-11"
 }

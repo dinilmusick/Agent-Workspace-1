@@ -1,7 +1,7 @@
 ---
 name: "Universal Task Router"
 slug: universal-task-router
-version: 2.0.1
+version: 2.1.0
 source: Supabase Skills Database
 sourceId: 28
 status: active
@@ -170,3 +170,8 @@ When asked what remains, query `public.agent_state_matrix` and classify rows as 
 When coding work is parallelized, activate Persistent Multi-Agent Execution alongside the coding specialist. Route each independent coding task to one GitHub Issue and one worker/PR. Supabase remains the parent goal/task coordination layer; GitHub Issue state is canonical for detailed coding execution.
 
 The orchestrator must poll Issues, linked PRs and CI, write blocker resolutions into Issues, and remain in the loop while actionable work exists. Workers must persist blockers and resume points in Issues and poll for responses. continue/proceed is a global resume signal; workers reread their own Issue and do not treat it as permission for unrelated work.
+
+
+## Goal prerequisite dependencies
+
+Goals may have explicit prerequisite edges in `public.goal_dependencies`. The edge points from the dependent goal to the prerequisite goal. `blocking` edges gate all task starts and goal completion; `advisory` edges are informational only. The database rejects self-dependencies, duplicate edges, blocking cycles and cross-Vision edges. Every task transition to `running` checks all blocking prerequisite goals and their complete descendant task trees. Finalizing a dependent goal is similarly blocked until prerequisites are completed and verified. Do not rely on prompts or worker cooperation for these gates; PostgreSQL triggers are authoritative. For ordered Vision phases, persist blocking edges between phase goals.

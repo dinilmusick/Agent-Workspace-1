@@ -28,6 +28,7 @@ begin
  select array_agg(distinct vt.vision_id order by vt.vision_id) into prerequisite_visions from public.vision_target_goals vtg join public.vision_targets vt on vt.id=vtg.vision_target_id where vtg.goal_id=new.depends_on_goal_id;
  if coalesce(cardinality(dependent_visions),0)>1 or coalesce(cardinality(prerequisite_visions),0)>1 then raise exception 'a goal may only be linked to targets within one Vision'; end if;
  if dependent_visions is distinct from prerequisite_visions and (dependent_visions is not null or prerequisite_visions is not null) then raise exception 'goal dependencies must connect goals within the same Vision'; end if;
+ if new.dependency_type='blocking' and exists(select 1 from public.goals dependent join public.goals prerequisite on prerequisite.id=new.depends_on_goal_id where dependent.id=new.goal_id and dependent.status in ('active','completed') and (prerequisite.status<>'completed' or public.goal_has_unverified_descendant_tasks(prerequisite.id))) then raise exception 'cannot add an unsatisfied blocking prerequisite to an active or completed goal'; end if;
  return new;
 end; $fn$;
 drop trigger if exists goal_dependencies_validate on public.goal_dependencies;
@@ -43,11 +44,11 @@ create trigger tasks_enforce_goal_prerequisites before insert or update of statu
 
 create or replace function public.enforce_goal_dependency_completion() returns trigger language plpgsql set search_path=public as $fn$
 begin
- if new.status in ('active','completed') and old.status is distinct from new.status and exists(select 1 from public.goal_dependencies d join public.goals p on p.id=d.depends_on_goal_id where d.goal_id=new.id and d.dependency_type='blocking' and (p.status<>'completed' or public.goal_has_unverified_descendant_tasks(p.id))) then raise exception 'goal is locked: all blocking prerequisite goals must be completed and verified before activation or completion'; end if;
+ if new.status in ('active','completed') and (tg_op='INSERT' or old.status is distinct from new.status) and exists(select 1 from public.goal_dependencies d join public.goals p on p.id=d.depends_on_goal_id where d.goal_id=new.id and d.dependency_type='blocking' and (p.status<>'completed' or public.goal_has_unverified_descendant_tasks(p.id))) then raise exception 'goal is locked: all blocking prerequisite goals must be completed and verified before activation or completion'; end if;
  return new;
 end; $fn$;
 drop trigger if exists goals_enforce_prerequisite_completion on public.goals;
-create trigger goals_enforce_prerequisite_completion before update of status on public.goals for each row execute function public.enforce_goal_dependency_completion();
+create trigger goals_enforce_prerequisite_completion before insert or update of status on public.goals for each row execute function public.enforce_goal_dependency_completion();
 
 create or replace function public.enforce_goal_completion() returns trigger language plpgsql set search_path=public as $fn$
 begin

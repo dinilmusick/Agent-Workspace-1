@@ -62,6 +62,8 @@ s = p.read_text().replace(
 s = re.sub(r'  "networking/fetch": \{.*?\n  \},\n  "networking/websocket":',
            '  "networking/websocket":', s, flags=re.S)
 p.write_text(s)
+s = re.sub(r'(?ms)^  "networking/websocket": \{.*?(?=^  "[^"]+": \{)', "", s)
+p.write_text(s)
 
 (root / "nodes/index.ts").write_text("""import { NodeRegistry } from "../registry";
 import { registerPresetNodes } from "./presets";

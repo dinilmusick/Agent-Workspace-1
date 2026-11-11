@@ -82,5 +82,7 @@ Use `workflow` mode only for repositories and workflow definitions that are trus
 
 The runner validates the target workflow definitions, clones the requested ref, runs the target workflow definitions with pinned `act`, records an Actions summary/artifacts, and unconditionally removes the private clone.
 
+The compatibility issue route is restricted to owner/member/collaborator-authored issues titled `[private-ci] <short task>` with a JSON body containing `repository`, `ref`, and either `workflow` or `command`. Other issue types (including `[github-dev]` and `[acquire-repo]`) are ignored.
+
 The target workflow files are never copied into Agent-Workspace-1's workflow directory.
 

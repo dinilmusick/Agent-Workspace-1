@@ -1,7 +1,7 @@
 ---
 name: "Universal Task Router"
 slug: universal-task-router
-version: 2.0.1
+version: 2.2.0
 source: Supabase Skills Database
 sourceId: 28
 status: active

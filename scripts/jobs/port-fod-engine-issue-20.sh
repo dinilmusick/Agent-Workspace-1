@@ -524,12 +524,12 @@ const node = (id: string, type: string, data: Record<string, unknown> = {}) => (
 
 test("executes native graph nodes and routes connected data", async () => {
   const result = await new GraphEngine().execute(graph(
-    [node("sum", "math/add", { addend: 4 }), node("product", "math/multiply", { factor: 3 })],
-    [{ id: "edge-1", source: "sum", sourceHandle: "result", target: "product", targetHandle: "factor" }]
+    [node("sum", "math/add", { addend: 4 }), node("power", "math/power", { b: 3 })],
+    [{ id: "edge-1", source: "sum", sourceHandle: "result", target: "power", targetHandle: "a" }]
   ), { workspaceId: "workspace-1", principal, executionId: "execution-dataflow" });
   assert.equal(result.success, true);
   assert.equal(result.outputs.sum.result, 4);
-  assert.equal(result.outputs.product.result, 12);
+  assert.equal(result.outputs.power.result, 64);
 });
 
 test("isolates registries between engine instances", () => {

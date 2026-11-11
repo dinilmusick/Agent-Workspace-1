@@ -9,7 +9,7 @@ declare
 begin
   root_id := public.task_ledger_create_tree(
     'integration-test-orchestrator','Integration Test Orchestrator',
-    jsonb_build_object('name','integration-test-root','tags',jsonb_build_array('integration-test'),
+    jsonb_build_object('name','integration-test-root','actions',jsonb_build_array('Inspect child results','Verify child evidence','Finalize the parent after all checks pass'),'general_pattern',jsonb_build_object('objective','Coordinate child execution','approach','Wait, verify and finalize'),'tags',jsonb_build_array('integration-test'),
       'required_capabilities',jsonb_build_array('orchestrator-only'),
       'loop',jsonb_build_object(
         'enabled',true,'objective','Coordinate child execution and finalize after verification',
@@ -24,7 +24,7 @@ begin
         'iteration_policy',jsonb_build_object('mode','persistent','heartbeat_required',true,'continue_on_partial_success',true,'record_observation_each_iteration',true),
         'stop_conditions',jsonb_build_array('all children verified'),'max_iterations',3
       ),
-      'subtasks',jsonb_build_array(jsonb_build_object('name','integration-test-child',
+      'subtasks',jsonb_build_array(jsonb_build_object('name','integration-test-child','actions',jsonb_build_array('Run the child integration test','Capture test evidence'),'general_pattern',jsonb_build_object('objective','Execute child test','approach','Run, observe and report'),
         'tags',jsonb_build_array('integration-test'),
         'required_capabilities',jsonb_build_array('test-capability'),
         'loop',jsonb_build_object(

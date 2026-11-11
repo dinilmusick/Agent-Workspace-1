@@ -1,7 +1,7 @@
 ---
 name: "Task Ledger"
 slug: task-ledger
-version: 2.0.0
+version: 2.2.0
 source: Supabase Skills Database
 sourceId: 7
 status: active
@@ -193,3 +193,44 @@ Task Ledger remains the canonical Supabase coordination layer for goals, depende
 For coding tasks, persist the parent task and GitHub identifiers in Supabase, then create a GitHub Issue as the authoritative execution record. Mirror only stable linkage/state needed for orchestration: repository, issue_number, issue_url, pr_number, pr_url, worker identity and terminal summary. Do not maintain a second detailed coding state machine in Supabase.
 
 Workers must read/update their Issue, not chat history, for detailed coding state. Orchestrators poll Issues/PRs/CI and write decisions back to Issues. This makes worker recovery and bulk continue deterministic.
+
+
+## Goal-level prerequisite dependencies (blocking gates)
+
+Goals may depend on other goals through `public.goal_dependencies`:
+
+- `goal_id` is the dependent goal; `depends_on_goal_id` is its prerequisite.
+- `dependency_type='blocking'` prevents the dependent goal from becoming active/completed and prevents every task in that goal from transitioning to `running` until every blocking prerequisite has status `completed` and all of its descendant tasks are verified (or explicitly `not_required`).
+- `dependency_type='advisory'` is recorded and shown to agents but never blocks activation, claims or completion.
+- Self-dependencies, duplicate edges and blocking cycles are rejected. Graph writes are serialized with a transaction-scoped advisory lock so concurrent edge insertions cannot create a cycle.
+- A dependency may not cross Vision boundaries: if either goal is attached to a Vision, both must be attached to the same Vision.
+- Goal completion is independently guarded by the database, even when an agent bypasses the normal finalize RPC.
+
+Use the trusted Supabase service-role database connector for dependency mutations. The canonical helper is:
+
+```sql
+select * from public.goal_ledger_add_dependency(
+  '<dependent-goal-key>',
+  '<prerequisite-goal-key>',
+  'blocking', -- or 'advisory'
+  '<agent-id>'
+);
+```
+
+The helper validates both readable goal keys, persists the edge and appends a goal event. Do not grant this operation to anon/authenticated API roles: `goal_dependencies` is a service-controlled coordination table. Never rely on prompts or client-side checks for enforcement.
+
+### Required multi-phase planning pattern
+
+For sequential project phases, create all goals first, then add explicit blocking edges before any worker starts:
+
+```text
+Research goal
+  └─ verified completion unlocks Repository acquisition goal
+       └─ verified completion unlocks Ecosystem absorption goal
+```
+
+Add edges from the later goal to its prerequisite (dependent → prerequisite). Parallel work within a phase remains parallel; only later phases are gated. Advisory edges express useful context without serializing execution.
+
+### Verification
+
+Run the rollback-only regression script in `supabase/tests/task-ledger-goal-dependencies.integration.sql` against the trusted Supabase connector. It proves that blocking prerequisites prevent goal activation and task claims, blocking cycles are rejected, and advisory edges remain non-blocking. The script rolls back its fixtures. Also inspect the database triggers on `goals`, `tasks` and `goal_dependencies` after schema changes.

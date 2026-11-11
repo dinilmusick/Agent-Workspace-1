@@ -28,6 +28,8 @@ write('Srkl-Engine','.env.example','APP_URL=');
 write('Depm-Engine','wrangler.toml','APP_URL');
 for (const repo of ['Aiko','Qwnsr-Engine','DocuStack-Engine','Srkl-Engine','Fod-Engine','Theta-Engine','Kult-Engine','Kelt-Engine']) {
   write(repo,'.env.example','APP_URL=');
+  // The validator intentionally scans source/config extensions, not .env.example files.
+  write(repo,'src/config/app-url.ts','export const APP_URL = process.env.APP_URL;');
 }
 write('Depm-Engine','.env.example','APP_URL=');
 write('Aiko','wrangler.toml','nodejs_compat_populate_process_env');
@@ -46,5 +48,5 @@ console.log('validator positive fixture: PASS');
 fs.writeFileSync(path.join(temp, 'Depm-Engine', 'legacy.ts'), 'DEPM_GATEWAY_DOMAIN');
 const negative = spawnSync(process.execPath, [script, temp], { encoding: 'utf8' });
 assert.notEqual(negative.status, 0, negative.stdout + negative.stderr);
-assert.match(negative.stdout, /DEPM_GATEWAY_DOMAIN/);
+assert.match(negative.stdout, /forbidden legacy DEPM gateway variable/);
 console.log('validator negative fixture: PASS');

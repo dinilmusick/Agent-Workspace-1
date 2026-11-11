@@ -177,3 +177,15 @@ The canonical local preflight is `python tools/agent-bootstrap/bootstrap.py plan
 - Never require the user to identify which worker is blocked or completed. The orchestrator derives this from live Issues/PRs/CI. User intervention is reserved for genuine external decisions, permissions, platform limits or unrecoverable blockers.
 - Reconciliation must inspect linked Issues as well as PRs, synchronize terminal state/evidence, and leave no coding task with lost execution context.
 - Use skills/persistent-multi-agent-execution/SKILL.md as the primary multi-agent execution protocol and apply it to Implementation Push, Feature, New Repo and Reconciliation workflows.
+
+
+## Goal prerequisite gates
+
+- Model phase ordering with `public.goal_dependencies`; edge direction is dependent goal → prerequisite goal.
+- Add `blocking` edges for true phase gates and `advisory` edges for context-only relationships.
+- Use `goal_ledger_add_dependency(dependent_goal_key, prerequisite_goal_key, 'blocking'|'advisory', agent_id)` through the trusted Supabase service-role connector. Do not mutate the dependency table through public client roles.
+- A blocking prerequisite must be completed and all its descendant tasks independently verified before a dependent goal can activate/complete or any dependent task can enter `running`. The database is the enforcement authority.
+- Reject self-edges, duplicate edges, blocking cycles and cross-Vision dependencies. The database serializes graph writes to prevent concurrent cycle races.
+- Add all phase edges before starting workers. Never launch a later phase merely because its tasks are queued; inspect the dependency gate and claimability.
+- Advisory dependencies never block execution. Preserve parallelism among tasks/goals that do not have blocking paths between them.
+- Regression coverage: `supabase/tests/task-ledger-goal-dependencies.integration.sql` (rollback-only fixtures).

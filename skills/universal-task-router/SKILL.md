@@ -1,7 +1,7 @@
 ---
 name: "Universal Task Router"
 slug: universal-task-router
-version: 2.0.1
+version: 2.2.0
 source: Supabase Skills Database
 sourceId: 28
 status: active
@@ -170,3 +170,8 @@ When asked what remains, query `public.agent_state_matrix` and classify rows as 
 When coding work is parallelized, activate Persistent Multi-Agent Execution alongside the coding specialist. Route each independent coding task to one GitHub Issue and one worker/PR. Supabase remains the parent goal/task coordination layer; GitHub Issue state is canonical for detailed coding execution.
 
 The orchestrator must poll Issues, linked PRs and CI, write blocker resolutions into Issues, and remain in the loop while actionable work exists. Workers must persist blockers and resume points in Issues and poll for responses. continue/proceed is a global resume signal; workers reread their own Issue and do not treat it as permission for unrelated work.
+
+
+## Goal phase dependencies
+
+For multi-phase work, represent each phase as a separate goal and persist ordering in `public.goal_dependencies`. Edges point from the dependent goal to its prerequisite. Use `blocking` only when the later phase must not start until the prerequisite is completed and its descendant tasks are verified; use `advisory` for non-blocking context. Add all blocking edges before worker dispatch. Create edges through `goal_ledger_add_dependency(dependent_goal_key, prerequisite_goal_key, dependency_type, agent_id)` using the trusted Supabase service-role connector. Database guards reject self/duplicate edges, blocking cycles and cross-Vision links, and enforce both goal-state transitions and task claim transitions. Never treat a queued task as claimable until the database gate permits its transition to `running`. The database, not the agent prompt, is authoritative.

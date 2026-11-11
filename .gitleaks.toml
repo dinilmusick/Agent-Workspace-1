@@ -1,0 +1,30 @@
+title = "Agent Workspace secret scanning configuration"
+
+[extend]
+useDefault = true
+
+# Attach narrow false-positive allowlists directly to the default generic-api-key
+# rule. Each exception requires BOTH an exact path and an exact matched token.
+[[rules]]
+id = "generic-api-key"
+
+  [[rules.allowlists]]
+  description = "SQL receipt_r2_key column equality is an identifier comparison, not a credential"
+  condition = "AND"
+  regexTarget = "match"
+  paths = ['''upstream/forge/migrations/core/0017_architecture_reset\.sql$''']
+  regexes = ['''(?:staged\.receipt_r2_key\s*=\s*legacy\.deletion_receipt_r2_key|legacy\.deletion_receipt_r2_key\s*=\s*staged\.receipt_r2_key)''']
+
+  [[rules.allowlists]]
+  description = "Prompt-attempts fixture uses a test-only HMAC placeholder"
+  condition = "AND"
+  regexTarget = "match"
+  paths = ['''upstream/forge/worker/prompt-attempts\.test\.ts$''']
+  regexes = ['''test-submission-attempt-secret-at-least-32-bytes''']
+
+  [[rules.allowlists]]
+  description = "Cloudflare GITHUB_OAUTH_CLIENT_ID is a public OAuth client identifier, not a client secret"
+  condition = "AND"
+  regexTarget = "match"
+  paths = ['''upstream/forge/wrangler\.quick-production\.jsonc$''']
+  regexes = ['''Ov23limRaIiQdRQ3xoyd''']

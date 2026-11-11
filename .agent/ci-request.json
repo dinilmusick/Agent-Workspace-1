@@ -1,8 +1,8 @@
 {
   "repository": "dinilmusick/Aiko",
-  "ref": "implementation/aiko-integration-push-2026-11-11",
+  "ref": "main",
   "event": "push",
   "workflow": "validate.yml",
-  "token_mode": "workflow",
-  "request_id": "aiko-issue-21-verification-2026-11-11"
+  "token_mode": "clone-only",
+  "request_id": "aiko-fod-editor-issue23-main-20261111"
 }

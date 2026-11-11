@@ -62,7 +62,7 @@ class DevelopmentRequestTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "100 command lines"):
             MODULE.validate_request({
                 "repository": "dinilmusick/Aiko",
-                "commands": "\\n".join(["true"] * 101),
+                "commands": "\n".join(["true"] * 101),
             })
 
 

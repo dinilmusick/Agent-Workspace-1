@@ -69,6 +69,10 @@ def validate_request(request: dict[str, Any]) -> dict[str, Any]:
     if create_pr and not push:
         raise ValueError("create_pr requires push=true.")
 
+    pr_body = request.get("pr_body", "")
+    if not isinstance(pr_body, str) or len(pr_body) > 20_000:
+        raise ValueError("pr_body must be a string of at most 20,000 characters.")
+
     return {
         "repository": repository,
         "ref": ref,

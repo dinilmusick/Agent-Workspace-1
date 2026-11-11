@@ -177,3 +177,11 @@ The canonical local preflight is `python tools/agent-bootstrap/bootstrap.py plan
 - Never require the user to identify which worker is blocked or completed. The orchestrator derives this from live Issues/PRs/CI. User intervention is reserved for genuine external decisions, permissions, platform limits or unrecoverable blockers.
 - Reconciliation must inspect linked Issues as well as PRs, synchronize terminal state/evidence, and leave no coding task with lost execution context.
 - Use skills/persistent-multi-agent-execution/SKILL.md as the primary multi-agent execution protocol and apply it to Implementation Push, Feature, New Repo and Reconciliation workflows.
+
+
+## Goal dependency enforcement
+
+- Goal phase prerequisites live in `public.goal_dependencies` (`goal_id` depends on `depends_on_goal_id`; `dependency_type` is `blocking` or `advisory`).
+- Blocking cycles, self-edges, duplicate edges and cross-Vision edges are rejected by PostgreSQL.
+- Database triggers guard every task transition into `running`, independent of claim RPC, and block dependent-goal completion until prerequisite goals and all descendant tasks are verified.
+- Advisory dependencies do not block execution. Do not treat queued tasks as claimable until all blocking prerequisite goals are complete.

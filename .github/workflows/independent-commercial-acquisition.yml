@@ -146,6 +146,7 @@ jobs:
           target_refs="$(git -C verify.git for-each-ref --format='%(refname) %(objectname)' | sort)"
           diff -u <(printf '%s\n' "$source_refs") <(printf '%s\n' "$target_refs")
           test "$(git -C verify.git rev-parse "refs/heads/$DEFAULT_BRANCH")" = "$(git -C source.git rev-parse "refs/heads/$DEFAULT_BRANCH")"
+          test "$(git -C verify.git rev-parse "refs/heads/$DEFAULT_BRANCH")" = "$(git -C source.git rev-parse "refs/heads/$DEFAULT_BRANCH")"
           git -C verify.git remote remove origin
           test -z "$(git -C verify.git remote)"
           echo "Verified: all refs match; the verification clone has no configured remotes after removing its temporary origin."

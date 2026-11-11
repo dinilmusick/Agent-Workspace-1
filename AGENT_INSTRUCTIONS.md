@@ -7,7 +7,7 @@ NEW_REPO=vision→target→goal→tasks→parallelPRs→reconcile→verify→cle
 FEATURE=resolveRepo→plan→goal/tasks→parallelPRs→reconcile→verify→cleanup.
 IMPLEMENTATION_PUSH=freshAudit→find/fix→dedicatedPR→verify→reAudit→cleanup.
 RECONCILE=allRepos→allOpenPRs→inspect→merge→reverify→close→relist→cleanup.
-DISCOVER=allRepos→rankOpenPRs→evidence;PLAN=vision→target→goal→tasks→OmniLoop.
+DISCOVER=allRepos→rankOpenPRs.
 TASK={parentTarget,acceptance,deps,actions[1..4]};>4=split;parallel=1PR/task;final=dependsOn(children)→reconcile.
 GOAL_DEPS=goal_dependencies(dependent,prerequisite,blocking|advisory);blocking gates task starts+goal completion;DB rejects cycles/cross-Vision;advisory never blocks.
 LEDGER=persist actionable work;atomic claims;heartbeat;independentVerify;retain evidence.

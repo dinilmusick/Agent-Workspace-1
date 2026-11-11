@@ -15,7 +15,7 @@ This register captures the first ten priority candidates. It is **not a legal cl
 | ERP | [aureuserp/aureuserp](https://github.com/aureuserp/aureuserp) | `tpl-erp-aureuserp` | `master` | MIT | `LICENSE` | `c31a0db21e00fa436c4949eb4f60ceef81e116ec` | REJECTED (current runtime dependency set) |
 | Python API starter | [fastapi/full-stack-fastapi-template](https://github.com/fastapi/full-stack-fastapi-template) | `tpl-backend-fastapi` | `master` | MIT | `LICENSE` | `aabb90126964a164e02aff39e7c385bb0598236d` | REJECTED (runtime dependency licenses) |
 | RAG | [arc53/DocsGPT](https://github.com/arc53/DocsGPT) | `tpl-ai-docsgpt` | `main` | MIT | `LICENSE` | `d1506d977d0c2036a07e7b464fa05479fab8d973` | REJECTED (runtime LGPL dependency) |
-| AI workspace | [Mintplex-Labs/anything-llm](https://github.com/Mintplex-Labs/anything-llm) | `tpl-ai-anythingllm` | `master` | MIT | `LICENSE` | `e8434c07c3d385411aec28e8f9758dfd073565ec` | CONDITIONAL |
+| AI workspace | [Mintplex-Labs/anything-llm](https://github.com/Mintplex-Labs/anything-llm) | `tpl-ai-anythingllm` | `master` | MIT | `LICENSE` | `e8434c07c3d385411aec28e8f9758dfd073565ec` | REJECTED (runtime LGPL libvips dependency) |
 | Self-hosted PaaS | [coollabsio/coolify](https://github.com/coollabsio/coolify) | `tpl-deployment-coolify` | `main` | Apache-2.0 | `LICENSE` | `d9ab3d1e8bea98215ed19a27f2f4ac1abd2fa40f` | REJECTED (current runtime dependency set) |
 | Inventory | [inventree/InvenTree](https://github.com/inventree/InvenTree) | `tpl-inventory-inventree` | `master` | MIT | `LICENSE` | `16309370ba0e4b4a088516ae06c0a681e5315348` | REJECTED (runtime LGPL dependencies) |
 | Healthcare platform | [medplum/medplum](https://github.com/medplum/medplum) | `tpl-health-medplum` | `main` | Apache-2.0 | `LICENSE.txt` | `cfd9d414ce458eb802f36d41318c7dc031b511a3` | CONDITIONAL |
@@ -77,10 +77,11 @@ The four rejected candidates above are not replaced automatically. These alterna
 - The core `pyproject.toml` directly declares `psycopg[binary,pool]>=3.1,<4` as a runtime dependency; the pinned `docsgpt/requirements.txt` contains `psycopg==3.3.8` and `psycopg-binary==3.3.8`. PyPI identifies Psycopg 3.3.8 as `LGPL-3.0-only`, which violates the user's explicit no-LGPL rule. <https://pypi.org/project/psycopg/>
 - This direct runtime blocker is sufficient to reject the current revision. The full lock includes optional Docling/Milvus/decision-model extras and multiple npm lockfiles; their dependency, model and asset reviews remain outstanding. Do not acquire unless the PostgreSQL driver is replaced with an allowlisted alternative and every supported configuration is re-locked and re-audited.
 
-### AnythingLLM
-- Root `LICENSE` and root `package.json` identify MIT.
-- It is a multi-part application (server, frontend, collector and additional integrations); root metadata does not establish the licenses of each workspace dependency or bundled component.
-- Still required: inspect every nested package manifest and lockfile, native/desktop/mobile components, icons/fonts, models and optional integrations.
+### AnythingLLM — REJECTED as-is
+- Root `LICENSE` and root/server/collector/frontend package manifests identify MIT.
+- The collector declares runtime dependency `sharp@^0.33.5` and uses it in `collector/utils/OCRLoader/index.js` to convert PDF pages to image buffers.
+- The exact collector `yarn.lock` pins `sharp@0.33.5` and optional platform packages `@img/sharp-libvips-*@1.0.4/1.0.5`. The Linux x64 libvips package is LGPL-3.0-or-later and contains LGPLv3 components including libvips, glib, libexif, libheif, librsvg and pango. This is a runtime image-processing path, not merely an unrelated development dependency. <https://www.npmjs.com/package/@img/sharp-libvips-linux-x64>
+- The LGPL runtime dependency violates the user's explicit no-LGPL rule. Do not acquire this revision unless the image-processing path is replaced with a fully allowlisted alternative and the complete server/collector/frontend/desktop dependency and asset graphs are re-audited.
 
 ### Coolify — REJECTED as-is
 - Root `LICENSE` and `composer.json` identify Apache-2.0.

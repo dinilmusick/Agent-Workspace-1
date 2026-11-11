@@ -57,7 +57,7 @@ on:
 
 permissions:
   contents: read
-  issues: read
+  issues: write
 
 jobs:
   develop:
@@ -194,3 +194,20 @@ jobs:
           path: development.log
           if-no-files-found: warn
           retention-days: 7
+
+      - name: Report development result on request issue
+        if: always() && github.event_name == 'issues'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          JOB_STATUS: ${{ job.status }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          body="**GitHub Development Workspace:** ${JOB_STATUS}
+
+          Run: ${RUN_URL}
+          Artifact: github-dev-workspace-${GITHUB_RUN_ID}
+          The artifact contains the complete command output."
+          gh api --method POST "repos/${GITHUB_REPOSITORY}/issues/${ISSUE_NUMBER}/comments" -f body="${body}"

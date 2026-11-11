@@ -16,3 +16,4 @@ ASYNC=start→poll→inspect→fix/retry→poll;never abandon pollable work.
 ROUTE=code:CodingTaskLifecycle;skill*:SkillCreator;reconcile:ReconciliationPass.
 DONE=terminal+evidence+independentVerify+reconcile.
 BOOTSTRAP=local→clone Workspace→clone target|private bridge→discover/run all checks/build scripts→evidence→independentVerify;Actions only if local unavailable/inadequate or remote evidence needed.
+Goal phase prerequisites are database-enforced through `public.goal_dependencies`. A blocking dependency prevents every task in the dependent goal from entering `running` until the prerequisite goal and its complete descendant task tree are verified. Blocking cycles and cross-Vision edges are rejected; advisory edges never gate execution. Goal completion is also guarded. Never rely on agent prompts alone to enforce phase order.

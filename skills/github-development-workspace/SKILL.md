@@ -130,3 +130,24 @@ Supabase is the canonical persistence layer for goals, tasks, ownership, leases 
 For any substantive repository task, establish the execution substrate before editing: use a usable local container/runtime first; clone Agent-Workspace-1 into that runtime; use its tools/scripts; attempt the target repository directly; if a private target cannot be cloned directly, use the Agent-Workspace-1 private-repository tooling and dedicated clones bridge. Discover and run all repository-defined build, test, typecheck, lint and custom build scripts that participate in the real build. Use GitHub Actions only when local execution is unavailable, insufficient for the target environment, or remote evidence is explicitly required. Capture command results as evidence and require independent verification before completion.
 
 The canonical local preflight is `python tools/agent-bootstrap/bootstrap.py plan`; use `prepare` to establish the workspace and target checkout. Never place credentials in source, logs or task metadata.
+
+
+## Issue-triggered development execution
+
+When workflow-dispatch API access is unavailable, use the issue-triggered route in `.github/workflows/github-dev-workspace.yml`:
+
+1. Create an issue in Agent-Workspace-1 titled `[github-dev] <short task>`.
+2. Put a JSON request in the issue body with `repository`, `ref`, and `commands`.
+3. For write work, set `push: true`, provide a new `branch`, and optionally set `create_pr: true`.
+4. Only owners, members and collaborators can invoke the route.
+5. The request resolver validates the issue author, repository/ref, command limits and branch/PR contract.
+6. Target commands run without repository or deployment secrets. Credentials are supplied only to checkout and post-execution push/PR steps.
+7. Inspect the Actions run and download its development log artifact. Do not claim completion without checking the run result and evidence.
+
+Request schema and examples: `docs/github-development-workspace.md`.
+
+Run resolver tests with:
+
+```bash
+python3 -m unittest runner/test_resolve_development_request.py
+```

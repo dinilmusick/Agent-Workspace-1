@@ -14,7 +14,7 @@ For a new objective, describe the outcome normally. The orchestrator creates a t
 
 ## Run code
 
-Use [Agent Compute Workspace](.github/workflows/agent-compute.yml). It supports Python, Node.js, TypeScript, Bash, Go, Rust, Java, C, C++, C#, Ruby, PHP, Perl, R and PowerShell.
+Use [GitHub Development Workspace](docs/github-development-workspace.md) to execute commands against an authorized repository through either a `[github-dev]` issue or workflow dispatch. It can run checks, push a new branch, and open a PR. Use [Agent Compute Workspace](.github/workflows/agent-compute.yml) for finite source-file execution. It supports Python, Node.js, TypeScript, Bash, Go, Rust, Java, C, C++, C#, Ruby, PHP, Perl, R and PowerShell.
 
 - Dispatch the workflow with a source file, runtime, arguments and timeout; or
 - Create an issue titled `[agent-compute] <goal-key> <runtime>` with a JSON body containing `ref`, `runtime`, `source_file`, `arguments` (string array) and `timeout_seconds`. The issue route accepts repository owners, members and collaborators.

@@ -42,11 +42,12 @@ s = s.replace("""  private constructor() {}
 s = s.replace("return Array.from(this.registry.values());", "return Array.from(this.registry.values()).sort((a, b) => a.metadata.type.localeCompare(b.metadata.type));")
 p.write_text(s)
 
-for name in ["core", "math", "logic", "string", "collections", "parsing", "networking", "utilities"]:
+for name in ["core", "math", "logic", "string", "collections", "parsing", "networking", "utilities", "ai", "database"]:
     p = root / f"nodes/{name}.ts"
     s = p.read_text()
     for fn in ["registerCoreNodes", "registerMathNodes", "registerLogicNodes", "registerStringNodes",
-               "registerCollectionsNodes", "registerParsingNodes", "registerNetworkingNodes", "registerUtilitiesNodes"]:
+               "registerCollectionsNodes", "registerParsingNodes", "registerNetworkingNodes", "registerUtilitiesNodes",
+               "registerAiNodes", "registerDatabaseNodes"]:
         s = s.replace(f"export function {fn}() {{\n  const registry = NodeRegistry.getInstance();",
                       f"export function {fn}(registry: NodeRegistry) {{")
     s = re.sub(r"registry\.register\((\w+)\);", r"registry.register(\1, true);", s)
@@ -196,6 +197,7 @@ export interface RuntimeNodeServices {
   execute(input: Record<string, unknown>, principal: VerifiedLuthPrincipal, signal?: AbortSignal): Promise<{ handle: unknown; result: { stdout: string; stderr: string; exitCode: number; [key: string]: unknown } }>;
   status(input: Record<string, unknown>, principal: VerifiedLuthPrincipal, signal?: AbortSignal): Promise<unknown>;
   destroy(input: Record<string, unknown>, principal: VerifiedLuthPrincipal, signal?: AbortSignal): Promise<unknown>;
+  cleanupExecution(input: { workspaceId: string; executionId: string }, principal: VerifiedLuthPrincipal): Promise<unknown>;
 }
 export interface GraphExecutionServices {
   readonly runtime?: RuntimeNodeServices;
@@ -409,8 +411,12 @@ export class GraphEngine {
         logs: memory.getLogs(), errors
       };
     } finally {
-      scheduler.dispose();
-      this.active.delete(executionId);
+      try {
+        await options.services?.runtime?.cleanupExecution({ workspaceId: options.workspaceId, executionId }, options.principal);
+      } finally {
+        scheduler.dispose();
+        this.active.delete(executionId);
+      }
     }
   }
 }
@@ -528,6 +534,7 @@ test("rejects a principal from a different workspace", async () => {
 test("propagates verified principal and cancellation signal through the runtime facade", async () => {
   const controller = new AbortController();
   let received: any;
+  let cleanupCalls = 0;
   const result = await new GraphEngine().execute(graph([node("spawn", "runtime/spawn", {
     providerId: "mock", accountId: "account-1", configuration: {}, persistence: "transient"
   })]), {
@@ -539,7 +546,13 @@ test("propagates verified principal and cancellation signal through the runtime 
       },
       async execute() { throw new Error("unused"); },
       async status() { throw new Error("unused"); },
-      async destroy() { throw new Error("unused"); }
+      async destroy() { throw new Error("unused"); },
+      async cleanupExecution(input, verifiedPrincipal) {
+        cleanupCalls += 1;
+        assert.equal(input.workspaceId, "workspace-1");
+        assert.equal(input.executionId, received.input.executionId);
+        assert.equal(verifiedPrincipal.userId, "user-1");
+      }
     } }
   });
   assert.equal(result.success, true);
@@ -547,6 +560,7 @@ test("propagates verified principal and cancellation signal through the runtime 
   assert.equal(received.input.executionId, result.executionId);
   assert.equal(received.signal.aborted, false);
   assert.equal("token" in received.verifiedPrincipal, false);
+  assert.equal(cleanupCalls, 1);
 });
 
 test("reports node failures without claiming success", async () => {

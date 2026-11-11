@@ -1,19 +1,20 @@
 {
   "schemaVersion": 1,
   "sourceOfTruth": "Supabase Skills Database current_version_id",
-  "generatedAt": "2026-11-09",
+  "generatedAt": "2026-11-11",
   "versions": {
-    "loop-generator": "1.2.1",
-    "task-ledger": "1.9.0",
-    "coding-router": "1.2.7",
-    "coding-workflow": "1.0.9",
-    "universal-task-router": "1.4.6",
+    "loop-generator": "1.4.0",
+    "task-ledger": "2.0.0",
+    "coding-router": "2.0.0",
+    "coding-workflow": "2.0.1",
+    "universal-task-router": "2.0.1",
     "devops-ci-release": "1.0.5",
-    "agent-systems-engineering": "1.0.3",
+    "agent-systems-engineering": "2.0.1",
     "platform-adapters": "1.0.3",
     "private-repo-ci-workspace-runner": "1.0.0",
     "github-development-workspace": "1.0.0",
-    "implementation-push": "1.0.0",
-    "reconciliation-pass": "1.0.0"
+    "implementation-push": "2.0.1",
+    "reconciliation-pass": "2.0.1",
+    "persistent-multi-agent-execution": "1.0.0"
   }
 }

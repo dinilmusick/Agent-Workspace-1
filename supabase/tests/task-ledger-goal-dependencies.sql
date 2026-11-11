@@ -1,16 +1,31 @@
--- Rollback-only integration regression for goal-level dependency gates.
--- Run through the trusted Supabase service-role SQL connector.
+-- pgTAP integration regression for goal-level prerequisite gates.
+-- The whole fixture is transactional and is rolled back after assertions.
 begin;
-do $test$
+select plan(6);
+
+create temporary table goal_dependency_test_fixtures (
+  dependent_goal_id uuid,
+  prerequisite_goal_id uuid,
+  advisory_goal_id uuid,
+  advisory_dependent_goal_id uuid,
+  task_id uuid,
+  cross_vision_goal_id uuid,
+  cross_vision_prerequisite_id uuid
+) on commit drop;
+
+do $setup$
 declare
   dependent_goal public.goals;
   prerequisite_goal public.goals;
   advisory_goal public.goals;
-  advisory_dependent public.goals;
-  blocked_activation boolean := false;
-  blocked_claim boolean := false;
-  cycle_rejected boolean := false;
-  task_id uuid;
+  advisory_dependent_goal public.goals;
+  vision_a public.visions;
+  vision_b public.visions;
+  target_a public.vision_targets;
+  target_b public.vision_targets;
+  cross_goal_a public.goals;
+  cross_goal_b public.goals;
+  test_task_id uuid;
 begin
   insert into public.goals(name, created_by_agent_id)
     values ('__goal_dependency_test_dependent__', 'ledger-regression-test')
@@ -35,62 +50,10 @@ begin
     advisory_dependent.goal_key, advisory_goal.goal_key, 'advisory', 'ledger-regression-test'
   );
 
-  begin
-    update public.goals set status = 'active' where id = dependent_goal.id;
-  exception when others then
-    if sqlerrm like 'goal is locked:%' then blocked_activation := true;
-    else raise;
-    end if;
-  end;
-  if not blocked_activation then
-    raise exception 'FAIL: blocking prerequisite did not prevent goal activation';
-  end if;
-
   insert into public.tasks(agent_id, agent_name, task_name, goal_id)
     values ('ledger-regression-test', 'ledger-regression-test', 'blocked task', dependent_goal.id)
-    returning id into task_id;
-  begin
-    update public.tasks set status = 'running' where id = task_id;
-  exception when others then
-    if sqlerrm like 'task claim denied:%' then blocked_claim := true;
-    else raise;
-    end if;
-  end;
-  if not blocked_claim then
-    raise exception 'FAIL: blocking prerequisite did not prevent task claim';
-  end if;
+    returning id into test_task_id;
 
-  begin
-    insert into public.goal_dependencies(goal_id, depends_on_goal_id, dependency_type)
-      values (prerequisite_goal.id, dependent_goal.id, 'blocking');
-  exception when others then
-    if sqlerrm = 'goal dependency would create a blocking cycle' then cycle_rejected := true;
-    else raise;
-    end if;
-  end;
-  if not cycle_rejected then
-    raise exception 'FAIL: blocking dependency cycle was accepted';
-  end if;
-
-  update public.goals set status = 'active' where id = advisory_dependent.id;
-  if (select status from public.goals where id = advisory_dependent.id) <> 'active' then
-    raise exception 'FAIL: advisory dependency incorrectly blocked activation';
-  end if;
-  raise notice 'PASS: blocking activation gate; blocking task-claim gate; cycle rejection; advisory non-blocking behavior';
-end;
-$test$;
-rollback;
-
-
--- Cross-Vision edges are invalid; fixtures are rolled back.
-begin;
-do $vision_scope_test$
-declare
-  vision_a public.visions; vision_b public.visions;
-  target_a public.vision_targets; target_b public.vision_targets;
-  goal_a public.goals; goal_b public.goals;
-  rejected boolean := false;
-begin
   vision_a := public.vision_ledger_create(
     '__goal_dependency_vision_a__', '',
     '{"type":"application","id":"goal-dependency-vision-a"}',
@@ -112,25 +75,72 @@ begin
   insert into public.goals(name, created_by_agent_id, target)
     values ('__goal_dependency_vision_goal_a__', 'ledger-regression-test',
       '{"type":"application","id":"goal-dependency-vision-a"}')
-    returning * into goal_a;
+    returning * into cross_goal_a;
   insert into public.goals(name, created_by_agent_id, target)
     values ('__goal_dependency_vision_goal_b__', 'ledger-regression-test',
       '{"type":"application","id":"goal-dependency-vision-b"}')
-    returning * into goal_b;
-  perform public.vision_ledger_link_goal(target_a.id, goal_a.id);
-  perform public.vision_ledger_link_goal(target_b.id, goal_b.id);
-  begin
-    insert into public.goal_dependencies(goal_id, depends_on_goal_id, dependency_type)
-      values (goal_b.id, goal_a.id, 'blocking');
-  exception when others then
-    if sqlerrm = 'goal dependencies must connect goals within the same Vision' then
-      rejected := true;
-    else
-      raise;
-    end if;
-  end;
-  if not rejected then raise exception 'FAIL: cross-Vision dependency was accepted'; end if;
-  raise notice 'PASS: cross-Vision dependency rejected';
+    returning * into cross_goal_b;
+  perform public.vision_ledger_link_goal(target_a.id, cross_goal_a.id);
+  perform public.vision_ledger_link_goal(target_b.id, cross_goal_b.id);
+
+  insert into goal_dependency_test_fixtures values (
+    dependent_goal.id, prerequisite_goal.id, advisory_goal.id,
+    advisory_dependent.id, test_task_id, cross_goal_b.id, cross_goal_a.id
+  );
 end;
-$vision_scope_test$;
+$setup$;
+
+select throws_ok(
+  format('update public.goals set status = ''active'' where id = %L',
+    (select dependent_goal_id from goal_dependency_test_fixtures)),
+  'P0001',
+  'goal is locked: all blocking prerequisite goals must be completed and verified before activation or completion',
+  'blocking prerequisite prevents goal activation'
+);
+
+select throws_ok(
+  format('update public.goals set status = ''completed'' where id = %L',
+    (select dependent_goal_id from goal_dependency_test_fixtures)),
+  'P0001',
+  'goal is locked: all blocking prerequisite goals must be completed and verified before activation or completion',
+  'blocking prerequisite prevents goal completion'
+);
+
+select throws_ok(
+  format('update public.tasks set status = ''running'' where id = %L',
+    (select task_id from goal_dependency_test_fixtures)),
+  'P0001',
+  'task claim denied: one or more blocking prerequisite goals are not completed and verified',
+  'blocking prerequisite prevents task claim'
+);
+
+select throws_ok(
+  format(
+    'insert into public.goal_dependencies(goal_id, depends_on_goal_id, dependency_type) values (%L, %L, ''blocking'')',
+    (select prerequisite_goal_id from goal_dependency_test_fixtures),
+    (select dependent_goal_id from goal_dependency_test_fixtures)
+  ),
+  'P0001',
+  'goal dependency would create a blocking cycle',
+  'blocking cycle is rejected'
+);
+
+select lives_ok(
+  format('update public.goals set status = ''active'' where id = %L',
+    (select advisory_dependent_goal_id from goal_dependency_test_fixtures)),
+  'advisory dependency does not block activation'
+);
+
+select throws_ok(
+  format(
+    'insert into public.goal_dependencies(goal_id, depends_on_goal_id, dependency_type) values (%L, %L, ''blocking'')',
+    (select cross_vision_goal_id from goal_dependency_test_fixtures),
+    (select cross_vision_prerequisite_id from goal_dependency_test_fixtures)
+  ),
+  'P0001',
+  'goal dependencies must connect goals within the same Vision',
+  'cross-Vision dependency is rejected'
+);
+
+select * from finish();
 rollback;

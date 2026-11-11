@@ -2,30 +2,35 @@
 -- goal-dependency activation/claim hardening migration.
 -- The base public.goal_dependencies table and task/goal guard triggers pre-existed.
 create or replace function public.validate_goal_dependency()
-returns trigger language plpgsql set search_path = public
+returns trigger
+language plpgsql
+set search_path = public
 as $function$
-declare dependent_vision uuid; prerequisite_vision uuid;
+declare dependent_visions uuid[]; prerequisite_visions uuid[];
 begin
   perform pg_advisory_xact_lock(hashtext('public.goal_dependencies.graph'));
   if new.dependency_type='blocking' and exists (
     with recursive prerequisites(id) as (
       select new.depends_on_goal_id
       union
-      select d.depends_on_goal_id
-      from public.goal_dependencies d
+      select d.depends_on_goal_id from public.goal_dependencies d
       join prerequisites p on d.goal_id=p.id
       where d.dependency_type='blocking' and (tg_op='INSERT' or d.id<>new.id)
     )
     select 1 from prerequisites where id=new.goal_id
   ) then raise exception 'goal dependency would create a blocking cycle'; end if;
-  select vt.vision_id into dependent_vision
+  select array_agg(distinct vt.vision_id order by vt.vision_id) into dependent_visions
   from public.vision_target_goals vtg join public.vision_targets vt on vt.id=vtg.vision_target_id
-  where vtg.goal_id=new.goal_id limit 1;
-  select vt.vision_id into prerequisite_vision
+  where vtg.goal_id=new.goal_id;
+  select array_agg(distinct vt.vision_id order by vt.vision_id) into prerequisite_visions
   from public.vision_target_goals vtg join public.vision_targets vt on vt.id=vtg.vision_target_id
-  where vtg.goal_id=new.depends_on_goal_id limit 1;
-  if dependent_vision is distinct from prerequisite_vision
-     and (dependent_vision is not null or prerequisite_vision is not null) then
+  where vtg.goal_id=new.depends_on_goal_id;
+  if coalesce(cardinality(dependent_visions),0)>1
+     or coalesce(cardinality(prerequisite_visions),0)>1 then
+    raise exception 'a goal may only be linked to targets within one Vision';
+  end if;
+  if dependent_visions is distinct from prerequisite_visions
+     and (dependent_visions is not null or prerequisite_visions is not null) then
     raise exception 'goal dependencies must connect goals within the same Vision';
   end if;
   return new;

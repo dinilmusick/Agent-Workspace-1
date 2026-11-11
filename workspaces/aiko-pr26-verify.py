@@ -61,3 +61,5 @@ report["overall"] = "PASS" if report.get("head_sha") and all(c.get("exit_code") 
 (RESULTS / "verification-report.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
 print("\nFINAL_REPORT=" + json.dumps(report), flush=True)
 sys.exit(0 if report["overall"] == "PASS" else 1)
+
+# Trigger exact-head verification from the base-branch workflow.

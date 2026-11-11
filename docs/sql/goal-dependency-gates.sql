@@ -18,6 +18,8 @@ create or replace function public.goal_has_unverified_descendant_tasks(goal_id_i
  with recursive descendants(id) as (select t.id from public.tasks t where t.goal_id=goal_id_in union all select child.id from public.tasks child join descendants parent on child.parent_task_id=parent.id)
  select exists(select 1 from descendants d join public.tasks t on t.id=d.id where not (t.status='completed' and t.verification_status in ('verified','not_required')));
 $fn$;
+revoke all on function public.goal_has_unverified_descendant_tasks(uuid) from public, anon, authenticated;
+grant execute on function public.goal_has_unverified_descendant_tasks(uuid) to service_role;
 
 create or replace function public.validate_goal_dependency() returns trigger language plpgsql set search_path=public as $fn$
 declare dependent_visions uuid[]; prerequisite_visions uuid[];

@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-git clone --depth 1 https://github.com/dinilmusick/Fod-Engine.git /tmp/Fod-Engine
+test -d "$GITHUB_WORKSPACE/source/src/engine" || { echo "Private Fod-Engine source checkout is missing." >&2; exit 1; }
 mkdir -p src/backend/workflows/engine/types
-cp -R /tmp/Fod-Engine/src/engine/. src/backend/workflows/engine/
-cp /tmp/Fod-Engine/src/shared/types/graph.ts src/backend/workflows/engine/types/graph.ts
+cp -R $GITHUB_WORKSPACE/source/src/engine/. src/backend/workflows/engine/
+cp $GITHUB_WORKSPACE/source/src/shared/types/graph.ts src/backend/workflows/engine/types/graph.ts
 
 python3 - <<'PY'
 from pathlib import Path

@@ -43,6 +43,10 @@ def validate_request(request: dict[str, Any]) -> dict[str, Any]:
         raise ValueError("repository must use owner/name format.")
 
     ref = _valid_git_ref(request.get("ref", "main"), "ref")
+    source_repository = request.get("source_repository", "")
+    if not isinstance(source_repository, str) or (source_repository and not REPOSITORY_RE.fullmatch(source_repository)):
+        raise ValueError("source_repository must be empty or use owner/name format.")
+    source_ref = _valid_git_ref(request.get("source_ref", "main"), "source_ref") if source_repository else ""
     commands = request.get("commands", [])
     if isinstance(commands, list) and all(isinstance(item, str) for item in commands):
         command_text = "\n".join(commands).strip()
@@ -76,6 +80,8 @@ def validate_request(request: dict[str, Any]) -> dict[str, Any]:
     return {
         "repository": repository,
         "ref": ref,
+        "source_repository": source_repository,
+        "source_ref": source_ref,
         "commands": command_text,
         "push": push,
         "branch": branch,
@@ -108,6 +114,8 @@ def resolve_request(event_name: str, event: dict[str, Any], env: dict[str, str])
     return validate_request({
         "repository": env.get("INPUT_REPOSITORY", ""),
         "ref": env.get("INPUT_REF", "main"),
+        "source_repository": env.get("INPUT_SOURCE_REPOSITORY", ""),
+        "source_ref": env.get("INPUT_SOURCE_REF", "main"),
         "commands": env.get("INPUT_COMMANDS", ""),
         "push": env.get("INPUT_PUSH", "false").lower() == "true",
         "branch": env.get("INPUT_BRANCH", ""),

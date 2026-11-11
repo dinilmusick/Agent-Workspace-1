@@ -9,7 +9,7 @@
       "public.skill_tool_links",
       "public.skill_tools"
     ],
-    "exportedAt": "2026-11-05T00:00:00.000Z"
+    "exportedAt": "2026-11-11T14:10:00.000Z"
   },
   "count": 39,
   "skills": [
@@ -76,7 +76,7 @@
       "id": 7,
       "name": "Task Ledger",
       "slug": "task-ledger",
-      "version": "2.0.0",
+      "version": "2.2.0",
       "status": "active",
       "path": "skills/task-ledger/SKILL.md",
       "tools": [
@@ -272,7 +272,7 @@
       "id": 28,
       "name": "Universal Task Router",
       "slug": "universal-task-router",
-      "version": "2.0.1",
+      "version": "2.2.0",
       "status": "active",
       "path": "skills/universal-task-router/SKILL.md",
       "tools": []
@@ -463,7 +463,7 @@
       "id": 46,
       "name": "Persistent Multi-Agent Execution",
       "slug": "persistent-multi-agent-execution",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "status": "active",
       "path": "skills/persistent-multi-agent-execution/SKILL.md",
       "tools": [

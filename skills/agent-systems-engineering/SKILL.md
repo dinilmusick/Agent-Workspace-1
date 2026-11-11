@@ -1,7 +1,7 @@
 ---
 name: "AI Agent and Tooling Engineering"
 slug: agent-systems-engineering
-version: 1.0.0
+version: 2.0.1
 source: Supabase Skills Database
 sourceId: 23
 status: active
@@ -60,3 +60,13 @@ Security boundary: PRIVATE_REPO_TOKEN is read-only clone/verification access. CO
 For any substantive repository task, establish the execution substrate before editing: use a usable local container/runtime first; clone Agent-Workspace-1 into that runtime; use its tools/scripts; attempt the target repository directly; if a private target cannot be cloned directly, use the Agent-Workspace-1 private-repository tooling and dedicated clones bridge. Discover and run all repository-defined build, test, typecheck, lint and custom build scripts that participate in the real build. Use GitHub Actions only when local execution is unavailable, insufficient for the target environment, or remote evidence is explicitly required. Capture command results as evidence and require independent verification before completion.
 
 The canonical local preflight is `python tools/agent-bootstrap/bootstrap.py plan`; use `prepare` to establish the workspace and target checkout. Never place credentials in source, logs or task metadata.
+
+
+## Persistent worker protocol
+
+For multi-agent coding systems, model workers as durable state machines whose detailed state lives in GitHub Issues and whose implementation artifact is a dedicated PR. The orchestrator is a persistent control loop, not a one-shot prompt.
+
+Worker: readIssue → execute → updateIssue → pollIssue → resume.
+Orchestrator: pollIssues + PRs + CI → diagnose → answerIssue → continue.
+
+A blocker is valid only when persisted with the question and resume point. A global continue/proceed signal causes every worker to reread its Issue; completed workers no-op, resolved workers resume, unresolved workers wait, active workers continue. Design all transitions to be idempotent and recoverable from repository state without chat history.

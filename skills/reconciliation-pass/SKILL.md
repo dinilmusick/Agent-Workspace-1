@@ -1,7 +1,7 @@
 ---
 name: "Reconciliation Pass"
 slug: reconciliation-pass
-version: 1.0.0
+version: 2.0.1
 source: Supabase Skills Database
 sourceId: 44
 status: active
@@ -146,3 +146,8 @@ Supporting skills normally include GitHub Development Workspace, Coding Workflow
 - Do not delete branches or alter unrelated issues/resources unless required by the repository workflow.
 - Do not discard code without first checking its patch/diff for unique value.
 - Do not claim success from merge responses alone; independently verify the final repository state.
+
+
+## Issue-aware reconciliation
+
+Reconciliation must inspect every linked coding Issue as well as every PR. Read Current Implementation State, blockers, orchestrator responses, evidence and resume points before classifying PRs. Preserve valuable Issue history when synthesizing work. After merges/reverification, synchronize Issue state and close/supersede Issues consistently. Do not declare reconciliation terminal while a linked coding Issue has unresolved actionable state.

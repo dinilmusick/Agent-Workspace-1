@@ -1,7 +1,7 @@
 ---
 name: "Feature Implementation"
 slug: feature-implementation
-version: 1.0.0
+version: 2.0.0
 source: Supabase Skills Database
 sourceId: 19
 status: active
@@ -44,3 +44,8 @@ Never substitute mock behavior for a requested working feature. Clearly label an
   "source_repository": "obra/superpowers"
 }
 ```
+
+
+## Persistent parallel execution
+
+For independent feature tasks, create one GitHub Issue per task and one dedicated PR per worker. Workers read and update the Issue as their durable execution context. Blockers require a persisted question and resume point; workers poll for the orchestrator response. A global continue/proceed prompt is safe: terminal workers no-op, active workers continue, and resolved blockers resume.

@@ -1,7 +1,7 @@
 ---
 name: "Implementation Push"
 slug: implementation-push
-version: 1.0.0
+version: 2.0.1
 source: Supabase Skills Database
 sourceId: 42
 status: active
@@ -156,3 +156,29 @@ Do not use vague descriptions such as "fixed various bugs" or "completed impleme
 `create dedicated branch → fresh re-analysis → implement/fix → focused verification → integration/E2E verification → write exact PR findings → independent verification → PR ready for review`
 
 The implementation push is not complete merely because the PR exists. The PR is the evidence container for that push and must contain the concrete findings, implementation work and verification evidence.
+
+
+## Persistent multi-agent execution
+
+When decomposing an implementation push for parallel workers, create one GitHub Issue per independent task and one dedicated PR per worker. The Issue is the worker's durable execution context.
+
+### Worker state contract
+
+The worker MUST maintain a Current Implementation State section containing:
+- Status: IN_PROGRESS | BLOCKED | WAITING | COMPLETE | FAILED
+- Completed work
+- Current work
+- Next action
+- Blocker
+- Question for orchestrator
+- Orchestrator response
+- Resume point
+- Files/tests/evidence
+
+A blocker must be written to the Issue before waiting. The worker then polls the Issue for an orchestrator response. Never make the user reconstruct worker state from chat.
+
+### Orchestrator contract
+
+The main implementation-push agent continuously polls active Issues, linked PRs and CI, resolves worker questions by writing responses into Issues, and keeps polling until the execution reaches a terminal condition. A later continue or proceed prompt is a global resume signal: every worker rereads its Issue and independently decides whether to resume, continue, remain waiting, or do nothing because its task is terminal.
+
+This protocol deliberately makes bulk prompting safe and minimizes user scheduling. Do not create duplicate work when a worker receives a global continuation signal.

@@ -2,9 +2,10 @@
 
 Agent Workspace provides three distinct capabilities:
 
-1. **Goal and task coordination — Supabase PostgreSQL.** Goals, task trees, leases, loop iterations, parameters, evidence, verification and finalization are persisted and enforced by database RPCs.
-2. **Reasoning and orchestration — ChatGPT conversations.** The user opens the orchestrator and worker chats. Chats load and update shared state directly through the connected Supabase tools.
-3. **Finite compute — GitHub Actions.** The Agent Compute Workspace runs source files from a selected repository revision on an ephemeral GitHub-hosted runner and returns an artifact.
+1. **Goal and task coordination — Supabase PostgreSQL.** Goals, parent tasks, dependencies, leases, loop iterations, parameters, evidence, verification and finalization are persisted and enforced by database RPCs.
+2. **Coding execution — GitHub Issues and PRs.** Each independent coding task gets one Issue as its durable execution state and one dedicated PR as its implementation artifact. Workers persist blockers and resume points in Issues; the orchestrator polls Issues/PRs/CI and writes decisions back to Issues.
+3. **Reasoning and orchestration — ChatGPT conversations.** The user opens the orchestrator and worker chats. Chats load and update shared state directly through the connected Supabase tools.
+4. **Finite compute — GitHub Actions.** The Agent Compute Workspace runs source files from a selected repository revision on an ephemeral GitHub-hosted runner and returns an artifact.
 
 ## Resume or create work
 
@@ -39,6 +40,7 @@ The runner is ephemeral, has read-only repository permissions, does not persist 
 - [Browser test harness](tools/react-typescript-fullstack/README.md): real-preview routes and workflows, responsive checks, traces, DOM/network evidence, axe accessibility and controlled visual baselines.
 - [Platform adapters](skills/platform-adapters/SKILL.md): local Cloudflare Worker tests, Vercel preview diagnostics and local Supabase migrations/pgTAP.
 - [Implementation Push](skills/implementation-push/SKILL.md): fresh whole-codebase completion passes that find incomplete implementation, rewire systems and verify end to end.
+- [Persistent Multi-Agent Execution](skills/persistent-multi-agent-execution/SKILL.md): GitHub-Issue-backed durable worker/orchestrator execution, blocker persistence, polling and safe bulk continuation.
 - [Tools catalogue](tools/catalog/README.md): curated coding, testing and browser tools.
 - [Skills catalogue](skills/catalog.json): versioned skill snapshot backed by the Skills Database.
 

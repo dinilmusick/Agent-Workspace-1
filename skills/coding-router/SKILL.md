@@ -1,7 +1,7 @@
 ---
 name: "Coding Router"
 slug: coding-router
-version: 1.2.7
+version: 2.0.0
 source: Supabase Skills Database
 sourceId: 17
 status: active
@@ -118,3 +118,8 @@ When routing an implementation push, the execution unit is a fresh dedicated bra
 ## Deterministic routing matrix
 
 Inspect `public.skill_routing_matrix` before specialist selection; `routable=false` is a hard exclusion. For coding lifecycle selection use explicit request signals first, then trigger weight, then `routing_priority`, then stable skill ID. The four lifecycle modes are `newRepo`, `feature`, `implementationPush`, and `reconciliation`. Do not use creation time, previous chat, or agent preference as tie-breaks.
+
+
+## Multi-agent coding execution
+
+Parallel coding routes must activate Persistent Multi-Agent Execution. Each independent task gets one GitHub Issue and one dedicated PR. The Issue is canonical detailed execution state; Supabase stores parent task and stable Issue/PR linkage. Orchestrators poll Issues, PRs and CI; workers persist blockers/questions/resume points and poll Issues for responses. continue/proceed is a global safe resume signal.

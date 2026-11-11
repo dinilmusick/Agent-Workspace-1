@@ -674,18 +674,26 @@ test("propagates verified principal and cancellation signal through the runtime 
   })]), {
     workspaceId: "workspace-1", principal, signal: controller.signal,
     services: { runtime: {
-      async spawn(input, verifiedPrincipal, signal) {
-        received = { input, verifiedPrincipal, signal };
-        return { id: "runtime-1", workspaceId: "workspace-1" };
+      service: {
+        async spawn(input) {
+          received = { input };
+          return { id: "runtime-1", workspaceId: "workspace-1" };
+        },
+        async execute() { throw new Error("unused"); },
+        async status() { throw new Error("unused"); },
+        async terminate() { throw new Error("unused"); },
+        async cleanupTransient(workspaceId, executionId) {
+          cleanupCalls += 1;
+          assert.equal(workspaceId, "workspace-1");
+          assert.equal(executionId, received.input.executionId);
+          return [];
+        }
       },
-      async execute() { throw new Error("unused"); },
-      async status() { throw new Error("unused"); },
-      async destroy() { throw new Error("unused"); },
-      async cleanupExecution(input, verifiedPrincipal) {
-        cleanupCalls += 1;
-        assert.equal(input.workspaceId, "workspace-1");
-        assert.equal(input.executionId, received.input.executionId);
+      async authorize(verifiedPrincipal, operation, resource, signal) {
         assert.equal(verifiedPrincipal.userId, "user-1");
+        assert.equal(resource.workspaceId, "workspace-1");
+        assert.ok(!signal || !signal.aborted);
+        authorizedOps.push(operation);
       }
     } }
   });
@@ -693,8 +701,7 @@ test("propagates verified principal and cancellation signal through the runtime 
   assert.ok(authorizedOps.includes("spawn"));
   assert.ok(authorizedOps.includes("terminate"));
   assert.equal(received.input.executionId, result.executionId);
-  assert.equal(received.signal.aborted, false);
-  assert.equal("token" in received.verifiedPrincipal, false);
+  assert.equal("token" in principal, false);
   assert.equal(cleanupCalls, 1);
 });
 

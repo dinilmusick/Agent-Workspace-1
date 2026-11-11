@@ -181,3 +181,8 @@ revoke all on function public.goal_ledger_add_dependency(text,text,text,text)
   from public, anon, authenticated;
 grant execute on function public.goal_ledger_add_dependency(text,text,text,text)
   to service_role;
+
+-- This helper exposes a per-goal completion bit and is only needed by
+-- trusted orchestration/trigger paths. Keep it out of the public Data API.
+revoke all on function public.goal_has_unverified_descendant_tasks(uuid) from public, anon, authenticated;
+grant execute on function public.goal_has_unverified_descendant_tasks(uuid) to service_role;

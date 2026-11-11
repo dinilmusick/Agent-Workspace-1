@@ -1,8 +1,8 @@
 {
-  "repository": "dinilmusick/GutTS",
-  "ref": "main",
+  "repository": "dinilmusick/Aiko",
+  "ref": "implementation/aiko-integration-push-2026-11-11",
   "event": "push",
-  "workflow": "architecture-boundary.yml",
+  "workflow": "validate.yml",
   "token_mode": "workflow",
-  "nonce": "ecosystem-boundary-20261109-gutts"
+  "request_id": "aiko-issue-21-verification-2026-11-11"
 }

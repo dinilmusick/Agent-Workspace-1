@@ -3,6 +3,11 @@ name: Aiko PR 26 Verification
 on:
   issues:
     types: [opened]
+  pull_request:
+    branches: [main]
+    paths:
+      - "workspaces/aiko-pr26-verify.py"
+      - ".github/workflows/aiko-pr26-verify.yml"
 
 permissions:
   contents: read
@@ -10,7 +15,7 @@ permissions:
 
 jobs:
   verify:
-    if: startsWith(github.event.issue.title, '[aiko-verify]')
+    if: github.event_name == 'pull_request' || (github.event_name == 'issues' && startsWith(github.event.issue.title, '[aiko-verify]'))
     runs-on: ubuntu-latest
     timeout-minutes: 40
     steps:

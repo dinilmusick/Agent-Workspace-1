@@ -59,3 +59,8 @@ The user never needs to identify which workers are complete or blocked.
 ## Safety
 
 No duplicate work. No unrelated changes. Preserve evidence. Never claim completion without verification. User intervention is required only for genuine external decisions, permissions, unavailable capabilities or unrecoverable blockers.
+
+
+## Goal-phase dependency gates
+
+Before dispatching workers for a phase, inspect its parent goal's `goal_dependencies`. A blocking edge means the dependent phase remains locked until its prerequisite goal is completed and all prerequisite descendants are independently verified. Do not dispatch or manually start tasks in a locked phase; the database rejects task transitions to `running` regardless of the claim route. Advisory edges are informational and must not serialize work. Orchestrators must create all blocking edges before worker dispatch and report the exact prerequisite preventing a phase from starting.

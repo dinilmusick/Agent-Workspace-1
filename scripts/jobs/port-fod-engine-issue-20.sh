@@ -417,6 +417,69 @@ export class GraphEngine {
 export function createGraphEngine(): GraphEngine { return new GraphEngine(); }
 """)
 
+# Culled source categories still participate in explicit registry wiring.
+for name, function_name in [
+    ("ai", "registerAiNodes"), ("database", "registerDatabaseNodes"),
+    ("string", "registerStringNodes"), ("parsing", "registerParsingNodes")
+]:
+    p = root / f"nodes/{name}.ts"
+    content = p.read_text()
+    content = content.replace(
+        f"export function {function_name}() {{",
+        f'import type {{ NodeRegistry }} from "../registry";\nexport function {function_name}(_registry: NodeRegistry) {{'
+    )
+    p.write_text(content)
+
+# The SDK verification helper must use an engine-owned registry, not deleted singletons.
+p = root / "sdk/test-sdk.ts"
+content = p.read_text()
+content = content.replace(
+    "  const sdkRegistry = SDKRegistry.getInstance();\n  sdkRegistry.registerNode(TestMathNode);\n  \n  const registeredNode = NodeRegistry.getInstance().getDefinition(\"sdk/test-math\");",
+    "  const nodeRegistry = new NodeRegistry();\n  const sdkRegistry = new SDKRegistry(nodeRegistry);\n  sdkRegistry.registerNode(TestMathNode);\n  \n  const registeredNode = nodeRegistry.getDefinition(\"sdk/test-math\");"
+)
+p.write_text(content)
+
+# Fix the source scheduler's data-only graph path and persist all node failures in MemoryStore.
+p = root / "scheduler/index.ts"
+content = p.read_text()
+content = content.replace(
+    "      if (isPureNode) {\\n        return !isConnectedToActiveFlow(nodeId);\\n      }",
+    "      if (isPureNode) {\\n        return hasAnyExecEdges && !isConnectedToActiveFlow(nodeId);\\n      }"
+)
+content = content.replace(
+    "        } catch (err: any) {\\n          nodeState[bodyNodeId] = \"failed\";",
+    "        } catch (err: any) {\\n          memory.setError(bodyNodeId, err instanceof Error ? err.message : String(err));\\n          nodeState[bodyNodeId] = \"failed\";"
+)
+content = content.replace(
+    "        } catch (err: any) {\\n          nodeState[nodeId] = \"failed\";",
+    "        } catch (err: any) {\\n          memory.setError(nodeId, err instanceof Error ? err.message : String(err));\\n          nodeState[nodeId] = \"failed\";"
+)
+content = content.replace(
+    "      } catch (err: any) {\\n        nodeState[nodeId] = \"failed\";",
+    "      } catch (err: any) {\\n        memory.setError(nodeId, err instanceof Error ? err.message : String(err));\\n        nodeState[nodeId] = \"failed\";"
+)
+p.write_text(content)
+
+# Emit NodeNext-compatible .js specifiers for relative TypeScript imports, including
+# directory index modules. This is the convention already used throughout Aiko.
+import re
+for path in root.rglob("*.ts"):
+    content = path.read_text()
+    def fix_specifier(match):
+        prefix, specifier, suffix = match.groups()
+        if not specifier.startswith(".") or Path(specifier).suffix:
+            return match.group(0)
+        candidate = (path.parent / specifier).resolve()
+        if candidate.is_dir() and (candidate / "index.ts").exists():
+            specifier = specifier.rstrip("/") + "/index.js"
+        elif candidate.with_suffix(".ts").exists():
+            specifier += ".js"
+        elif candidate.with_suffix(".tsx").exists():
+            specifier += ".js"
+        return prefix + specifier + suffix
+    content = re.sub(r'(["\'])(\.{1,2}/[^"\']+)(["\'])', fix_specifier, content)
+    path.write_text(content)
+
 # Remove the source repository's test, which exercised the deleted FOD HTTP bridge.
 (root / "nodes/runtime.test.ts").unlink(missing_ok=True)
 PY
@@ -429,8 +492,8 @@ import type { GraphJSON, VerifiedLuthPrincipal } from "./engine/index.js";
 
 const principal: VerifiedLuthPrincipal = { verified: true, userId: "user-1", workspaceId: "workspace-1" };
 const graph = (nodes: GraphJSON["nodes"], edges: GraphJSON["edges"] = []): GraphJSON => ({
-  nodes, edges, variables: {}, metadata: { id: "graph-1", name: "test", description: "", version: "1" }
-});
+  nodes, edges, variables: {}, metadata: { id: "graph-1", name: "test", description: "", version: "1" }, settings: { executionDelayMs: 0 }
+} as GraphJSON);
 const node = (id: string, type: string, data: Record<string, unknown> = {}) => ({
   id, type, position: { x: 0, y: 0 }, data
 });

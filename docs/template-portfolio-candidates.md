@@ -88,10 +88,11 @@ The four rejected candidates above are not replaced automatically. These alterna
 - The runtime GPL/LGPL dependencies violate the user's permissive-only policy. Do not acquire this revision unless they are removed/replaced and the complete graph is re-audited.
 - The repository also contains third-party deployment templates (including an EMQX Enterprise template); a template does not grant rights to redistribute the third-party image or its branding.
 
-### InvenTree
-- Root `LICENSE`, `docs/LICENSE` and `src/frontend/LICENSE` state MIT.
-- Recursive tree inspection found a separate Tabler Icons license file; its terms and attribution requirements must be retained and checked against the intended redistribution.
-- Still required: audit Python/frontend dependency lockfiles, plugin ecosystem boundaries, all icons/fonts/images and any third-party assets.
+### InvenTree — CONDITIONAL
+- Root `LICENSE`, `docs/LICENSE` and `src/frontend/LICENSE` state MIT. The nested Tabler Icons license is MIT and must be retained.
+- The frontend manifest includes `@fortawesome/free-solid-svg-icons` and `@fortawesome/free-regular-svg-icons`. Font Awesome Free separates licenses: SVG/JS icons are CC BY 4.0, font files are SIL OFL 1.1, and non-font/non-icon code is MIT. Both CC BY and OFL permit commercial distribution subject to their attribution/notice and font-specific terms, but they are outside the preferred SPDX allowlist. Keep all embedded attribution comments and notices; do not treat the entire Font Awesome package as MIT.
+- Official licensing evidence: Font Awesome's project README and license text describe these distinct grants and attribution requirements. The complete Python/frontend dependency scan is still pending; the current metadata audit run has not completed.
+- Operational checks, plugins, fonts/images and any other third-party assets also remain to be cleared. Do not acquire until the complete graph is reviewed and the attribution-only asset licenses are explicitly accepted under the portfolio policy.
 
 ### Medplum
 - Root `LICENSE.txt` states Apache-2.0. The repository also contains a `NOTICE` file identifying Medplum as a registered trademark of Orangebot, Inc.

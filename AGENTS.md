@@ -164,3 +164,16 @@ Every implementation push is a new dedicated branch and PR. The PR must have a d
 For any substantive repository task, establish the execution substrate before editing: use a usable local container/runtime first; clone Agent-Workspace-1 into that runtime; use its tools/scripts; attempt the target repository directly; if a private target cannot be cloned directly, use the Agent-Workspace-1 private-repository tooling and dedicated clones bridge. Discover and run all repository-defined build, test, typecheck, lint and custom build scripts that participate in the real build. Use GitHub Actions only when local execution is unavailable, insufficient for the target environment, or remote evidence is explicitly required. Capture command results as evidence and require independent verification before completion.
 
 The canonical local preflight is `python tools/agent-bootstrap/bootstrap.py plan`; use `prepare` to establish the workspace and target checkout. Never place credentials in source, logs or task metadata.
+
+
+## Persistent multi-agent coding execution
+
+- Supabase is canonical for goals, non-coding task state, dependencies, leases and durable orchestration evidence. For coding execution, the GitHub Issue is the canonical task-state and communication record; Supabase stores the parent goal/task relationship and Issue/PR references rather than duplicating the full coding queue.
+- Every independent coding task gets exactly one GitHub Issue and one dedicated PR/worker. The Issue must contain objective, acceptance criteria, dependencies, current implementation state, evidence, blocker/question, orchestrator response and resume point.
+- Worker protocol: read the complete Issue before acting → execute → update the Issue whenever material state changes → create/update PR evidence → poll the Issue when blocked or waiting. Never leave a blocker only in chat.
+- Blocked workers MUST write: status, completed work, current work, exact blocker, question for orchestrator, attempted resolution, relevant files/tests, and a deterministic resume point. Then they wait/poll for an orchestrator response; they do not silently abandon the task.
+- Orchestrator protocol: continuously poll active Issues, linked PRs and CI; answer worker questions by editing/commenting on the Issue; preserve decisions in the Issue; keep the execution loop alive while actionable work exists.
+- continue/proceed is a global resume signal, not a new task. Every worker re-reads its own Issue. A terminal worker performs no unrelated work; a resolved blocker resumes; an unresolved blocker remains waiting/polling; an active worker continues its existing task.
+- Never require the user to identify which worker is blocked or completed. The orchestrator derives this from live Issues/PRs/CI. User intervention is reserved for genuine external decisions, permissions, platform limits or unrecoverable blockers.
+- Reconciliation must inspect linked Issues as well as PRs, synchronize terminal state/evidence, and leave no coding task with lost execution context.
+- Use skills/persistent-multi-agent-execution/SKILL.md as the primary multi-agent execution protocol and apply it to Implementation Push, Feature, New Repo and Reconciliation workflows.

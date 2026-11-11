@@ -506,7 +506,7 @@ test("honors cancellation for an active execution", async () => {
 });
 TS
 
-npm ci
+npm install --package-lock=false --no-audit --no-fund
 
 set +e
 failed_scoped=0

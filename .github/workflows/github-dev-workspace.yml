@@ -12,6 +12,15 @@ on:
         required: true
         default: main
         type: string
+      source_repository:
+        description: "Optional private source owner/name to check out without exposing its token to commands"
+        required: false
+        type: string
+      source_ref:
+        description: "Source branch, tag or commit"
+        required: false
+        default: main
+        type: string
       commands:
         description: "Newline-separated shell commands executed in the target repository"
         required: true
@@ -71,6 +80,8 @@ jobs:
           GITHUB_EVENT_NAME: ${{ github.event_name }}
           INPUT_REPOSITORY: ${{ inputs.repository }}
           INPUT_REF: ${{ inputs.ref }}
+          INPUT_SOURCE_REPOSITORY: ${{ inputs.source_repository }}
+          INPUT_SOURCE_REF: ${{ inputs.source_ref }}
           INPUT_COMMANDS: ${{ inputs.commands }}
           INPUT_PUSH: ${{ inputs.push_changes }}
           INPUT_BRANCH: ${{ inputs.branch }}
@@ -80,6 +91,17 @@ jobs:
           INPUT_PR_BODY: ${{ inputs.pr_body }}
         shell: bash
         run: python3 runner/resolve-development-request.py
+
+      - name: Checkout private source repository
+        if: steps.request.outputs.source_repository != ''
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          repository: ${{ steps.request.outputs.source_repository }}
+          ref: ${{ steps.request.outputs.source_ref }}
+          token: ${{ secrets.CODING_REPO_TOKEN }}
+          path: source
+          fetch-depth: 1
+          persist-credentials: false
 
       - name: Checkout target repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2

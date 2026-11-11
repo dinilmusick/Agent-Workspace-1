@@ -80,3 +80,57 @@ begin
 end;
 $test$;
 rollback;
+
+
+-- Cross-Vision edges are invalid; fixtures are rolled back.
+begin;
+do $vision_scope_test$
+declare
+  vision_a public.visions; vision_b public.visions;
+  target_a public.vision_targets; target_b public.vision_targets;
+  goal_a public.goals; goal_b public.goals;
+  rejected boolean := false;
+begin
+  vision_a := public.vision_ledger_create(
+    '__goal_dependency_vision_a__', '',
+    '{"type":"application","id":"goal-dependency-vision-a"}',
+    'ledger-regression-test'
+  );
+  target_a := public.vision_ledger_add_target(
+    vision_a.id, null, 'phase A',
+    '{"type":"application","id":"goal-dependency-vision-a"}'
+  );
+  vision_b := public.vision_ledger_create(
+    '__goal_dependency_vision_b__', '',
+    '{"type":"application","id":"goal-dependency-vision-b"}',
+    'ledger-regression-test'
+  );
+  target_b := public.vision_ledger_add_target(
+    vision_b.id, null, 'phase B',
+    '{"type":"application","id":"goal-dependency-vision-b"}'
+  );
+  insert into public.goals(name, created_by_agent_id, target)
+    values ('__goal_dependency_vision_goal_a__', 'ledger-regression-test',
+      '{"type":"application","id":"goal-dependency-vision-a"}')
+    returning * into goal_a;
+  insert into public.goals(name, created_by_agent_id, target)
+    values ('__goal_dependency_vision_goal_b__', 'ledger-regression-test',
+      '{"type":"application","id":"goal-dependency-vision-b"}')
+    returning * into goal_b;
+  perform public.vision_ledger_link_goal(target_a.id, goal_a.id);
+  perform public.vision_ledger_link_goal(target_b.id, goal_b.id);
+  begin
+    insert into public.goal_dependencies(goal_id, depends_on_goal_id, dependency_type)
+      values (goal_b.id, goal_a.id, 'blocking');
+  exception when others then
+    if sqlerrm = 'goal dependencies must connect goals within the same Vision' then
+      rejected := true;
+    else
+      raise;
+    end if;
+  end;
+  if not rejected then raise exception 'FAIL: cross-Vision dependency was accepted'; end if;
+  raise notice 'PASS: cross-Vision dependency rejected';
+end;
+$vision_scope_test$;
+rollback;

@@ -52,7 +52,7 @@ if clone_code == 0:
         commands = [
             ("lint", ["npm", "run", "lint"]),
             ("system_env", ["npm", "run", "test:system-env"]),
-            ("unit_integration", ["npm", "test"]),
+            ("unit_integration", ["npm", "run", "test:integration"]),
             ("architecture_prebuild", ["npm", "run", "test:architecture"]),
             ("fullstack_build", ["npm", "run", "build:fullstack"]),
             ("api_build", ["npm", "run", "build:api"]),

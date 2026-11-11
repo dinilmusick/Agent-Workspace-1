@@ -1,7 +1,7 @@
 ---
 name: "Coding Workflow"
 slug: coding-workflow
-version: 1.0.9
+version: 2.0.1
 source: Supabase Skills Database
 sourceId: 20
 status: active

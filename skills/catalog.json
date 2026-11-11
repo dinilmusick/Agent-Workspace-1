@@ -9,7 +9,7 @@
       "public.skill_tool_links",
       "public.skill_tools"
     ],
-    "exportedAt": "2026-11-05T00:00:00.000Z"
+    "exportedAt": "2026-11-11T14:10:00.000Z"
   },
   "count": 37,
   "skills": [
@@ -86,7 +86,7 @@
         }
       ],
       "status": "active",
-      "version": "1.7.9"
+      "version": "2.2.0"
     },
     {
       "id": 8,
@@ -541,7 +541,7 @@
       "slug": "universal-task-router",
       "tools": [],
       "status": "active",
-      "version": "1.4.5"
+      "version": "2.2.0"
     },
     {
       "id": 29,
@@ -704,5 +704,5 @@
       ]
     }
   ],
-  "exportedAt": "2026-11-09"
+  "exportedAt": "2026-11-11"
 }

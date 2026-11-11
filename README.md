@@ -25,6 +25,7 @@ The runner is ephemeral, has read-only repository permissions, does not persist 
 ## Architecture
 
 - [Architecture](docs/architecture.md)
+- [Template portfolio candidate audit](docs/template-portfolio-candidates.md) — selected starter per category, source revisions and commercial-license clearance status.
 - [Goal and task ledger integration](docs/task-ledger-integration.md)
 - [Chat-driven goal and worker protocol](docs/chat-agent-workflow.md)
 - [Compute request contract](docs/compute-request.md)

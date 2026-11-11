@@ -28,6 +28,8 @@ write('Srkl-Engine','.env.example','APP_URL=');
 write('Depm-Engine','wrangler.toml','APP_URL');
 for (const repo of ['Aiko','Qwnsr-Engine','DocuStack-Engine','Srkl-Engine','Fod-Engine','Theta-Engine','Kult-Engine','Kelt-Engine']) {
   write(repo,'.env.example','APP_URL=');
+  // The validator intentionally scans source/config extensions, not .env.example files.
+  write(repo,'src/config/app-url.ts','export const APP_URL = process.env.APP_URL;');
 }
 write('Depm-Engine','.env.example','APP_URL=');
 write('Aiko','wrangler.toml','nodejs_compat_populate_process_env');

@@ -44,7 +44,7 @@ $fn$;
 
 create or replace function public.enforce_goal_prerequisites_on_claim() returns trigger language plpgsql set search_path=public as $fn$
 begin
-  if new.status='running' and (tg_op='INSERT' or old.status is distinct from 'running') and new.goal_id is not null then
+  if new.status='running' and new.goal_id is not null then
     if exists (select 1 from public.goal_dependencies d join public.goals prerequisite on prerequisite.id=d.depends_on_goal_id where d.goal_id=new.goal_id and d.dependency_type='blocking' and (prerequisite.status<>'completed' or public.goal_has_unverified_descendant_tasks(prerequisite.id))) then
       raise exception 'task claim denied: one or more blocking prerequisite goals are not completed and verified';
     end if;

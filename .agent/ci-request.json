@@ -2,7 +2,7 @@
   "repository": "dinilmusick/Aiko",
   "ref": "test/fod-absorption-regression-gates",
   "event": "push",
-  "workflow": "validate.yml",
+  "workflow": "fod-absorption-verification.yml",
   "token_mode": "clone-only",
-  "nonce": "aiko-pr26-private-ci-20261111"
+  "nonce": "aiko-pr26-full-matrix-20261111"
 }

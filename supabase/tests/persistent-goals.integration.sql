@@ -16,6 +16,8 @@ begin
     'smoke-orchestrator',
     jsonb_build_object(
       'name','Smoke parent','description','Decomposition-only parent',
+      'actions',jsonb_build_array('Inspect child task outcomes','Confirm independent verification evidence','Finalize only after all child criteria pass'),
+      'general_pattern',jsonb_build_object('objective','Coordinate and verify child tasks','approach','Evaluate child results and evidence'),
       'acceptance_criteria',jsonb_build_array('All child tasks verified'),
       'verification',jsonb_build_object('required',true),
       'loop',jsonb_build_object('enabled',true,'objective','Parent complete',
@@ -31,6 +33,8 @@ begin
         'stop_conditions',jsonb_build_array('verified'),'max_iterations',3),
       'subtasks',jsonb_build_array(jsonb_build_object(
         'name','Smoke leaf','description','One independently claimable leaf',
+        'actions',jsonb_build_array('Run the smoke check','Capture reproducible test evidence'),
+        'general_pattern',jsonb_build_object('objective','Complete the smoke check','approach','Execute, observe and report'),
         'acceptance_criteria',jsonb_build_array('Smoke check passes'),
         'verification',jsonb_build_object('required',true,'method','independent'),
         'loop',jsonb_build_object('enabled',true,'objective','Pass smoke check',

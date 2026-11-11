@@ -123,6 +123,11 @@ with task_readiness as (
   when t.status='blocked' then 'blocked'
   when t.status='running' then 'running'
   when t.status='waiting' then 'waiting'
+  when t.goal_id is not null and exists (
+   select 1 from public.goal_dependencies gd join public.goals prerequisite on prerequisite.id=gd.depends_on_goal_id
+   where gd.goal_id=t.goal_id and gd.dependency_type='blocking'
+     and (prerequisite.status<>'completed' or public.goal_has_unverified_descendant_tasks(prerequisite.id))
+  ) then 'dependency_blocked'
   when exists(
    select 1 from public.task_dependencies d join public.tasks dep on dep.id=d.depends_on_task_id
    where d.task_id=t.id and d.dependency_type in ('required','blocking')
@@ -144,11 +149,18 @@ select 'goal'::text resource_type,g.goal_key resource_id,null::text parent_id,g.
  case when coalesce(gc.remaining_tasks,0)=0 and g.status='completed' then 'verified'
       when coalesce(gc.pending_verification,0)>0 then 'pending' else 'not_started' end verification_status,
  g.created_by_agent_id owner,
- case when g.status='blocked' then 'blocked' when coalesce(gc.blocked_tasks,0)>0 then 'dependency_blocked'
+ case when g.status='blocked' then 'blocked'
+      when exists(select 1 from public.goal_dependencies gd join public.goals prerequisite on prerequisite.id=gd.depends_on_goal_id
+        where gd.goal_id=g.id and gd.dependency_type='blocking'
+          and (prerequisite.status<>'completed' or public.goal_has_unverified_descendant_tasks(prerequisite.id))) then 'dependency_blocked'
+      when coalesce(gc.blocked_tasks,0)>0 then 'dependency_blocked'
       when g.status in ('planning','ready','active') then 'active' else 'terminal' end readiness,
  g.target->>'type' target_type,g.target->>'id' target_id,'goals' source,g.updated_at,
  jsonb_build_object('remaining_tasks',coalesce(gc.remaining_tasks,0),'blocked_tasks',coalesce(gc.blocked_tasks,0),
- 'pending_verification',coalesce(gc.pending_verification,0),'goal_type',g.goal_type) metadata
+ 'pending_verification',coalesce(gc.pending_verification,0),'goal_type',g.goal_type,
+ 'blocking_prerequisites',(select coalesce(jsonb_agg(jsonb_build_object('goal_key',prerequisite.goal_key,'status',prerequisite.status)),'[]'::jsonb)
+  from public.goal_dependencies gd join public.goals prerequisite on prerequisite.id=gd.depends_on_goal_id
+  where gd.goal_id=g.id and gd.dependency_type='blocking')) metadata
 from public.goals g left join goal_counts gc on gc.goal_id=g.id
 union all
 select 'task',t.task_key,t.parent_task_id::text,t.task_name,t.status,t.priority,t.blocker,t.verification_status,

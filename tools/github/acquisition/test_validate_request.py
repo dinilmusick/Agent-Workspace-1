@@ -3,7 +3,7 @@ import tempfile
 import unittest
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from validate_request import APPROVAL_URL, catalog_line_authorizes, validate_request_shape, write_outputs
+from validate_request import APPROVAL_URL, assert_exact_head, catalog_line_authorizes, validate_request_shape, write_outputs
 
 class AcquisitionRequestValidationTests(unittest.TestCase):
     def setUp(self):

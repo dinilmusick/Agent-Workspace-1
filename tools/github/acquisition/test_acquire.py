@@ -5,7 +5,7 @@ import unittest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from acquire import preserve_and_reconcile_existing_refs, safe_provenance_migration
+from acquire import preserve_and_reconcile_existing_refs, safe_provenance_migration, writable_refs
 
 
 def run_git(repo, *args, check=True):
@@ -38,6 +38,14 @@ class PreserveUpstreamHistoryTests(unittest.TestCase):
 
     def tearDown(self):
         self.temp.cleanup()
+
+    def test_writable_refs_excludes_github_internal_refs(self):
+        run_git(self.source, "update-ref", "refs/gh/queue-intermediate-merge-commits/main", self.second)
+        run_git(self.source, "update-ref", "refs/pull/1/head", self.second)
+        refs = writable_refs(self.source)
+        self.assertIn("refs/heads/main", refs)
+        self.assertNotIn("refs/gh/queue-intermediate-merge-commits/main", refs)
+        self.assertNotIn("refs/pull/1/head", refs)
 
     def test_allows_fast_forward_without_creating_archive(self):
         source_refs = {"refs/heads/main": self.second}

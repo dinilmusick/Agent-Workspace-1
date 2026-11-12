@@ -29,7 +29,7 @@ def refs(repo):
     return {line.split(" ",1)[0]:line.split(" ",1)[1] for line in output.splitlines() if line.strip()}
 
 def writable_refs(repo):
-    return {ref:sha for ref,sha in refs(repo).items() if not ref.startswith(("refs/pull/","refs/merge-queue/","refs/remotes/"))}
+    return {ref:sha for ref,sha in refs(repo).items() if not ref.startswith(("refs/pull/","refs/merge-queue/","refs/remotes/","refs/gh/"))}
 
 def objects(repo):
     output=git(["rev-list","--objects","--all"],cwd=repo).stdout
@@ -77,7 +77,7 @@ def main():
         destination=root/"destination.git"
         git(["clone","--mirror",target_url,str(destination)],env=git_env)
         for ref in list(refs(destination)):
-            if ref.startswith(("refs/pull/","refs/merge-queue/","refs/remotes/")):
+            if ref.startswith(("refs/pull/","refs/merge-queue/","refs/remotes/","refs/gh/")):
                 git(["update-ref","-d",ref],cwd=destination)
         git(["fsck","--full","--no-reflogs","--connectivity-only"],cwd=destination)
         destination_refs=writable_refs(destination)
@@ -93,7 +93,7 @@ def main():
             source_path=root/"source.git"
             git(["clone","--mirror",f"https://github.com/{source}.git",str(source_path)])
             for ref in list(refs(source_path)):
-                if ref.startswith(("refs/pull/","refs/merge-queue/","refs/remotes/")):
+                if ref.startswith(("refs/pull/","refs/merge-queue/","refs/remotes/","refs/gh/")):
                     git(["update-ref","-d",ref],cwd=source_path)
             git(["remote","remove","origin"],cwd=source_path)
             if git(["remote"],cwd=source_path).stdout.strip():

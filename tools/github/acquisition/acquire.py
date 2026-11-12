@@ -72,13 +72,13 @@ def remote_refs(url, env):
     return {
         line.split("\t", 1)[1]: line.split("\t", 1)[0]
         for line in output.splitlines()
-        if "\t" in line and not line.split("\t", 1)[1].startswith(("refs/pull/", "refs/merge-queue/", "refs/remotes/"))
+        if "\t" in line and not line.split("\t", 1)[1].startswith(("refs/pull/", "refs/merge-queue/", "refs/remotes/", "refs/gh/"))
     }
 
 def writable_refs(repo):
     return {
         ref: sha for ref, sha in refs(repo).items()
-        if not ref.startswith(("refs/pull/", "refs/merge-queue/", "refs/remotes/"))
+        if not ref.startswith(("refs/pull/", "refs/merge-queue/", "refs/remotes/", "refs/gh/"))
     }
 
 def reachable_objects(repo):
@@ -232,7 +232,7 @@ def main():
             git(["clone", "--mirror", f"https://github.com/{source}.git", str(source_path)])
             git(["cat-file", "-e", f"{source_commit}^{{commit}}"], cwd=source_path)
             for ref in list(refs(source_path)):
-                if ref.startswith(("refs/pull/", "refs/merge-queue/", "refs/remotes/")):
+                if ref.startswith(("refs/pull/", "refs/merge-queue/", "refs/remotes/", "refs/gh/")):
                     git(["update-ref", "-d", ref], cwd=source_path)
             git(["remote", "remove", "origin"], cwd=source_path)
             source_refs = writable_refs(source_path)
@@ -259,7 +259,7 @@ def main():
             verify_path = temp / "destination-verify.git"
             git(["clone", "--mirror", target_url, str(verify_path)], env=git_env)
             for ref in list(refs(verify_path)):
-                if ref.startswith(("refs/pull/", "refs/merge-queue/", "refs/remotes/")):
+                if ref.startswith(("refs/pull/", "refs/merge-queue/", "refs/remotes/", "refs/gh/")):
                     git(["update-ref", "-d", ref], cwd=verify_path)
             git(["fsck", "--full", "--no-reflogs", "--connectivity-only"], cwd=verify_path)
             final_refs = writable_refs(verify_path)

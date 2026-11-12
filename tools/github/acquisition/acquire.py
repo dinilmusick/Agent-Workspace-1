@@ -113,6 +113,23 @@ def write_summary(text):
         with open(path, "a", encoding="utf-8") as handle:
             handle.write(text.rstrip() + "\n")
 
+def safe_provenance_migration(existing_description, source, mode, category, old_default_branch, new_default_branch, new_commit, comparison):
+    match = re.fullmatch(r"ULTRST private (mirror|reference-only); upstream=([^;]+); commit=([0-9a-f]{40}); category=(.+)", existing_description or "")
+    if not match:
+        raise RuntimeError("Existing destination provenance marker is not a recognized ULTRST acquisition record.")
+    old_mode, old_source, old_commit, old_category = match.groups()
+    if old_mode != mode or old_source != source or old_category != category:
+        raise RuntimeError("Existing destination provenance belongs to a different source, mode or category; refusing to repurpose it.")
+    if mode != "mirror":
+        raise RuntimeError("Automatic provenance pin migration is supported only for private source mirrors.")
+    if old_default_branch != new_default_branch:
+        raise RuntimeError("Existing destination default branch differs from the reviewed current upstream default branch.")
+    if old_commit == new_commit:
+        raise RuntimeError("Destination description differs despite an unchanged source pin; manual provenance review is required.")
+    if comparison.get("status") != "ahead" or int(comparison.get("behind_by", -1)) != 0 or int(comparison.get("ahead_by", 0)) < 1:
+        raise RuntimeError("Previous destination pin is not a strict ancestor of the reviewed current upstream pin; refusing provenance migration.")
+    return old_commit
+
 def main():
     token = os.environ["GH_TOKEN"]
     source = os.environ["SOURCE"]
@@ -136,6 +153,7 @@ def main():
     if len(description) > 350:
         raise RuntimeError("Generated repository provenance description exceeds GitHub's limit.")
     destination_meta = api(token, "GET", f"/repos/{target}", allow_404=True)
+    provenance_migration_commit = None
     if destination_meta is None:
         try:
             destination_meta = api(token, "POST", "/user/repos", {
@@ -150,7 +168,17 @@ def main():
     if destination_meta.get("private") is not True or destination_meta.get("fork") is not False:
         raise RuntimeError("Destination must remain private and must not be a GitHub fork.")
     if destination_meta.get("description") != description:
-        raise RuntimeError("Existing destination lacks the exact acquisition provenance marker; refusing to overwrite or repurpose it.")
+        if destination_meta.get("default_branch") != source_branch:
+            raise RuntimeError("Existing destination default branch differs from the reviewed source branch; refusing provenance migration.")
+        old_marker = re.fullmatch(r"ULTRST private (mirror|reference-only); upstream=([^;]+); commit=([0-9a-f]{40}); category=(.+)", destination_meta.get("description") or "")
+        if not old_marker:
+            raise RuntimeError("Existing destination lacks a recognized ULTRST acquisition provenance marker; refusing to overwrite or repurpose it.")
+        old_commit = old_marker.group(3)
+        comparison = api(token, "GET", f"/repos/{source}/compare/{old_commit}...{source_commit}")
+        provenance_migration_commit = safe_provenance_migration(
+            destination_meta.get("description"), source, mode, category,
+            destination_meta.get("default_branch"), source_branch, source_commit, comparison
+        )
     auth = base64.b64encode(f"x-access-token:{token}".encode()).decode()
     git_env = os.environ.copy()
     git_env.update({"GIT_TERMINAL_PROMPT": "0", "GIT_CONFIG_COUNT": "1",
@@ -217,6 +245,10 @@ def main():
                 existing_path = temp / "existing.git"
                 git(["clone", "--mirror", target_url, str(existing_path)], env=git_env)
                 git(["fsck", "--full", "--no-reflogs", "--connectivity-only"], cwd=existing_path)
+                if provenance_migration_commit:
+                    previous_default = writable_refs(existing_path).get(f"refs/heads/{source_branch}")
+                    if previous_default != provenance_migration_commit:
+                        raise RuntimeError("Existing destination default-branch ref does not match its previous provenance pin.")
                 archived_history = preserve_and_reconcile_existing_refs(writable_refs(existing_path), source_refs, source_path, existing_path)
                 source_refs = writable_refs(source_path)
             git(["remote", "add", "destination", target_url], cwd=source_path)
@@ -250,13 +282,15 @@ def main():
                 raise RuntimeError("Final destination default branch metadata mismatch.")
             if final_refs.get(f"refs/heads/{source_branch}") != source_commit:
                 raise RuntimeError("Destination default branch does not equal the pinned source commit.")
-            result = f"Private independent mirror verified: all live writable refs, reachable history, pinned default branch, privacy and non-fork status match; preserved {len(archived_history)} previous ref tip(s) under refs/ultrst-archive/."
+            migration_note = f" Provenance pin safely migrated from {provenance_migration_commit} to {source_commit} after verified ancestry." if provenance_migration_commit else ""
+            result = f"Private independent mirror verified: all live writable refs, reachable history, pinned default branch, privacy and non-fork status match; preserved {len(archived_history)} previous ref tip(s) under refs/ultrst-archive.{migration_note}"
         archived_history = locals().get("archived_history", [])
         archive_details = "\n".join(
             f"- {item['source_ref']} -> {item['archive_ref']} ({item['sha']})" for item in archived_history
         ) or "- None"
-        write_summary(f"## Acquisition result\n\n- Status: **success**\n- Destination: https://github.com/{target}\n- Upstream: https://github.com/{source}\n- Source commit: {source_commit}\n- Source default branch: {source_branch}\n- GitHub SPDX metadata: {license_id}\n- Acquisition mode: {mode}\n- Verification: {result}\n\n### Preserved previous ref tips\n\n{archive_details}\n\nPrivate research acquisition only. No commercial clearance is implied.")
-        print(json.dumps({"destination": target, "source": source, "source_commit": source_commit, "mode": mode, "archived_history": archived_history, "result": result}, indent=2))
+        provenance_details = f"Previous approved pin migrated from {provenance_migration_commit} to {source_commit} after verified ancestry." if provenance_migration_commit else "No provenance pin migration was required."
+        write_summary(f"## Acquisition result\n\n- Status: **success**\n- Destination: https://github.com/{target}\n- Upstream: https://github.com/{source}\n- Source commit: {source_commit}\n- Source default branch: {source_branch}\n- GitHub SPDX metadata: {license_id}\n- Acquisition mode: {mode}\n- Verification: {result}\n\n### Preserved previous ref tips\n\n{archive_details}\n\n### Provenance pin migration\n\n{provenance_details}\n\nPrivate research acquisition only. No commercial clearance is implied.")
+        print(json.dumps({"destination": target, "source": source, "source_commit": source_commit, "mode": mode, "archived_history": archived_history, "provenance_migration_from": provenance_migration_commit, "result": result}, indent=2))
 
 if __name__ == "__main__":
     try:

@@ -92,8 +92,19 @@ jobs:
           dest="clones/${owner}__${name}"
           url="https://x-access-token:${CODING_REPO_TOKEN}@github.com/${TARGET_REPOSITORY}.git"
           git clone --depth 1 --branch "${TARGET_REF}" "$url" "$dest"
+          default_branch="$(git -C "$dest" ls-remote --symref origin HEAD | awk '$1 == "ref:" { sub("refs/heads/", "", $2); print $2; exit }')"
+          if [[ -n "$default_branch" && "$default_branch" != "$TARGET_REF" ]]; then
+            git -C "$dest" fetch --no-tags origin "${default_branch}:refs/remotes/origin/${default_branch}"
+          fi
           git -C "$dest" remote set-url origin "https://github.com/${TARGET_REPOSITORY}.git"
           echo "CLONED_REPO=$dest" >> "$GITHUB_ENV"
+
+      - name: Configure target git identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          git -C "$CLONED_REPO" config user.name "${GITHUB_ACTOR:-Agent Workspace}"
+          git -C "$CLONED_REPO" config user.email "${GITHUB_ACTOR_ID:-0}+${GITHUB_ACTOR:-agent-workspace}@users.noreply.github.com"
 
       - name: Install act
         shell: bash

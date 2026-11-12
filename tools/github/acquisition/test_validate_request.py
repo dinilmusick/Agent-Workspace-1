@@ -3,12 +3,12 @@ import tempfile
 import unittest
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from validate_request import APPROVAL_URL, assert_exact_head, catalog_line_authorizes, validate_request_shape, write_outputs
+from validate_request import APPROVAL_URL, assert_exact_head, catalog_authorization, catalog_line_authorizes, validate_catalog_authorization, validate_request_shape, write_outputs
 
 class AcquisitionRequestValidationTests(unittest.TestCase):
     def setUp(self):
         self.request = {"source_repository": "spree/spree", "source_commit": "a" * 40,
-            "target_repository": "tpl-commerce-spree", "category": "E-commerce and marketplace",
+            "target_repository": "tpl-commerce-spree", "category": "E-commerce + multi-vendor marketplace",
             "acquisition_mode": "mirror", "approval_record": APPROVAL_URL}
 
     def test_accepts_complete_valid_request(self):
@@ -57,10 +57,37 @@ class AcquisitionRequestValidationTests(unittest.TestCase):
 
     def test_catalog_authorization_requires_all_fields_on_same_row(self):
         sha = self.request["source_commit"]
-        row = f"| [spree/spree](https://github.com/spree/spree) | tpl-commerce-spree | main | BSD-3-Clause | {sha} |"
-        self.assertTrue(catalog_line_authorizes(row, self.request))
-        self.assertFalse(catalog_line_authorizes(row.replace("tpl-commerce-spree", "tpl-other"), self.request))
-        self.assertFalse(catalog_line_authorizes(row.replace(sha, "b" * 40), self.request))
+        catalog = f"""## 2. Additional full-source private research mirrors
+| Product category | Upstream source | Destination repository | Branch | GitHub SPDX | Pinned source commit | Why |
+| E-commerce + multi-vendor marketplace | [spree/spree](https://github.com/spree/spree) | `tpl-commerce-spree` | main | BSD-3-Clause | `{sha}` | test |
+## 3. Additional reference-only candidates
+| Product category | Upstream source | Destination repository | Branch | Pinned source commit | Why |
+| AI workflow builder | [langgenius/dify](https://github.com/langgenius/dify) | `tpl-ai-dify` | main | `{sha}` | test |
+"""
+        authorization = catalog_authorization(catalog, self.request)
+        self.assertEqual(authorization, {"branch": "main", "mode": "mirror", "category": self.request["category"], "license": "BSD-3-Clause"})
+        self.assertTrue(catalog_line_authorizes(catalog, self.request))
+        self.assertFalse(catalog_line_authorizes(catalog.replace("tpl-commerce-spree", "tpl-other"), self.request))
+        self.assertFalse(catalog_line_authorizes(catalog.replace(sha, "b" * 40, 1), self.request))
+        self.assertEqual(validate_catalog_authorization(catalog, self.request, "main", "BSD-3-Clause")["mode"], "mirror")
+        with self.assertRaisesRegex(ValueError, "default branch mismatch"):
+            validate_catalog_authorization(catalog, self.request, "master", "BSD-3-Clause")
+        with self.assertRaisesRegex(ValueError, "Acquisition mode mismatch"):
+            validate_catalog_authorization(catalog, {**self.request, "acquisition_mode": "reference-only"}, "main", "BSD-3-Clause")
+        with self.assertRaisesRegex(ValueError, "category"):
+            validate_catalog_authorization(catalog, {**self.request, "category": "Wrong category"}, "main", "BSD-3-Clause")
+        with self.assertRaisesRegex(ValueError, "SPDX metadata"):
+            validate_catalog_authorization(catalog, self.request, "main", "MIT")
+
+    def test_reference_only_catalog_row_requires_reference_only_mode(self):
+        sha = self.request["source_commit"]
+        catalog = f"""## 3. Additional reference-only candidates
+| Product category | Upstream source | Destination repository | Branch | Pinned source commit | Why |
+| AI workflow builder | [langgenius/dify](https://github.com/langgenius/dify) | `tpl-ai-dify` | main | `{sha}` | test |
+"""
+        request = {**self.request, "source_repository": "langgenius/dify", "target_repository": "tpl-ai-dify",
+                   "category": "AI workflow builder", "acquisition_mode": "reference-only"}
+        self.assertEqual(validate_catalog_authorization(catalog, request, "main", "NOASSERTION")["mode"], "reference-only")
 
     def test_workflow_contract_uses_valid_github_expression_delimiters(self):
         workflow_path = Path(__file__).resolve().parents[3] / ".github/workflows/independent-commercial-acquisition.yml"

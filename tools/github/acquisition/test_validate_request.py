@@ -75,6 +75,8 @@ class AcquisitionRequestValidationTests(unittest.TestCase):
         verifier = Path(__file__).with_name("verify.py").read_text()
         self.assertNotIn('method="POST"', verifier)
         self.assertNotIn('method="PATCH"', verifier)
+        self.assertIn("live_license", verifier)
+        self.assertIn('rev-list","--count"', verifier)
 
     def test_github_output_uses_delimited_values(self):
         with tempfile.TemporaryDirectory() as directory:

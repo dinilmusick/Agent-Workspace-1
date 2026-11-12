@@ -26,6 +26,8 @@ The runner is ephemeral, has read-only repository permissions, does not persist 
 
 - [Architecture](docs/architecture.md)
 - [Template portfolio candidate audit](docs/template-portfolio-candidates.md) — selected starter per category, source revisions and commercial-license clearance status.
+- [Template portfolio coverage and acquisition manifest](docs/template-portfolio-catalog.md) — existing starters, missing product categories, exact upstream commits and private-research acquisition mode.
+- [Commercial repository acquisition policy](docs/commercial-acquisition-policy.md) — private research mirrors are separate from approval for commercial reuse.
 - [Goal and task ledger integration](docs/task-ledger-integration.md)
 - [Chat-driven goal and worker protocol](docs/chat-agent-workflow.md)
 - [Compute request contract](docs/compute-request.md)
@@ -71,12 +73,14 @@ create repository
 
 Use:
 
-- `.github/workflows/create-skipo-app.yml` — create a repository and scaffold canonical Skipo.
+- `.github/workflows/create-skipo-app.yml` — create a repository and immediately scaffold canonical Skipo.
 - `.github/workflows/github-dev-workspace.yml` — edit/build/lint/test a target repository on GitHub-hosted compute.
 - `.github/workflows/github-public-compute-matrix.yml` — verify across standard Linux, Windows and macOS public runners.
 - `.github/workflows/private-repo-ci.yml` — execute private-repository workflows through Agent Workspace when native private CI is unavailable.
 - `skills/github-development-workspace/SKILL.md` — reusable agent instructions.
-- `tools/github/` — repository creation and Skipo scaffolding tools.\n- `.github/workflows/independent-commercial-acquisition.yml` — owner-triggered, private, non-fork Git mirror acquisition for license-qualified projects.\n- `docs/commercial-acquisition-policy.md` — mandatory commercial-use, redistribution and dependency clearance gate.
+- `tools/github/` — repository creation and Skipo scaffolding tools.
+- `.github/workflows/independent-commercial-acquisition.yml` — owner-triggered private, non-fork source mirror or reference-only acquisition.
+- `docs/commercial-acquisition-policy.md` — mandatory separation of private research acquisition and commercial-use clearance.
 
 GitHub Actions standard runners for public repositories are currently free and unlimited. Standard runner labels include Linux `ubuntu-latest`, Windows `windows-latest`, and macOS `macos-latest`; concurrency and runner-specific limits still apply.
 

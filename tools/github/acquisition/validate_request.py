@@ -46,6 +46,10 @@ def validate_request_shape(req: Any) -> dict[str, str]:
         raise ValueError(f"approval_record must be the canonical catalog URL: {APPROVAL_URL}")
     return {"source": source, "target": target, "source_commit": commit, "category": category, "mode": mode, "approval_record": approval}
 
+def assert_exact_head(requested: str, live: str) -> None:
+    if requested != live:
+        raise ValueError(f"Stale source pin: catalog={requested} live_default_branch_head={live}. Refresh and review the catalog before acquisition.")
+
 def catalog_line_authorizes(catalog: str, request: dict[str, str]) -> bool:
     source = request.get("source", request.get("source_repository", "")).lower()
     target = request.get("target", request.get("target_repository", "")).lower()
@@ -94,8 +98,7 @@ def main() -> int:
         branch_head = branch_meta.get("sha", "")
         if not re.fullmatch(r"[0-9a-f]{40}", branch_head):
             raise ValueError("Could not resolve the current upstream default-branch HEAD.")
-        if branch_head != req["source_commit"]:
-            raise ValueError(f"Stale source pin: catalog={req['source_commit']} live_default_branch_head={branch_head}. Refresh and review the catalog before acquisition.")
+        assert_exact_head(req["source_commit"], branch_head)
         if req["mode"] == "mirror" and license_id not in OPEN_SOURCE_IDS:
             raise ValueError(f"Cannot mirror code with missing or unrecognized open-source SPDX metadata: {license_id}.")
         catalog_meta = api_json(token, f"/repos/{WORKSPACE}/contents/{CATALOG_PATH}?ref=main")

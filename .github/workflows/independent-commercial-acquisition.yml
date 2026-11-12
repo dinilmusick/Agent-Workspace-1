@@ -19,7 +19,7 @@ jobs:
       github.event.issue.user.login == 'dinilmusick' &&
       startsWith(github.event.issue.title, '[acquire-repo]')
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 120
     steps:
       - name: Checkout acquisition controller
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -178,19 +178,15 @@ jobs:
         run: |
           set -euo pipefail
           auth="$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
-          git -c "http.extraheader=AUTHORIZATION: basic $auth" clone --mirror "https://github.com/$TARGET.git" verify.git
-          git -C verify.git remote remove origin
-          while IFS= read -r ref; do
-            [[ -z "$ref" ]] || git -C verify.git update-ref -d "$ref"
-          done < <(git -C verify.git for-each-ref --format="%(refname)" refs/remotes/origin)
           source_refs="$(git -C source.git for-each-ref --format='%(refname) %(objectname)' | grep -Ev '^refs/(pull|merge-queue)/' | sort)"
-          target_refs="$(git -C verify.git for-each-ref --format='%(refname) %(objectname)' | grep -Ev '^refs/(pull|merge-queue)/' | sort)"
+          target_refs="$(git -c "http.extraheader=AUTHORIZATION: basic $auth" ls-remote --refs "https://github.com/$TARGET.git" | awk '{print $2 " " $1}' | grep -Ev '^refs/(pull|merge-queue)/' | sort)"
           diff -u <(printf '%s\\n' "$source_refs") <(printf '%s\\n' "$target_refs")
-          test "$(git -C verify.git rev-parse "refs/heads/$DEFAULT_BRANCH")" = "$SOURCE_COMMIT"
+          target_default="$(git -c "http.extraheader=AUTHORIZATION: basic $auth" ls-remote --refs "https://github.com/$TARGET.git" "refs/heads/$DEFAULT_BRANCH" | awk '{print $1}')"
+          test "$target_default" = "$SOURCE_COMMIT"
           destination_meta="$(curl --fail-with-body -sS -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" "https://api.github.com/repos/$TARGET")"
           python3 -c 'import json,sys; d=json.loads(sys.argv[1]); assert d.get("private") is True, "destination must remain private"; assert d.get("fork") is False, "destination must not be a fork"' "$destination_meta"
-          test -z "$(git -C verify.git remote)"
-          echo "Verified: all refs match; default branch equals the approved source commit; destination is private, not a fork, and the verification clone has no upstream remote."
+          test -z "$(git -C source.git remote)"
+          echo "Verified: all writable refs match; default branch equals the approved source commit; destination is private, not a fork, and the source mirror has no remote."
 
       - name: Emit acquisition provenance record
         env:

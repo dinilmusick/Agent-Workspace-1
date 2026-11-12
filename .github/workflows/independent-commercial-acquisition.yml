@@ -145,7 +145,25 @@ jobs:
             [[ -z "$ref" ]] || git -C source.git update-ref -d "$ref"
           done < <(git -C source.git for-each-ref --format="%(refname)" refs/remotes/origin)
           git -C source.git remote add destination "https://github.com/$TARGET.git"
-          git -C source.git -c http.version=HTTP/1.1 -c "http.extraheader=AUTHORIZATION: basic $auth" push --mirror destination
+          # Push refs in bounded batches. Very large repositories can exceed GitHub's
+          # request limits when all branches and tags are sent as one mirror pack.
+          mapfile -t refs < <(git -C source.git for-each-ref --format="%(refname)" | grep -Ev '^refs/(pull|merge-queue|remotes)/')
+          batch_size=20
+          for ((offset=0; offset<${#refs[@]}; offset+=batch_size)); do
+            specs=()
+            for ((idx=offset; idx<offset+batch_size && idx<${#refs[@]}; idx++)); do
+              specs+=("${refs[idx]}:${refs[idx]}")
+            done
+            attempt=1
+            until git -C source.git -c http.version=HTTP/1.1 -c "http.extraheader=AUTHORIZATION: basic $auth" push destination "${specs[@]}"; do
+              if (( attempt >= 3 )); then
+                echo "Push batch starting at ref index $offset failed after three attempts." >&2
+                exit 1
+              fi
+              sleep $((attempt * 10))
+              attempt=$((attempt + 1))
+            done
+          done
           git -C source.git remote remove destination
           while IFS= read -r ref; do
             [[ -z "$ref" ]] || git -C source.git update-ref -d "$ref"

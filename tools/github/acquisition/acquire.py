@@ -226,6 +226,9 @@ def main():
                 raise RuntimeError("Temporary mirror retained a remote after push.")
             verify_path = temp / "destination-verify.git"
             git(["clone", "--mirror", target_url, str(verify_path)], env=git_env)
+            for ref in list(refs(verify_path)):
+                if ref.startswith(("refs/pull/", "refs/merge-queue/", "refs/remotes/")):
+                    git(["update-ref", "-d", ref], cwd=verify_path)
             git(["fsck", "--full", "--no-reflogs", "--connectivity-only"], cwd=verify_path)
             final_refs = writable_refs(verify_path)
             if final_refs != source_refs:
@@ -233,8 +236,12 @@ def main():
                 extra = sorted(set(final_refs) - set(source_refs))
                 changed = sorted(ref for ref in set(source_refs) & set(final_refs) if source_refs[ref] != final_refs[ref])
                 raise RuntimeError(f"Ref verification mismatch; missing={missing[:10]}, extra={extra[:10]}, changed={changed[:10]}.")
-            if reachable_objects(source_path) != reachable_objects(verify_path):
-                raise RuntimeError("Reachable Git object/history verification mismatch.")
+            source_objects = reachable_objects(source_path)
+            destination_objects = reachable_objects(verify_path)
+            if source_objects != destination_objects:
+                missing_objects = sorted(source_objects - destination_objects)
+                extra_objects = sorted(destination_objects - source_objects)
+                raise RuntimeError(f"Reachable Git object/history verification mismatch; missing_count={len(missing_objects)}, extra_count={len(extra_objects)}, missing_sample={missing_objects[:10]}, extra_sample={extra_objects[:10]}.")
             api(token, "PATCH", f"/repos/{target}", {"default_branch": source_branch})
             final_meta = api(token, "GET", f"/repos/{target}")
             if final_meta.get("private") is not True or final_meta.get("fork") is not False:

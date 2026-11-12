@@ -35,14 +35,14 @@ These are the proposed missing functional projects. The commit is pinned to the 
 | CRM / sales pipeline | [krayin/laravel-crm](https://github.com/krayin/laravel-crm) | `tpl-crm-krayin` | 2.2 | MIT | `ed6deebfcb8c616eaf352c893a10a6d8e666fc6e` | Complete Laravel CRM. Existing audit rejected the exact dependency set for commercial reuse; private study only. |
 | ERP / business operations | [apache/ofbiz-framework](https://github.com/apache/ofbiz-framework) | `tpl-erp-ofbiz` | trunk | Apache-2.0 | `59b32bdc3bed4abdeb9b5eaa12f5d605a3926985` | Broad Java ERP / commerce / order and business-process system. Full dependency and bundled-JAR audit remains required. |
 | Python full-stack API application | [fastapi/full-stack-fastapi-template](https://github.com/fastapi/full-stack-fastapi-template) | `tpl-backend-fastapi` | master | MIT | `aabb90126964a164e02aff39e7c385bb0598236d` | Complete API + database + frontend starter. Existing audit rejected the current lockfile graph for commercial reuse; private study only. |
-| RAG / document intelligence | [infiniflow/ragflow](https://github.com/infiniflow/ragflow) | `tpl-ai-ragflow` | main | Apache-2.0 | `1fc73d125f0081dc3090835a96a4e45e13055e84` | Functional document-understanding RAG engine with retrieval and agent capabilities. Dependency/model/asset audit remains separate. |
+| RAG / document intelligence | [infiniflow/ragflow](https://github.com/infiniflow/ragflow) | `tpl-ai-ragflow` | main | Apache-2.0 | `03b0c0ae04ab30e44796b927a3c0229b1a440358` | Functional document-understanding RAG engine with retrieval and agent capabilities. Dependency/model/asset audit remains separate. |
 | Visual AI agent and workflow builder | [langflow-ai/langflow](https://github.com/langflow-ai/langflow) | `tpl-ai-langflow` | main | MIT | `2cf9ce808afa6ad3f41aa5f6b47bdcb1927cde84` | Visual agent, LLM and MCP workflow builder. |
 | Self-hosted PaaS / deployment control plane | [dokku/dokku](https://github.com/dokku/dokku) | `tpl-deployment-dokku` | master | MIT | `bf03afb9810caea112f2ea2e203b21da4f84c382` | Self-hosted application deployment platform. Existing audit is CONDITIONAL pending plugin/module and bundled-helper review. |
 | Inventory / manufacturing operations | [inventree/InvenTree](https://github.com/inventree/InvenTree) | `tpl-inventory-inventree` | master | MIT | `7e57196d76f4560caebbff9508ea5e230341fc08` | Full inventory and parts-management product. Existing audit found LGPL runtime dependencies; private study only. |
 | Healthcare / FHIR platform | [medplum/medplum](https://github.com/medplum/medplum) | `tpl-health-medplum` | main | Apache-2.0 | `e7e7e40191440fca0d06ded9d2b56c11c639058f` | Full healthcare interoperability platform and FHIR server. Existing audit found an unlicensed bundled font; private study only until corrected. |
 | Appointment scheduling / booking | [calcom/cal.diy](https://github.com/calcom/cal.diy) | `tpl-booking-caldiy` | main | MIT | `ef7954d16ab50882ca2f263c551537115b8a8bb1` | Active self-hosted appointment-scheduling application. Treat as the community Cal.diy project, not a statement about Cal.com licensing. |
-| BI / analytics dashboards | [apache/superset](https://github.com/apache/superset) | `tpl-bi-superset` | master | Apache-2.0 | `58a1a5c7e8f759383573ba15ba509e8d1bc49015` | Mature business-intelligence and data-visualization application. |
-| ELT / data integration | [meltano/meltano](https://github.com/meltano/meltano) | `tpl-data-meltano` | main | MIT | `23fab6f99554b0de7ce17d6ede3b8a45bc3234a9` | Declarative, code-first ELT and connector platform. |
+| BI / analytics dashboards | [apache/superset](https://github.com/apache/superset) | `tpl-bi-superset` | master | Apache-2.0 | `8d5f06e5250230e55f7d953ab807af271d1ed01b` | Mature business-intelligence and data-visualization application. |
+| ELT / data integration | [meltano/meltano](https://github.com/meltano/meltano) | `tpl-data-meltano` | main | MIT | `3913352432f32632e16807142111455d5f64cb89` | Declarative, code-first ELT and connector platform. |
 | Mobile application starters | [expo/examples](https://github.com/expo/examples) | `tpl-mobile-expo-examples` | master | MIT | `2cc7a440b01eb30e326b91cf1f3aae41e749d128` | Official working examples across Expo / React Native mobile use cases. |
 | Desktop application framework (Rust) | [tauri-apps/tauri](https://github.com/tauri-apps/tauri) | `tpl-desktop-tauri` | dev | Apache-2.0 | `5edd31c8a8914674c217b21a660a914823da2dae` | Native desktop/mobile runtime and examples for web-fronted Rust applications. |
 | Desktop application starter (Electron) | [electron-react-boilerplate/electron-react-boilerplate](https://github.com/electron-react-boilerplate/electron-react-boilerplate) | `tpl-desktop-electron` | main | MIT | `e5b8242d8b21a4290c3a1f18ae3b64167e9de04a` | Complete Electron + React desktop starter. |
@@ -58,7 +58,7 @@ These are the proposed missing functional projects. The commit is pinned to the 
 | Social network / federated publishing | [mastodon/mastodon](https://github.com/mastodon/mastodon) | `tpl-social-mastodon` | main | AGPL-3.0 | `ca8b0ffac86cc5b064a4573f16b8061716c8ab6f` | Complete federated social-network product. |
 | Document management / archive | [paperless-ngx/paperless-ngx](https://github.com/paperless-ngx/paperless-ngx) | `tpl-documents-paperless` | dev | GPL-3.0 | `a1d76f3a19c9bf7067491de6f0a12672676ae9f1` | Full document ingestion, OCR, tagging and archive application. |
 | Cloud security assessment | [prowler-cloud/prowler](https://github.com/prowler-cloud/prowler) | `tpl-cloud-security-prowler` | master | Apache-2.0 | `f485982d4cf4be87a76c6906f44e42675fec2913` | Multi-cloud security posture assessment and reporting tool. |
-| Data workflow orchestration | [apache/airflow](https://github.com/apache/airflow) | `tpl-data-airflow` | main | Apache-2.0 | `e024d4c15a52a843c28aa773c2d5db69fe21deea` | Production-grade DAG-based workflow scheduling and execution; complements Temporal rather than replacing it. |
+| Data workflow orchestration | [apache/airflow](https://github.com/apache/airflow) | `tpl-data-airflow` | main | Apache-2.0 | `e17cecaabbb08681dddf3fc015307dbcc656a498` | Production-grade DAG-based workflow scheduling and execution; complements Temporal rather than replacing it. |
 
 ## 3. Additional reference-only candidates
 
@@ -197,4 +197,38 @@ The six assigned repositories were rechecked against their live upstream default
 The remaining four pins were independently confirmed at the live default-branch HEAD on 2026-11-12: `makeplane/plane` (`preview`, `6190932e2bc2b76d4a7ec11ea9040e3a70fc40ad`), `NodeBB/NodeBB` (`master`, `b04f482eb068e9421bed35c335232164a27fc5b5`), `frappe/hrms` (`develop`, `acc4b3a70a6ac52ae6de175df22a5855f428d067`) and `moodle/moodle` (`main`, `afbcc55fa1bd80dcdd887b8965dd8c28c0f3bbda`). GitHub SPDX metadata matched catalog identifiers for all six: Apache-2.0, AGPL-3.0, GPL-3.0, GPL-3.0, GPL-3.0 and AGPL-3.0 respectively.
 
 Legal-file inspection confirmed Jitsi's root Apache-2.0 license and Debian copyright notice (including a historical MIT attribution); Plane's AGPL-3.0 license, `COPYRIGHT.txt` and mandatory source-header policy; NodeBB's GPL-3.0 `LICENSE`; Frappe HRMS's GPL-3.0 `license.txt`; Moodle's GPL-3.0 `COPYING.txt` plus numerous bundled third-party license/NOTICE files; and Mastodon's AGPL-3.0 `LICENSE`, `AUTHORS.md` and separate font/icon/image license files. Preserve all such files verbatim. Moodle's recursive legal-file listing was truncated, and no complete transitive dependency-license audit was performed. These projects remain **PRIVATE-STUDY-MIRROR only**; no commercial reuse, distribution, deployment or feature/security/build approval is granted by this pin review.
+
+
+
+## 7. Agent 03 reviewed current upstream pin refresh — 2026-11-12
+
+These four full-source research mirror pins are advanced to their live upstream default-branch HEADs. GitHub compare confirms each range is a fast-forward with zero commits behind. These changes authorize private research acquisition only, not commercial deployment or reuse.
+
+### RAGFlow — `tpl-ai-ragflow`
+
+- Upstream `infiniflow/ragflow`, `main`: `1fc73d125f0081dc3090835a96a4e45e13055e84` → `03b0c0ae04ab30e44796b927a3c0229b1a440358` (11 commits).
+- Review covered removal of wildcard CORS headers from login/register routes that exposed Authorization tokens to any origin; PDF cross-page table geometry/preview fixes; PaddleOCR model selection/API changes; agent retry/streaming/deferred-node handling; shared exponential backoff; and a frontend `src/ee` extension seam with UI compatibility updates.
+- No dependency manifest or lockfile changed in this range. Root `LICENSE` remains Apache-2.0; no root `NOTICE` is present. No legal-file change was found in the compared range.
+- Accept for private research mirror; dependency, model, frontend asset and transitive-component duties require separate audit.
+
+### Apache Superset — `tpl-bi-superset`
+
+- Upstream `apache/superset`, `master`: `58a1a5c7e8f759383573ba15ba509e8d1bc49015` → `8d5f06e5250230e55f7d953ab807af271d1ed01b` (5 commits).
+- Review covered Docker base-image digest refresh, pinned `docker/login-action` 4.7.0→4.8.0, Babel updates, AG Grid / ag-charts updates (36.2.0→36.3.0 and 14.2.0→14.3.0), and docs formatter `oxfmt` 0.75.0→0.76.0. Frontend and docs package manifests/lockfiles changed; no Python runtime manifest changed in this range.
+- Root `LICENSE.txt` remains Apache-2.0; root `NOTICE` retains Apache Software Foundation attribution (Copyright 2016-2024). Neither legal file changed.
+- Accept for private research mirror; Docker base images, frontend/docs dependency graph, and bundled assets need separate audit.
+
+### Meltano — `tpl-data-meltano`
+
+- Upstream `meltano/meltano`, `main`: `23fab6f99554b0de7ce17d6ede3b8a45bc3234a9` → `3913352432f32632e16807142111455d5f64cb89` (2 commits).
+- Both commits update docs-only dependencies: `follow-redirects` 1.16.1→1.16.3 and `minimatch` 10.2.6→11.0.1. The latter adds `@isaacs/nonrecursive-glob-match`, whose lockfile license is BlueOak-1.0.0. No application/runtime Python manifest or `uv.lock` changed.
+- Root `LICENSE` remains MIT (Copyright Arch Data, Inc.); no root `NOTICE` is present. No legal-file change was found.
+- Accept for private research mirror; record BlueOak-1.0.0 and all other transitive dependency obligations for separate audit.
+
+### Apache Airflow — `tpl-data-airflow`
+
+- Upstream `apache/airflow`, `main`: `e024d4c15a52a843c28aa773c2d5db69fe21deea` → `e17cecaabbb08681dddf3fc015307dbcc656a498` (6 commits).
+- Review covered durable-agent support for generated IDs on id-less FunctionToolsets/toolset factories, per-attempt execution opt-outs via tool metadata, reduced durable-journal/state-store calls, retry divergence after repeated tool-call failures, provider docs/code/tests, and pydantic-ai-slim floor 2.36.0→2.46.0 in common AI provider metadata with `uv.lock` updates. Also reviewed improved fork-CI merge gating when switching to project CI and one docs-only INTHEWILD entry.
+- Root `LICENSE` remains Apache-2.0 and `NOTICE` retains Apache Software Foundation attribution (Copyright 2016-2026). Neither legal file changed.
+- Accept for private research mirror; provider extras, Python lockfiles, optional AI integrations and transitive dependencies require separate audit.
 

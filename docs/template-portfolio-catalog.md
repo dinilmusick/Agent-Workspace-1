@@ -173,4 +173,13 @@ A subsequent live-head check found that Spree's default branch advanced after th
 
 The new Spree head is a two-commit fast-forward from the previous pin. GitHub reports the latest commit signature as verified. The catalog pin now records the reviewed current default-branch HEAD; the acquisition validator will recheck it at request time.
 
+
+A subsequent live-head review found that RAGFlow's main branch advanced from `292e1717d60a8efcd48f1fa04d03923ac7579540` to `1fc73d125f0081dc3090835a96a4e45e13055e84`. The acquisition request correctly rejected the stale pin. The three-commit fast-forward was reviewed before refreshing the catalog:
+
+| Destination | Previous pin | Reviewed current source commit | Reviewed change | Decision |
+|---|---|---|---|---|
+| `tpl-ai-ragflow` | `292e1717d60a8efcd48f1fa04d03923ac7579540` | `1fc73d125f0081dc3090835a96a4e45e13055e84` | Three signature-verified commits: two documentation-icon corrections and PR #22241, a 12-file knowledge-compiler performance change (1,368 additions / 228 deletions). The performance work batches document-product reads, adds a compiled-row existence filter, gates debug-only diagnostics, and falls back to bounded per-document reads when a batch would exceed the engine result window. Regression tests cover grouping, deduplication, result-window boundaries and fallback behavior. No dependency manifest or license change identified; root license remains Apache-2.0. Upstream PR reports the targeted unit/full unit tier green; integration tests were not run because its Elasticsearch/MySQL service stack was unavailable. | Accept refreshed pin for private research mirror; preserve the integration-test limitation for later workspace verification. |
+
+GitHub compare confirms the previous pin is an ancestor of the new main HEAD (three commits ahead, zero behind). All three commit signatures are verified. The acquisition validator will recheck the exact new HEAD at request time.
+
 The acquisition validator requires each requested source, destination and exact commit to occur together in this catalog and independently requires that commit to equal the live default-branch HEAD at request time. A later branch movement therefore rejects acquisition until this catalog is refreshed and reviewed again.

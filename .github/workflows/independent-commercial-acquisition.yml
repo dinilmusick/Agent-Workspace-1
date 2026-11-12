@@ -58,6 +58,21 @@ jobs:
           set -euo pipefail
           python3 tools/github/acquisition/acquire.py
 
+      - name: Independent read-only destination verification
+        env:
+          GH_TOKEN: ${{ secrets.CODING_REPO_TOKEN }}
+          SOURCE: ${{ steps.request.outputs.SOURCE }}
+          TARGET: ${{ steps.request.outputs.TARGET }}
+          CATEGORY: ${{ steps.request.outputs.CATEGORY }}
+          LICENSE_ID: ${{ steps.request.outputs.LICENSE_ID }}
+          SOURCE_COMMIT: ${{ steps.request.outputs.SOURCE_COMMIT }}
+          SOURCE_DEFAULT_BRANCH: ${{ steps.request.outputs.SOURCE_DEFAULT_BRANCH }}
+          MODE: ${{ steps.request.outputs.MODE }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/github/acquisition/verify.py
+
       - name: Report acquisition result on request issue
         if: always()
         env:

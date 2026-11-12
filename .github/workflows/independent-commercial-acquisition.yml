@@ -189,7 +189,6 @@ jobs:
           test "$(git -C verify.git rev-parse "refs/heads/$DEFAULT_BRANCH")" = "$SOURCE_COMMIT"
           destination_meta="$(curl --fail-with-body -sS -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" "https://api.github.com/repos/$TARGET")"
           python3 -c 'import json,sys; d=json.loads(sys.argv[1]); assert d.get("private") is True, "destination must remain private"; assert d.get("fork") is False, "destination must not be a fork"' "$destination_meta"
-          git -C verify.git remote remove origin
           test -z "$(git -C verify.git remote)"
           echo "Verified: all refs match; default branch equals the approved source commit; destination is private, not a fork, and the verification clone has no upstream remote."
 

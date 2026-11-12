@@ -64,6 +64,7 @@ class PreserveUpstreamHistoryTests(unittest.TestCase):
 
     def test_archives_changed_tag_object(self):
         run_git(self.destination, "tag", "v1", self.first)
+        run_git(self.source, "tag", "v1", self.second)
         source_refs = {"refs/heads/main": self.second, "refs/tags/v1": self.second}
         archived = preserve_and_reconcile_existing_refs(
             {"refs/heads/main": self.first, "refs/tags/v1": self.first},

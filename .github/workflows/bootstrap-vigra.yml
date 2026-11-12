@@ -1,0 +1,82 @@
+name: Bootstrap VIGRA from refreshed Skipo scaffold
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/bootstrap-vigra.yml
+
+permissions:
+  contents: read
+
+jobs:
+  bootstrap:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      GITHUB_TOKEN: ${{ secrets.CODING_REPO_TOKEN }}
+      SKIPO_REPOSITORY: dinilmusick/Skipo
+      TEMPLATE_REPOSITORY: dinilmusick/Skipo-Vite-Scaffold
+      TARGET_REPOSITORY: dinilmusick/VIGRA
+    steps:
+      - name: Checkout Agent Workspace
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Refresh Skipo application template
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$GITHUB_TOKEN"
+          WORK="$RUNNER_TEMP/vigra-bootstrap"
+          rm -rf "$WORK"
+          mkdir -p "$WORK"
+          git clone --depth 1 "https://x-access-token:$GITHUB_TOKEN@github.com/$SKIPO_REPOSITORY.git" "$WORK/skipo"
+          git clone --depth 1 "https://x-access-token:$GITHUB_TOKEN@github.com/$TEMPLATE_REPOSITORY.git" "$WORK/template"
+          python3 "$WORK/skipo/assistant.py" generate scaffold "$WORK/template" --name MyApp --force
+          python3 "$WORK/skipo/assistant.py" validate "$WORK/template" --json > "$WORK/template-validation.json"
+          cd "$WORK/template"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: refresh template from canonical Skipo scaffold"
+            git push origin HEAD:main
+          fi
+
+      - name: Create VIGRA repository
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash tools/github/create-repository.sh "VIGRA" "private" "VIGRA — Vision Graph and execution ledger surface"
+
+      - name: Populate VIGRA from refreshed template
+        shell: bash
+        run: |
+          set -euo pipefail
+          WORK="$RUNNER_TEMP/vigra-bootstrap"
+          APP="$WORK/vigra"
+          rm -rf "$APP"
+          git clone --depth 1 "https://x-access-token:$GITHUB_TOKEN@github.com/$TEMPLATE_REPOSITORY.git" "$APP"
+          rm -rf "$APP/.git"
+          python3 "$WORK/skipo/scripts/rename_app.py" "VIGRA"
+          cd "$APP"
+          git init -b main
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git remote add origin "https://x-access-token:$GITHUB_TOKEN@github.com/$TARGET_REPOSITORY.git"
+          git add .
+          git commit -m "feat: initialize VIGRA from refreshed Skipo template"
+          git push -u origin main
+          python3 "$WORK/skipo/assistant.py" validate "$APP" --json > "$WORK/vigra-validation.json"
+
+      - name: Upload bootstrap evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vigra-bootstrap-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/vigra-bootstrap/template-validation.json
+            ${{ runner.temp }}/vigra-bootstrap/vigra-validation.json
+          retention-days: 7

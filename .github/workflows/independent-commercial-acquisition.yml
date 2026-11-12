@@ -80,12 +80,23 @@ jobs:
                   raise SystemExit("Could not resolve current source default-branch commit")
           # Explicitly source-available / non-open-source licenses and missing license
           # metadata are represented as link-and-metadata references, not copied code.
-          reference_only_ids = {
-              "NOASSERTION", "OTHER", "BUSL-1.1", "SSPL-1.0", "Elastic-2.0",
-              "PolyForm-Noncommercial-1.0.0", "PolyForm-Small-Business-1.0.0",
-              "CC-BY-NC-4.0", "CC-BY-NC-SA-4.0", "Commons-Clause"
+          # Full private source mirrors are limited to recognized open-source
+          # licenses. Copyleft licenses are included: private study is allowed,
+          # while downstream distribution/network obligations must be reviewed later.
+          open_source_ids = {
+              "MIT", "Apache-2.0", "BSD-2-Clause", "BSD-3-Clause", "ISC", "0BSD",
+              "Zlib", "PostgreSQL", "Unlicense", "BSL-1.0", "BlueOak-1.0.0",
+              "AFL-3.0", "Artistic-2.0", "CDDL-1.0", "CDDL-1.1", "CPL-1.0",
+              "EPL-1.0", "EPL-2.0", "EUPL-1.1", "EUPL-1.2", "IPL-1.0",
+              "MPL-1.1", "MPL-2.0", "OSL-3.0", "Python-2.0", "PSF-2.0",
+              "Ruby", "UPL-1.0", "ZPL-2.1", "MulanPSL-2.0", "OpenSSL",
+              "GPL-2.0", "GPL-2.0-only", "GPL-2.0-or-later",
+              "GPL-3.0", "GPL-3.0-only", "GPL-3.0-or-later",
+              "LGPL-2.1", "LGPL-2.1-only", "LGPL-2.1-or-later",
+              "LGPL-3.0", "LGPL-3.0-only", "LGPL-3.0-or-later",
+              "AGPL-3.0", "AGPL-3.0-only", "AGPL-3.0-or-later"
           }
-          mirrorable = license_id not in reference_only_ids
+          mirrorable = license_id in open_source_ids
           if requested_mode == "auto":
               mode = "mirror" if mirrorable else "reference-only"
           elif requested_mode == "mirror":
@@ -239,7 +250,7 @@ jobs:
           else
             default_branch="$SOURCE_DEFAULT_BRANCH"
           fi
-          payload="$(python3 -c 'import json,os; print(json.dumps({"default_branch":os.environ["BRANCH"]}))' BRANCH="$default_branch")"
+          payload="$(BRANCH="$default_branch" python3 -c 'import json,os; print(json.dumps({"default_branch":os.environ["BRANCH"]}))')"
           curl --fail-with-body -sS -X PATCH -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" -H "Content-Type: application/json" "https://api.github.com/repos/$TARGET" -d "$payload" >/dev/null
           echo "Destination default branch set to $default_branch"
           echo "branch=$default_branch" >> "$GITHUB_OUTPUT"

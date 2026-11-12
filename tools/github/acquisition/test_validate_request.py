@@ -1,3 +1,4 @@
+import re
 import sys
 import tempfile
 import unittest
@@ -88,6 +89,46 @@ class AcquisitionRequestValidationTests(unittest.TestCase):
         request = {**self.request, "source_repository": "langgenius/dify", "target_repository": "tpl-ai-dify",
                    "category": "AI workflow builder", "acquisition_mode": "reference-only"}
         self.assertEqual(validate_catalog_authorization(catalog, request, "main", "NOASSERTION")["mode"], "reference-only")
+
+    def test_canonical_catalog_authorizes_all_35_candidates(self):
+        catalog_path = Path(__file__).resolve().parents[3] / "docs/template-portfolio-catalog.md"
+        catalog = catalog_path.read_text()
+        mode = None
+        counts = {"mirror": 0, "reference-only": 0}
+        for line in catalog.splitlines():
+            heading = line.strip().lower()
+            if heading.startswith("## "):
+                if "additional full-source private research mirrors" in heading:
+                    mode = "mirror"
+                elif "additional reference-only candidates" in heading:
+                    mode = "reference-only"
+                else:
+                    mode = None
+            if mode is None or not line.lstrip().startswith("|"):
+                continue
+            cells = [cell.strip() for cell in line.split("|")]
+            if len(cells) < 6:
+                continue
+            source_match = re.search(r"https://github\\.com/([^/]+)/([^/)\\s]+)", cells[2], re.IGNORECASE)
+            if not source_match:
+                continue
+            commit_cell = cells[6] if mode == "mirror" else cells[5]
+            commit_match = re.search(r"[0-9a-f]{40}", commit_cell)
+            if not commit_match:
+                continue
+            source = f"{source_match.group(1)}/{source_match.group(2)}"
+            target = cells[3].strip().strip("`")
+            branch = cells[4].strip().strip("`")
+            category = cells[1].strip().strip("`")
+            license_id = cells[5].strip().strip("`") if mode == "mirror" else "NOASSERTION"
+            request = {"source_repository": source, "target_repository": target,
+                       "source_commit": commit_match.group(0), "category": category,
+                       "acquisition_mode": mode}
+            authorization = validate_catalog_authorization(catalog, request, branch, license_id)
+            self.assertEqual(authorization["branch"], branch)
+            self.assertEqual(authorization["mode"], mode)
+            counts[mode] += 1
+        self.assertEqual(counts, {"mirror": 29, "reference-only": 6})
 
     def test_workflow_contract_uses_valid_github_expression_delimiters(self):
         workflow_path = Path(__file__).resolve().parents[3] / ".github/workflows/independent-commercial-acquisition.yml"

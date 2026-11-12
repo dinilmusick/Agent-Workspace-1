@@ -1,0 +1,1254 @@
+{
+  "snapshot_date": "2026-11-12",
+  "scope": "private internal reference acquisition",
+  "repositories": [
+    {
+      "source_repository": "payloadcms/payload",
+      "target_repository": "tpl-cms-payload",
+      "category": "Payload CMS",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "strapi/strapi",
+      "target_repository": "tpl-cms-strapi",
+      "category": "Strapi",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "directus/directus",
+      "target_repository": "tpl-cms-directus",
+      "category": "Directus",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "keystonejs/keystone",
+      "target_repository": "tpl-cms-keystone",
+      "category": "Keystone",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "TryGhost/Ghost",
+      "target_repository": "tpl-cms-ghost",
+      "category": "Ghost",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "apostrophecms/apostrophe",
+      "target_repository": "tpl-cms-apostrophe",
+      "category": "Apostrophe",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "TinaCMS/tinacms",
+      "target_repository": "tpl-cms-tinacms",
+      "category": "TinaCMS",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "sanity-io/sanity",
+      "target_repository": "tpl-cms-sanity",
+      "category": "Sanity",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "vuejs/vitepress",
+      "target_repository": "tpl-docs-vitepress",
+      "category": "VitePress",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "mkdocs/mkdocs",
+      "target_repository": "tpl-docs-mkdocs",
+      "category": "MkDocs",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "sphinx-doc/sphinx",
+      "target_repository": "tpl-docs-sphinx",
+      "category": "Sphinx",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "honkit/honkit",
+      "target_repository": "tpl-docs-honkit",
+      "category": "HonKit",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "11ty/eleventy",
+      "target_repository": "tpl-static-eleventy",
+      "category": "Eleventy",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "getpelican/pelican",
+      "target_repository": "tpl-static-pelican",
+      "category": "Pelican",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "hexojs/hexo",
+      "target_repository": "tpl-static-hexo",
+      "category": "Hexo",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "gatsbyjs/gatsby",
+      "target_repository": "tpl-static-gatsby",
+      "category": "Gatsby",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "jekyll/jekyll",
+      "target_repository": "tpl-static-jekyll",
+      "category": "Jekyll",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "GrapesJS/grapesjs",
+      "target_repository": "tpl-website-grapesjs",
+      "category": "GrapesJS",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "webstudio-is/webstudio",
+      "target_repository": "tpl-builder-webstudio",
+      "category": "Webstudio",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "requarks/wiki",
+      "target_repository": "tpl-wiki-wiki",
+      "category": "Wiki.js",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "dokuwiki/dokuwiki",
+      "target_repository": "tpl-wiki-dokuwiki",
+      "category": "DokuWiki",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "tiddlywiki/tiddlywiki",
+      "target_repository": "tpl-wiki-tiddlywiki",
+      "category": "TiddlyWiki",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "outline/outline",
+      "target_repository": "tpl-wiki-outline",
+      "category": "Outline",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "xwiki/xwiki-platform",
+      "target_repository": "tpl-wiki-xwiki-platform",
+      "category": "XWiki",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "bagisto/bagisto",
+      "target_repository": "tpl-commerce-bagisto",
+      "category": "Bagisto",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "saleor/saleor",
+      "target_repository": "tpl-commerce-saleor",
+      "category": "Saleor",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "Sylius/Sylius",
+      "target_repository": "tpl-commerce-sylius",
+      "category": "Sylius",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "spree/spree",
+      "target_repository": "tpl-commerce-spree",
+      "category": "Spree",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "nopSolutions/nopCommerce",
+      "target_repository": "tpl-commerce-nopcommerce",
+      "category": "nopCommerce",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "medusajs/medusa",
+      "target_repository": "tpl-commerce-medusa",
+      "category": "Medusa",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "vendure-ecommerce/vendure",
+      "target_repository": "tpl-commerce-vendure",
+      "category": "Vendure",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "saasfly/saasfly",
+      "target_repository": "tpl-saas-saasfly",
+      "category": "SaaSfly",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "ixartz/Next-js-Boilerplate",
+      "target_repository": "tpl-saas-next-js-boilerplate",
+      "category": "Next.js Boilerplate",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "Blazity/next-enterprise",
+      "target_repository": "tpl-saas-next-enterprise",
+      "category": "Next Enterprise",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "BoxyHQ/saas-quickstart",
+      "target_repository": "tpl-saas-saas-quickstart",
+      "category": "BoxyHQ SaaS Quickstart",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "appsmithorg/appsmith",
+      "target_repository": "tpl-admin-appsmith",
+      "category": "Appsmith",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "ToolJet/ToolJet",
+      "target_repository": "tpl-admin-tooljet",
+      "category": "ToolJet",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "Budibase/budibase",
+      "target_repository": "tpl-admin-budibase",
+      "category": "Budibase",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "nocodb/nocodb",
+      "target_repository": "tpl-admin-nocodb",
+      "category": "NocoDB",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "marmelab/react-admin",
+      "target_repository": "tpl-admin-react-admin",
+      "category": "React Admin",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "krayin/laravel-crm",
+      "target_repository": "tpl-crm-krayin",
+      "category": "Krayin CRM",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "TwentyHQ/twenty",
+      "target_repository": "tpl-crm-twenty",
+      "category": "Twenty CRM",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "espocrm/espocrm",
+      "target_repository": "tpl-crm-espocrm",
+      "category": "EspoCRM",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "SuiteCRM/SuiteCRM",
+      "target_repository": "tpl-crm-suitecrm",
+      "category": "SuiteCRM",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "YetiForceCompany/YetiForceCRM",
+      "target_repository": "tpl-crm-yetiforcecrm",
+      "category": "YetiForce CRM",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "Django-CRM/Django-CRM",
+      "target_repository": "tpl-crm-bottlecrm",
+      "category": "BottleCRM",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "aureuserp/aureuserp",
+      "target_repository": "tpl-erp-aureuserp",
+      "category": "AureusERP",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "apache/ofbiz-framework",
+      "target_repository": "tpl-erp-ofbiz",
+      "category": "Apache OFBiz",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "frappe/erpnext",
+      "target_repository": "tpl-erp-erpnext",
+      "category": "ERPNext",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "dolibarr/dolibarr",
+      "target_repository": "tpl-erp-dolibarr",
+      "category": "Dolibarr",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "metasfresh/metasfresh",
+      "target_repository": "tpl-erp-metasfresh",
+      "category": "metasfresh",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "odoo/odoo",
+      "target_repository": "tpl-erp-odoo",
+      "category": "Odoo",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "FOSSBilling/FOSSBilling",
+      "target_repository": "tpl-billing-fossbilling",
+      "category": "FOSSBilling",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "killbill/killbill",
+      "target_repository": "tpl-billing-killbill",
+      "category": "Kill Bill",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "InvoicePlane/InvoicePlane",
+      "target_repository": "tpl-billing-invoiceplane",
+      "category": "InvoicePlane",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "crater-invoice/crater",
+      "target_repository": "tpl-billing-crater",
+      "category": "Crater",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "solidinvoice/solidinvoice",
+      "target_repository": "tpl-billing-solidinvoice",
+      "category": "SolidInvoice",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "invoiceninja/invoiceninja",
+      "target_repository": "tpl-billing-invoiceninja",
+      "category": "Invoice Ninja",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "wekan/wekan",
+      "target_repository": "tpl-project-wekan",
+      "category": "Wekan",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "taigaio/taiga-back",
+      "target_repository": "tpl-project-taiga-back",
+      "category": "Taiga",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "plane-so/plane",
+      "target_repository": "tpl-project-plane",
+      "category": "Plane",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "leantime/leantime",
+      "target_repository": "tpl-project-leantime",
+      "category": "Leantime",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "OpenProject/openproject",
+      "target_repository": "tpl-project-openproject",
+      "category": "OpenProject",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "snipe/snipe-it",
+      "target_repository": "tpl-inventory-snipe-it",
+      "category": "Snipe-IT",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "grocy/grocy",
+      "target_repository": "tpl-inventory-grocy",
+      "category": "Grocy",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "Part-DB/Part-DB-server",
+      "target_repository": "tpl-inventory-part-db-server",
+      "category": "Part-DB",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "pretix/pretix",
+      "target_repository": "tpl-event-pretix",
+      "category": "pretix",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "pretalx/pretalx",
+      "target_repository": "tpl-event-pretalx",
+      "category": "pretalx",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "frab/frab",
+      "target_repository": "tpl-event-frab",
+      "category": "frab",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "discourse/discourse",
+      "target_repository": "tpl-forum-discourse",
+      "category": "Discourse",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "NodeBB/NodeBB",
+      "target_repository": "tpl-forum-nodebb",
+      "category": "NodeBB",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "forem/forem",
+      "target_repository": "tpl-forum-forem",
+      "category": "Forem",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "zulip/zulip",
+      "target_repository": "tpl-chat-zulip",
+      "category": "Zulip",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "RocketChat/Rocket.Chat",
+      "target_repository": "tpl-chat-rocket-chat",
+      "category": "Rocket.Chat",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "mattermost/mattermost",
+      "target_repository": "tpl-chat-mattermost",
+      "category": "Mattermost",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "matrix-org/synapse",
+      "target_repository": "tpl-chat-synapse",
+      "category": "Matrix Synapse",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "Mintplex-Labs/anything-llm",
+      "target_repository": "tpl-ai-anythingllm",
+      "category": "AnythingLLM",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "open-webui/open-webui",
+      "target_repository": "tpl-ai-workspace-open-webui",
+      "category": "Open WebUI",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "lobehub/lobehub",
+      "target_repository": "tpl-ai-workspace-lobehub",
+      "category": "LobeHub",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "danny-avila/LibreChat",
+      "target_repository": "tpl-ai-workspace-librechat",
+      "category": "LibreChat",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "big-agi/big-AGI",
+      "target_repository": "tpl-ai-workspace-big-agi",
+      "category": "Big-AGI",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "arc53/DocsGPT",
+      "target_repository": "tpl-ai-docsgpt",
+      "category": "DocsGPT",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "infiniflow/ragflow",
+      "target_repository": "tpl-rag-ragflow",
+      "category": "RAGFlow",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "deepset-ai/haystack",
+      "target_repository": "tpl-rag-haystack",
+      "category": "Haystack",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "Cinnamon/kotaemon",
+      "target_repository": "tpl-rag-kotaemon",
+      "category": "Kotaemon",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "langchain-ai/langchain",
+      "target_repository": "tpl-rag-langchain",
+      "category": "LangChain",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "langflow-ai/langflow",
+      "target_repository": "tpl-ai-flows-langflow",
+      "category": "Langflow",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "FlowiseAI/Flowise",
+      "target_repository": "tpl-ai-flows-flowise",
+      "category": "Flowise",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "n8n-io/n8n",
+      "target_repository": "tpl-ai-flows-n8n",
+      "category": "n8n",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "langchain-ai/langgraph",
+      "target_repository": "tpl-agents-langgraph",
+      "category": "LangGraph",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "agno-agi/agno",
+      "target_repository": "tpl-agents-agno",
+      "category": "Agno",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "crewAIInc/crewAI",
+      "target_repository": "tpl-agents-crewai",
+      "category": "CrewAI",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "microsoft/autogen",
+      "target_repository": "tpl-agents-autogen",
+      "category": "AutoGen",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "All-Hands-AI/OpenHands",
+      "target_repository": "tpl-agents-openhands",
+      "category": "OpenHands",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "activepieces/activepieces",
+      "target_repository": "tpl-automation-activepieces",
+      "category": "Activepieces",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "kestra-io/kestra",
+      "target_repository": "tpl-automation-kestra",
+      "category": "Kestra",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "huginn/huginn",
+      "target_repository": "tpl-automation-huginn",
+      "category": "Huginn",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "windmill-labs/windmill",
+      "target_repository": "tpl-automation-windmill",
+      "category": "Windmill",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "camunda/camunda",
+      "target_repository": "tpl-orchestration-camunda",
+      "category": "Camunda",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "conductor-oss/conductor",
+      "target_repository": "tpl-orchestration-conductor",
+      "category": "Conductor",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "dagster-io/dagster",
+      "target_repository": "tpl-orchestration-dagster",
+      "category": "Dagster",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "PrefectHQ/prefect",
+      "target_repository": "tpl-orchestration-prefect",
+      "category": "Prefect",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "apache/airflow",
+      "target_repository": "tpl-pipeline-airflow",
+      "category": "Apache Airflow",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "meltano/meltano",
+      "target_repository": "tpl-pipeline-meltano",
+      "category": "Meltano",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "dlt-hub/dlt",
+      "target_repository": "tpl-pipeline-dlt",
+      "category": "dlt",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "apache/nifi",
+      "target_repository": "tpl-pipeline-nifi",
+      "category": "Apache NiFi",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "apache/superset",
+      "target_repository": "tpl-bi-superset",
+      "category": "Apache Superset",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "metabase/metabase",
+      "target_repository": "tpl-bi-metabase",
+      "category": "Metabase",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "getredash/redash",
+      "target_repository": "tpl-bi-redash",
+      "category": "Redash",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "lightdash/lightdash",
+      "target_repository": "tpl-bi-lightdash",
+      "category": "Lightdash",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "evidence-dev/evidence",
+      "target_repository": "tpl-bi-evidence",
+      "category": "Evidence",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "umami-software/umami",
+      "target_repository": "tpl-analytics-umami",
+      "category": "Umami",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "plausible/analytics",
+      "target_repository": "tpl-analytics-analytics",
+      "category": "Plausible",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "posthog/posthog",
+      "target_repository": "tpl-analytics-posthog",
+      "category": "PostHog",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "matomo-org/matomo",
+      "target_repository": "tpl-analytics-matomo",
+      "category": "Matomo",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "coollabsio/coolify",
+      "target_repository": "tpl-deployment-coolify",
+      "category": "Coolify",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "dokku/dokku",
+      "target_repository": "tpl-deployment-dokku",
+      "category": "Dokku",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "caprover/caprover",
+      "target_repository": "tpl-paas-caprover",
+      "category": "CapRover",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "henrygd/beszel",
+      "target_repository": "tpl-monitoring-beszel",
+      "category": "Beszel",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "louislam/uptime-kuma",
+      "target_repository": "tpl-monitoring-uptime-kuma",
+      "category": "Uptime Kuma",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "prometheus/prometheus",
+      "target_repository": "tpl-monitoring-prometheus",
+      "category": "Prometheus",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "netdata/netdata",
+      "target_repository": "tpl-monitoring-netdata",
+      "category": "Netdata",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "grafana/grafana",
+      "target_repository": "tpl-monitoring-grafana",
+      "category": "Grafana",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "netbox-community/netbox",
+      "target_repository": "tpl-network-netbox",
+      "category": "NetBox",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "phpipam/phpipam",
+      "target_repository": "tpl-network-phpipam",
+      "category": "phpIPAM",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "nautobot/nautobot",
+      "target_repository": "tpl-network-nautobot",
+      "category": "Nautobot",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "netdisco/netdisco",
+      "target_repository": "tpl-network-netdisco",
+      "category": "Netdisco",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "louislam/dockge",
+      "target_repository": "tpl-docker-ui-dockge",
+      "category": "Dockge",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "portainer/portainer",
+      "target_repository": "tpl-docker-ui-portainer",
+      "category": "Portainer",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "Selfhostedpro/Yacht",
+      "target_repository": "tpl-docker-ui-yacht",
+      "category": "Yacht",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "papermerge/papermerge",
+      "target_repository": "tpl-dms-papermerge",
+      "category": "Papermerge",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "paperless-ngx/paperless-ngx",
+      "target_repository": "tpl-dms-paperless-ngx",
+      "category": "Paperless-ngx",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "mayan-edms/Mayan-EDMS",
+      "target_repository": "tpl-dms-mayan-edms",
+      "category": "Mayan EDMS",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "gotenberg/gotenberg",
+      "target_repository": "tpl-pdf-gotenberg",
+      "category": "Gotenberg",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "Stirling-Tools/Stirling-PDF",
+      "target_repository": "tpl-pdf-stirling-pdf",
+      "category": "Stirling PDF",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "mozilla/pdf.js",
+      "target_repository": "tpl-pdf-pdf-js",
+      "category": "PDF.js",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "medplum/medplum",
+      "target_repository": "tpl-health-medplum",
+      "category": "Medplum",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "openemr/openemr",
+      "target_repository": "tpl-health-openemr",
+      "category": "OpenEMR",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "openmrs/openmrs-core",
+      "target_repository": "tpl-health-openmrs-core",
+      "category": "OpenMRS",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "Bahmni/bahmni-core",
+      "target_repository": "tpl-health-bahmni-core",
+      "category": "Bahmni",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "GNUHealth/gnuhealth",
+      "target_repository": "tpl-health-gnuhealth",
+      "category": "GNU Health",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "OHIF/Viewers",
+      "target_repository": "tpl-imaging-viewers",
+      "category": "OHIF Viewer",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "orthanc-server/orthanc",
+      "target_repository": "tpl-imaging-orthanc",
+      "category": "Orthanc",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "dcm4che/dcm4che",
+      "target_repository": "tpl-imaging-dcm4che",
+      "category": "dcm4che",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "cornerstonejs/cornerstone3D",
+      "target_repository": "tpl-imaging-cornerstone3d",
+      "category": "Cornerstone3D",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "infinitered/ignite",
+      "target_repository": "tpl-react-native-ignite",
+      "category": "Ignite",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "expo/expo",
+      "target_repository": "tpl-react-native-expo",
+      "category": "Expo",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "callstack/react-native-paper",
+      "target_repository": "tpl-react-native-react-native-paper",
+      "category": "React Native Paper",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "gluestack/gluestack-ui",
+      "target_repository": "tpl-react-native-gluestack-ui",
+      "category": "Gluestack UI",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "electron-react-boilerplate/electron-react-boilerplate",
+      "target_repository": "tpl-electron-electron-react-boilerplate",
+      "category": "Electron React Boilerplate",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "electron-vite/electron-vite",
+      "target_repository": "tpl-electron-electron-vite",
+      "category": "Electron Vite",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "electron/forge",
+      "target_repository": "tpl-electron-forge",
+      "category": "Electron Forge",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "tauri-apps/tauri",
+      "target_repository": "tpl-electron-tauri",
+      "category": "Tauri",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "fastapi/full-stack-fastapi-template",
+      "target_repository": "tpl-backend-fastapi",
+      "category": "FastAPI Full Stack",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "cookiecutter/cookiecutter-django",
+      "target_repository": "tpl-python-cookiecutter-django",
+      "category": "Cookiecutter Django",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "django/django",
+      "target_repository": "tpl-python-django",
+      "category": "Django",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "litestar-org/litestar",
+      "target_repository": "tpl-python-litestar",
+      "category": "Litestar",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "loco-rs/loco",
+      "target_repository": "tpl-rust-loco",
+      "category": "Loco",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "actix/actix-web",
+      "target_repository": "tpl-rust-actix-web",
+      "category": "Actix Web",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "tokio-rs/axum",
+      "target_repository": "tpl-rust-axum",
+      "category": "Axum",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "gofiber/fiber",
+      "target_repository": "tpl-go-fiber",
+      "category": "Fiber",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "gin-gonic/gin",
+      "target_repository": "tpl-go-gin",
+      "category": "Gin",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "go-chi/chi",
+      "target_repository": "tpl-go-chi",
+      "category": "Chi",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "go-kratos/kratos",
+      "target_repository": "tpl-go-kratos",
+      "category": "Kratos",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "jasontaylordev/CleanArchitecture",
+      "target_repository": "tpl-dotnet-cleanarchitecture",
+      "category": "Clean Architecture",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "ardalis/CleanArchitecture",
+      "target_repository": "tpl-dotnet-cleanarchitecture-ardalis",
+      "category": "Ardalis Clean Architecture",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "dotnet/eShop",
+      "target_repository": "tpl-dotnet-eshop",
+      "category": "eShop",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "laravel/laravel",
+      "target_repository": "tpl-php-laravel",
+      "category": "Laravel",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "symfony/symfony",
+      "target_repository": "tpl-php-symfony",
+      "category": "Symfony",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "symfony/demo",
+      "target_repository": "tpl-php-demo",
+      "category": "Symfony Demo",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "jhipster/generator-jhipster",
+      "target_repository": "tpl-java-generator-jhipster",
+      "category": "JHipster",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "spring-projects/spring-petclinic",
+      "target_repository": "tpl-java-spring-petclinic",
+      "category": "Spring Petclinic",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "quarkusio/quarkus",
+      "target_repository": "tpl-java-quarkus",
+      "category": "Quarkus",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "owncast/owncast",
+      "target_repository": "tpl-live-owncast",
+      "category": "Owncast",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "peertube/PeerTube",
+      "target_repository": "tpl-live-peertube",
+      "category": "PeerTube",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "jitsi/jitsi-meet",
+      "target_repository": "tpl-video-jitsi-meet",
+      "category": "Jitsi Meet",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "bigbluebutton/bigbluebutton",
+      "target_repository": "tpl-video-bigbluebutton",
+      "category": "BigBlueButton",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "zammad/zammad",
+      "target_repository": "tpl-helpdesk-zammad",
+      "category": "Zammad",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "freescout-helpdesk/freescout",
+      "target_repository": "tpl-helpdesk-freescout",
+      "category": "FreeScout",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "osTicket/osTicket",
+      "target_repository": "tpl-helpdesk-osticket",
+      "category": "osTicket",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "glpi-project/glpi",
+      "target_repository": "tpl-helpdesk-glpi",
+      "category": "GLPI",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "moodle/moodle",
+      "target_repository": "tpl-lms-moodle",
+      "category": "Moodle",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "instructure/canvas-lms",
+      "target_repository": "tpl-lms-canvas-lms",
+      "category": "Canvas LMS",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "chamilo/chamilo-lms",
+      "target_repository": "tpl-lms-chamilo-lms",
+      "category": "Chamilo",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "ILIAS-e.V./ILIAS",
+      "target_repository": "tpl-lms-ilias",
+      "category": "ILIAS",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "Docuseal/docuseal",
+      "target_repository": "tpl-esign-docuseal",
+      "category": "DocuSeal",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "documenso/documenso",
+      "target_repository": "tpl-esign-documenso",
+      "category": "Documenso",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "OpenSignLabs/OpenSign",
+      "target_repository": "tpl-esign-opensign",
+      "category": "OpenSign",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "syncthing/syncthing",
+      "target_repository": "tpl-filesync-syncthing",
+      "category": "Syncthing",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "nextcloud/server",
+      "target_repository": "tpl-filesync-server",
+      "category": "Nextcloud",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "owncloud/core",
+      "target_repository": "tpl-filesync-core",
+      "category": "ownCloud",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "seafileltd/seafile",
+      "target_repository": "tpl-filesync-seafile",
+      "category": "Seafile",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "gnucash/gnucash",
+      "target_repository": "tpl-accounting-gnucash",
+      "category": "GnuCash",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "hledger/hledger",
+      "target_repository": "tpl-accounting-hledger",
+      "category": "hledger",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "Akaunting/akaunting",
+      "target_repository": "tpl-accounting-akaunting",
+      "category": "Akaunting",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "frappe/books",
+      "target_repository": "tpl-accounting-books",
+      "category": "Frappe Books",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "frappe/hrms",
+      "target_repository": "tpl-hrms-hrms",
+      "category": "Frappe HRMS",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "orangehrm/orangehrm",
+      "target_repository": "tpl-hrms-orangehrm",
+      "category": "OrangeHRM",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "OpenCATS/OpenCATS",
+      "target_repository": "tpl-recruitment-opencats",
+      "category": "OpenCATS",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "Infisical/infisical",
+      "target_repository": "tpl-secrets-infisical",
+      "category": "Infisical",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "openbao/openbao",
+      "target_repository": "tpl-secrets-openbao",
+      "category": "OpenBao",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "thingsboard/thingsboard",
+      "target_repository": "tpl-iot-thingsboard",
+      "category": "ThingsBoard",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "eclipse/mosquitto",
+      "target_repository": "tpl-iot-mosquitto",
+      "category": "Eclipse Mosquitto",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "chirpstack/chirpstack",
+      "target_repository": "tpl-iot-chirpstack",
+      "category": "ChirpStack",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "home-assistant/core",
+      "target_repository": "tpl-iot-core",
+      "category": "Home Assistant",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "calcom/cal.com",
+      "target_repository": "tpl-booking-cal-com",
+      "category": "Cal.com",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "easyappointments/easyappointments",
+      "target_repository": "tpl-booking-easyappointments",
+      "category": "EasyAppointments",
+      "acquisition_mode": "auto"
+    },
+    {
+      "source_repository": "LibreBooking/librebooking",
+      "target_repository": "tpl-booking-librebooking",
+      "category": "LibreBooking",
+      "acquisition_mode": "auto"
+    }
+  ]
+}

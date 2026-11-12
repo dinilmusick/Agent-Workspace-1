@@ -28,6 +28,9 @@ def refs(repo):
     output=git(["for-each-ref","--format=%(refname) %(objectname)"],cwd=repo).stdout
     return {line.split(" ",1)[0]:line.split(" ",1)[1] for line in output.splitlines() if line.strip()}
 
+def writable_refs(repo):
+    return {ref:sha for ref,sha in refs(repo).items() if not ref.startswith(("refs/pull/","refs/merge-queue/","refs/remotes/"))}
+
 def objects(repo):
     output=git(["rev-list","--objects","--all"],cwd=repo).stdout
     return sorted({line.split(" ",1)[0] for line in output.splitlines() if line.strip()})
@@ -92,18 +95,30 @@ def main():
             git(["remote","remove","origin"],cwd=source_path)
             if git(["remote"],cwd=source_path).stdout.strip():
                 raise RuntimeError("Read-only source comparison clone retained a remote.")
-            source_refs=refs(source_path)
+            source_refs=writable_refs(source_path)
+            if any(ref.startswith("refs/ultrst-archive/") for ref in source_refs):
+                raise RuntimeError("Upstream uses the reserved refs/ultrst-archive namespace.")
             if source_refs.get(f"refs/heads/{branch}")!=commit:
                 raise RuntimeError("Upstream source clone does not resolve to the approved default-branch SHA.")
-            if destination_refs!=source_refs:
-                missing=sorted(set(source_refs)-set(destination_refs))
-                extra=sorted(set(destination_refs)-set(source_refs))
-                changed=sorted(ref for ref in set(source_refs)&set(destination_refs) if source_refs[ref]!=destination_refs[ref])
-                raise RuntimeError(f"Independent read-only verifier found Git ref mismatches; missing={missing[:10]}, extra={extra[:10]}, changed={changed[:10]}.")
-            if objects(destination)!=objects(source_path):
-                raise RuntimeError("Independent read-only verifier found reachable history/object mismatches.")
-            result="Read-only verifier independently matched every writable ref and reachable object ID, plus exact default branch, pin, private/non-fork metadata and provenance."
-    summary(f"## Independent read-only acquisition verification\n\n- Status: **passed**\n- Destination: https://github.com/{target}\n- Upstream: https://github.com/{source}\n- Pinned commit: {commit}\n- Mode: {mode}\n- Result: {result}\n\nThis confirms acquisition only; commercial clearance remains separate.")
+            archive_refs={ref:sha for ref,sha in destination_refs.items() if ref.startswith("refs/ultrst-archive/")}
+            upstream_destination_refs={ref:sha for ref,sha in destination_refs.items() if not ref.startswith("refs/ultrst-archive/")}
+            if upstream_destination_refs!=source_refs:
+                missing=sorted(set(source_refs)-set(upstream_destination_refs))
+                extra=sorted(set(upstream_destination_refs)-set(source_refs))
+                changed=sorted(ref for ref in set(source_refs)&set(upstream_destination_refs) if source_refs[ref]!=upstream_destination_refs[ref])
+                raise RuntimeError(f"Independent read-only verifier found upstream ref mismatches; missing={missing[:10]}, extra={extra[:10]}, changed={changed[:10]}.")
+            import re
+            for archive_ref,archive_sha in archive_refs.items():
+                if not re.fullmatch(r"refs/ultrst-archive/[0-9a-f]{16}/[0-9a-f]{40}",archive_ref) or archive_ref.rsplit("/",1)[-1]!=archive_sha:
+                    raise RuntimeError(f"Malformed history-preservation ref {archive_ref}.")
+                object_type=git(["cat-file","-t",archive_sha],cwd=destination).stdout.strip()
+                if object_type not in {"commit","tag"}:
+                    raise RuntimeError(f"History-preservation ref {archive_ref} does not point to a commit or tag object.")
+            if not set(objects(source_path)).issubset(set(objects(destination))):
+                raise RuntimeError("Independent read-only verifier found upstream reachable objects missing from destination history.")
+            result=f"Read-only verifier matched every live upstream writable ref and reachable object ID, plus exact default branch, pin, private/non-fork metadata and provenance; preserved {len(archive_refs)} prior ref tip(s) in refs/ultrst-archive/."
+    archive_details = "\n".join(f"- {ref} ({sha})" for ref,sha in sorted(archive_refs.items())) if mode != "reference-only" else "- None"
+    summary(f"## Independent read-only acquisition verification\n\n- Status: **passed**\n- Destination: https://github.com/{target}\n- Upstream: https://github.com/{source}\n- Pinned commit: {commit}\n- Mode: {mode}\n- Result: {result}\n\n### Preserved history refs\n\n{archive_details}\n\nThis confirms acquisition only; commercial clearance remains separate.")
     print(json.dumps({"destination":target,"source":source,"commit":commit,"mode":mode,"verification":"passed","result":result},indent=2))
 
 if __name__=="__main__":

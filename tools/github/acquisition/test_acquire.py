@@ -5,67 +5,90 @@ import unittest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from acquire import ensure_existing_refs_are_safe
+from acquire import preserve_and_reconcile_existing_refs
 
 
-def run_git(repo, *args):
-    return subprocess.run(["git", *args], cwd=repo, check=True, capture_output=True, text=True).stdout.strip()
+def run_git(repo, *args, check=True):
+    result = subprocess.run(["git", *args], cwd=repo, check=check, capture_output=True, text=True)
+    return result.stdout.strip()
 
 
-class SafeFastForwardResumeTests(unittest.TestCase):
+def init_repo(path, branch="main", content="first\n"):
+    path.mkdir(parents=True, exist_ok=True)
+    run_git(path, "init", "-b", branch)
+    run_git(path, "config", "user.name", "Acquisition Test")
+    run_git(path, "config", "user.email", "acquisition-test@example.invalid")
+    (path / "file.txt").write_text(content)
+    run_git(path, "add", "file.txt")
+    run_git(path, "commit", "-m", "initial")
+    return run_git(path, "rev-parse", "HEAD")
+
+
+class PreserveUpstreamHistoryTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
-        self.repo = Path(self.temp.name) / "repo"
-        self.repo.mkdir()
-        run_git(self.repo, "init", "-b", "main")
-        run_git(self.repo, "config", "user.name", "Acquisition Test")
-        run_git(self.repo, "config", "user.email", "acquisition-test@example.invalid")
-        (self.repo / "file.txt").write_text("first\n")
-        run_git(self.repo, "add", "file.txt")
-        run_git(self.repo, "commit", "-m", "first")
-        self.first = run_git(self.repo, "rev-parse", "HEAD")
-        (self.repo / "file.txt").write_text("second\n")
-        run_git(self.repo, "commit", "-am", "second")
-        self.second = run_git(self.repo, "rev-parse", "HEAD")
+        self.root = Path(self.temp.name)
+        self.source = self.root / "source"
+        self.first = init_repo(self.source)
+        self.destination = self.root / "destination.git"
+        run_git(self.root, "clone", "--bare", str(self.source), str(self.destination))
+        (self.source / "file.txt").write_text("second\n")
+        run_git(self.source, "commit", "-am", "second")
+        self.second = run_git(self.source, "rev-parse", "HEAD")
 
     def tearDown(self):
         self.temp.cleanup()
 
-    def test_allows_existing_branch_that_is_behind_by_fast_forward(self):
-        ensure_existing_refs_are_safe(
-            {"refs/heads/main": self.first},
-            {"refs/heads/main": self.second},
-            self.repo,
+    def test_allows_fast_forward_without_creating_archive(self):
+        source_refs = {"refs/heads/main": self.second}
+        archived = preserve_and_reconcile_existing_refs(
+            {"refs/heads/main": self.first}, source_refs, self.source, self.destination
         )
+        self.assertEqual(archived, [])
+        self.assertEqual(source_refs, {"refs/heads/main": self.second})
 
-    def test_rejects_divergent_branch_history(self):
-        run_git(self.repo, "checkout", "--orphan", "divergent")
-        (self.repo / "other.txt").write_text("different history\n")
-        run_git(self.repo, "add", "other.txt")
-        run_git(self.repo, "commit", "-m", "divergent")
-        divergent = run_git(self.repo, "rev-parse", "HEAD")
-        with self.assertRaisesRegex(RuntimeError, "not an ancestor"):
-            ensure_existing_refs_are_safe(
-                {"refs/heads/main": self.second},
-                {"refs/heads/main": divergent},
-                self.repo,
-            )
+    def test_archives_force_pushed_branch_tip_before_replacing(self):
+        diverged_destination = self.root / "diverged.git"
+        old_sha = init_repo(self.root / "diverged-work", content="old independent branch\n")
+        run_git(self.root / "diverged-work", "clone", "--bare", ".", str(diverged_destination))
+        source_refs = {"refs/heads/main": self.second}
+        archived = preserve_and_reconcile_existing_refs(
+            {"refs/heads/main": old_sha}, source_refs, self.source, diverged_destination
+        )
+        self.assertEqual(len(archived), 1)
+        archive_ref = archived[0]["archive_ref"]
+        self.assertTrue(archive_ref.startswith("refs/ultrst-archive/"))
+        self.assertEqual(source_refs[archive_ref], old_sha)
+        self.assertEqual(run_git(self.source, "rev-parse", archive_ref), old_sha)
+        self.assertEqual(run_git(self.source, "cat-file", "-t", old_sha), "commit")
 
-    def test_rejects_changed_tags(self):
-        with self.assertRaisesRegex(RuntimeError, "non-branch ref"):
-            ensure_existing_refs_are_safe(
-                {"refs/tags/v1": self.first},
-                {"refs/tags/v1": self.second},
-                self.repo,
-            )
+    def test_archives_changed_tag_object(self):
+        run_git(self.destination, "tag", "v1", self.first)
+        run_git(self.source, "tag", "v1", self.second)
+        source_refs = {"refs/heads/main": self.second, "refs/tags/v1": self.second}
+        archived = preserve_and_reconcile_existing_refs(
+            {"refs/heads/main": self.first, "refs/tags/v1": self.first},
+            source_refs,
+            self.source,
+            self.destination,
+        )
+        self.assertEqual(len(archived), 1)
+        self.assertEqual(archived[0]["source_ref"], "refs/tags/v1")
+        self.assertEqual(run_git(self.source, "rev-parse", archived[0]["archive_ref"]), self.first)
 
-    def test_rejects_destination_refs_missing_upstream(self):
-        with self.assertRaisesRegex(RuntimeError, "absent upstream"):
-            ensure_existing_refs_are_safe(
-                {"refs/heads/foreign": self.first},
-                {"refs/heads/main": self.second},
-                self.repo,
-            )
+    def test_archives_deleted_upstream_branch_tip(self):
+        run_git(self.destination, "branch", "feature", self.first)
+        source_refs = {"refs/heads/main": self.second}
+        archived = preserve_and_reconcile_existing_refs(
+            {"refs/heads/main": self.first, "refs/heads/feature": self.first},
+            source_refs,
+            self.source,
+            self.destination,
+        )
+        self.assertEqual(len(archived), 1)
+        self.assertEqual(archived[0]["source_ref"], "refs/heads/feature")
+        self.assertNotIn("refs/heads/feature", source_refs)
+        self.assertEqual(run_git(self.source, "rev-parse", archived[0]["archive_ref"]), self.first)
 
 
 if __name__ == "__main__":

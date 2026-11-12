@@ -78,6 +78,9 @@ class AcquisitionRequestValidationTests(unittest.TestCase):
         self.assertNotIn('method="PATCH"', verifier)
         self.assertIn("live_license", verifier)
         self.assertIn('rev-list","--count"', verifier)
+        self.assertIn("refs/ultrst-archive/", verifier)
+        acquisition = Path(__file__).with_name("acquire.py").read_text()
+        self.assertIn("preserve_and_reconcile_existing_refs", acquisition)
 
     def test_github_output_uses_delimited_values(self):
         with tempfile.TemporaryDirectory() as directory:

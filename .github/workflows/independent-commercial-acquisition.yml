@@ -66,6 +66,10 @@ jobs:
           if not default_branch:
               raise SystemExit("Source repository has no default branch")
           license_id = (meta.get("license") or {}).get("spdx_id") or "NOASSERTION"
+          branch_meta = api("https://api.github.com/repos/" + source + "/commits/" + default_branch)
+          branch_head = branch_meta.get("sha", "")
+          if not re.fullmatch(r"[0-9a-f]{40}", branch_head):
+              raise SystemExit("Could not resolve current source default-branch commit")
           if requested_commit:
               if not re.fullmatch(r"[0-9a-f]{40}", requested_commit):
                   raise SystemExit("source_commit must be a full 40-character lowercase SHA")
@@ -73,11 +77,10 @@ jobs:
               source_commit = commit_meta.get("sha")
               if source_commit != requested_commit:
                   raise SystemExit("Pinned source_commit does not resolve")
+              if source_commit != branch_head:
+                  raise SystemExit("Pinned source_commit is no longer the current source default-branch HEAD; refresh the catalog before acquisition")
           else:
-              branch_meta = api("https://api.github.com/repos/" + source + "/commits/" + default_branch)
-              source_commit = branch_meta.get("sha", "")
-              if not re.fullmatch(r"[0-9a-f]{40}", source_commit):
-                  raise SystemExit("Could not resolve current source default-branch commit")
+              source_commit = branch_head
           # Explicitly source-available / non-open-source licenses and missing license
           # metadata are represented as link-and-metadata references, not copied code.
           # Full private source mirrors are limited to recognized open-source

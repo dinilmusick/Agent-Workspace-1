@@ -32,6 +32,20 @@ def refs(repo):
     output = git(["for-each-ref", "--format=%(refname) %(objectname)"], cwd=repo).stdout
     return {line.split(" ", 1)[0]: line.split(" ", 1)[1] for line in output.splitlines() if line.strip()}
 
+def ensure_existing_refs_are_safe(existing_refs, source_refs, source_repo):
+    """Allow exact refs or verified branch fast-forwards; reject divergence and repurposing."""
+    for ref, existing_sha in existing_refs.items():
+        source_sha = source_refs.get(ref)
+        if source_sha is None:
+            raise RuntimeError(f"Existing destination ref {ref} is absent upstream; refusing to overwrite or delete it.")
+        if existing_sha == source_sha:
+            continue
+        if not ref.startswith("refs/heads/"):
+            raise RuntimeError(f"Existing non-branch ref {ref} differs from upstream; refusing to overwrite it.")
+        ancestry = git(["merge-base", "--is-ancestor", existing_sha, source_sha], cwd=source_repo, check=False)
+        if ancestry.returncode != 0:
+            raise RuntimeError(f"Existing branch {ref} is not an ancestor of the live upstream branch; divergent history is never overwritten.")
+
 def remote_refs(url, env):
     output = git(["ls-remote", "--refs", url], env=env).stdout
     return {line.split("\t", 1)[1]: line.split("\t", 1)[0] for line in output.splitlines() if "\t" in line}
@@ -165,16 +179,12 @@ def main():
             source_refs = refs(source_path)
             if source_refs.get(f"refs/heads/{source_branch}") != source_commit:
                 raise RuntimeError("Local mirror does not point its default branch at the approved source commit.")
-            for ref, sha in existing_refs.items():
-                if source_refs.get(ref) != sha:
-                    raise RuntimeError(f"Existing destination ref {ref} is not an exact source ref; refusing to overwrite.")
+            ensure_existing_refs_are_safe(existing_refs, source_refs, source_path)
             if existing_refs:
                 existing_path = temp / "existing.git"
                 git(["clone", "--mirror", target_url, str(existing_path)], env=git_env)
                 git(["fsck", "--full", "--no-reflogs", "--connectivity-only"], cwd=existing_path)
-                for ref, sha in refs(existing_path).items():
-                    if source_refs.get(ref) != sha:
-                        raise RuntimeError(f"Existing destination provenance mismatch at {ref}.")
+                ensure_existing_refs_are_safe(refs(existing_path), source_refs, source_path)
             git(["remote", "add", "destination", target_url], cwd=source_path)
             git(["push", "--mirror", "destination"], cwd=source_path, env=git_env)
             git(["remote", "remove", "destination"], cwd=source_path)

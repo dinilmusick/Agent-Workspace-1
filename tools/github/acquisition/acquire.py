@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Create or safely resume a private independent mirror/reference repository."""
 from __future__ import annotations
-import base64, json, os, pathlib, subprocess, sys, tempfile, urllib.error, urllib.parse, urllib.request
+import base64, hashlib, json, os, pathlib, re, subprocess, sys, tempfile, urllib.error, urllib.parse, urllib.request
 API = "https://api.github.com"
 OWNER = "dinilmusick"
 
@@ -32,23 +32,54 @@ def refs(repo):
     output = git(["for-each-ref", "--format=%(refname) %(objectname)"], cwd=repo).stdout
     return {line.split(" ", 1)[0]: line.split(" ", 1)[1] for line in output.splitlines() if line.strip()}
 
-def ensure_existing_refs_are_safe(existing_refs, source_refs, source_repo):
-    """Allow exact refs or verified branch fast-forwards; reject divergence and repurposing."""
+def archive_ref_name(ref, sha):
+    digest = hashlib.sha256(ref.encode("utf-8")).hexdigest()[:16]
+    return f"refs/ultrst-archive/{digest}/{sha}"
+
+def preserve_and_reconcile_existing_refs(existing_refs, source_refs, source_repo, destination_repo):
+    """Keep every previous destination tip reachable while reconciling refs to live upstream."""
+    archived = []
     for ref, existing_sha in existing_refs.items():
-        source_sha = source_refs.get(ref)
-        if source_sha is None:
-            raise RuntimeError(f"Existing destination ref {ref} is absent upstream; refusing to overwrite or delete it.")
-        if existing_sha == source_sha:
-            continue
-        if not ref.startswith("refs/heads/"):
-            raise RuntimeError(f"Existing non-branch ref {ref} differs from upstream; refusing to overwrite it.")
-        ancestry = git(["merge-base", "--is-ancestor", existing_sha, source_sha], cwd=source_repo, check=False)
-        if ancestry.returncode != 0:
-            raise RuntimeError(f"Existing branch {ref} is not an ancestor of the live upstream branch; divergent history is never overwritten.")
+        if ref.startswith("refs/ultrst-archive/"):
+            if not re.fullmatch(r"refs/ultrst-archive/[0-9a-f]{16}/[0-9a-f]{40}", ref) or ref.rsplit("/", 1)[-1] != existing_sha:
+                raise RuntimeError(f"Malformed ULTRST history-preservation ref {ref}; refusing to trust it.")
+            archive_ref = ref
+        else:
+            source_sha = source_refs.get(ref)
+            if source_sha == existing_sha:
+                continue
+            if source_sha is not None and ref.startswith("refs/heads/"):
+                ancestry = git(["merge-base", "--is-ancestor", existing_sha, source_sha], cwd=source_repo, check=False)
+                if ancestry.returncode == 0:
+                    continue
+            archive_ref = archive_ref_name(ref, existing_sha)
+
+        current_source_refs = refs(source_repo)
+        if current_source_refs.get(archive_ref) != existing_sha:
+            fetch = git(["fetch", "--no-tags", str(destination_repo), f"{ref}:{archive_ref}"], cwd=source_repo, check=False)
+            if fetch.returncode != 0:
+                if git(["cat-file", "-e", existing_sha], cwd=source_repo, check=False).returncode != 0:
+                    raise RuntimeError(f"Could not preserve previous destination history for {ref} at {existing_sha}: {fetch.stderr[-2000:]}")
+                git(["update-ref", archive_ref, existing_sha], cwd=source_repo)
+        if refs(source_repo).get(archive_ref) != existing_sha:
+            raise RuntimeError(f"History preservation ref {archive_ref} does not point to the previous destination object.")
+        source_refs[archive_ref] = existing_sha
+        archived.append({"source_ref": ref, "archive_ref": archive_ref, "sha": existing_sha})
+    return archived
 
 def remote_refs(url, env):
     output = git(["ls-remote", "--refs", url], env=env).stdout
-    return {line.split("\t", 1)[1]: line.split("\t", 1)[0] for line in output.splitlines() if "\t" in line}
+    return {
+        line.split("\t", 1)[1]: line.split("\t", 1)[0]
+        for line in output.splitlines()
+        if "\t" in line and not line.split("\t", 1)[1].startswith(("refs/pull/", "refs/merge-queue/", "refs/remotes/"))
+    }
+
+def writable_refs(repo):
+    return {
+        ref: sha for ref, sha in refs(repo).items()
+        if not ref.startswith(("refs/pull/", "refs/merge-queue/", "refs/remotes/"))
+    }
 
 def reachable_objects(repo):
     output = git(["rev-list", "--objects", "--all"], cwd=repo).stdout
@@ -176,15 +207,18 @@ def main():
                 if ref.startswith(("refs/pull/", "refs/merge-queue/", "refs/remotes/")):
                     git(["update-ref", "-d", ref], cwd=source_path)
             git(["remote", "remove", "origin"], cwd=source_path)
-            source_refs = refs(source_path)
+            source_refs = writable_refs(source_path)
+            if any(ref.startswith("refs/ultrst-archive/") for ref in source_refs):
+                raise RuntimeError("Upstream uses the reserved refs/ultrst-archive namespace; refusing to mix upstream refs with ULTRST history records.")
             if source_refs.get(f"refs/heads/{source_branch}") != source_commit:
                 raise RuntimeError("Local mirror does not point its default branch at the approved source commit.")
-            ensure_existing_refs_are_safe(existing_refs, source_refs, source_path)
+            archived_history = []
             if existing_refs:
                 existing_path = temp / "existing.git"
                 git(["clone", "--mirror", target_url, str(existing_path)], env=git_env)
                 git(["fsck", "--full", "--no-reflogs", "--connectivity-only"], cwd=existing_path)
-                ensure_existing_refs_are_safe(refs(existing_path), source_refs, source_path)
+                archived_history = preserve_and_reconcile_existing_refs(writable_refs(existing_path), source_refs, source_path, existing_path)
+                source_refs = writable_refs(source_path)
             git(["remote", "add", "destination", target_url], cwd=source_path)
             git(["push", "--mirror", "destination"], cwd=source_path, env=git_env)
             git(["remote", "remove", "destination"], cwd=source_path)
@@ -193,7 +227,7 @@ def main():
             verify_path = temp / "destination-verify.git"
             git(["clone", "--mirror", target_url, str(verify_path)], env=git_env)
             git(["fsck", "--full", "--no-reflogs", "--connectivity-only"], cwd=verify_path)
-            final_refs = refs(verify_path)
+            final_refs = writable_refs(verify_path)
             if final_refs != source_refs:
                 missing = sorted(set(source_refs) - set(final_refs))
                 extra = sorted(set(final_refs) - set(source_refs))
@@ -209,7 +243,7 @@ def main():
                 raise RuntimeError("Final destination default branch metadata mismatch.")
             if final_refs.get(f"refs/heads/{source_branch}") != source_commit:
                 raise RuntimeError("Destination default branch does not equal the pinned source commit.")
-            result = "Private independent mirror verified: all writable refs, reachable history, pinned default branch, privacy and non-fork status match."
+            result = f"Private independent mirror verified: all live writable refs, reachable history, pinned default branch, privacy and non-fork status match; preserved {len(archived_history)} previous ref tip(s) under refs/ultrst-archive/."
         write_summary(f"## Acquisition result\n\n- Status: **success**\n- Destination: https://github.com/{target}\n- Upstream: https://github.com/{source}\n- Source commit: {source_commit}\n- Source default branch: {source_branch}\n- GitHub SPDX metadata: {license_id}\n- Acquisition mode: {mode}\n- Verification: {result}\n\nPrivate research acquisition only. No commercial clearance is implied.")
         print(json.dumps({"destination": target, "source": source, "source_commit": source_commit, "mode": mode, "result": result}, indent=2))
 

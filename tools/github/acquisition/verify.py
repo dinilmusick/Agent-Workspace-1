@@ -76,8 +76,11 @@ def main():
         root=pathlib.Path(tmp)
         destination=root/"destination.git"
         git(["clone","--mirror",target_url,str(destination)],env=git_env)
+        for ref in list(refs(destination)):
+            if ref.startswith(("refs/pull/","refs/merge-queue/","refs/remotes/")):
+                git(["update-ref","-d",ref],cwd=destination)
         git(["fsck","--full","--no-reflogs","--connectivity-only"],cwd=destination)
-        destination_refs=refs(destination)
+        destination_refs=writable_refs(destination)
         if mode=="reference-only":
             expected=reference_readme(source,commit,branch,category,license_id)
             tree=git(["ls-tree","-r","--name-only","refs/heads/main"],cwd=destination).stdout.splitlines()

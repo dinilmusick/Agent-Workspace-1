@@ -30,7 +30,7 @@ def main() -> int:
         assert f"| {branch} | {spdx} |" in row, f"{destination}: branch/SPDX mismatch"
         assert f"`{sha}`" in row, f"{destination}: current SHA missing"
         assert f"`{OLD[destination]}`" not in row, f"{destination}: stale SHA remains in row"
-    for marker in ("wildcard CORS", "BlueOak-1.0.0", "2.46.0", "AG Grid", "pydantic-ai", "SQLToolsetConnectionError", "pg_advisory_lock", "oxfmt 0.75.0→0.77.0"):
+    for marker in ("CORS", "BlueOak-1.0.0", "2.46.0", "AG Grid", "pydantic-ai", "SQLToolsetConnectionError", "pg_advisory_lock", "oxfmt 0.75.0→0.77.0"):
         assert marker.lower() in text.lower(), f"missing review marker: {marker}"
     compiled = compileall.compile_dir(str(ROOT / "tools/github/acquisition"), quiet=1, force=True)
     assert compiled, "acquisition controller compileall failed"

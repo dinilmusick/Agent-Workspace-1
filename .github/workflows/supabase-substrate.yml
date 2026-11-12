@@ -1,0 +1,38 @@
+name: Supabase substrate
+
+on:
+  pull_request:
+    paths:
+      - 'supabase/**'
+      - 'tools/supabase/**'
+      - '.github/workflows/supabase-substrate.yml'
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - name: Validate substrate plan
+        run: python3 tools/supabase/substrate/bootstrap.py plan
+      - name: Run substrate unit tests
+        run: python3 -m unittest tools/supabase/substrate/test_bootstrap.py
+
+  deploy:
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: supabase
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - name: Push Agent Substrate
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+          SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
+        run: python3 tools/supabase/substrate/bootstrap.py push

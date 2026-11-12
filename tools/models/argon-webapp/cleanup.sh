@@ -3,7 +3,7 @@ set -euo pipefail
 
 RUNTIME_ROOT="${ARGON_WEBAPP_RUNTIME_DIR:-$HOME/.agent-workspace/argon-webapp}"
 
-if [[ -z "$RUNTIME_ROOT" || "$RUNTIME_ROOT == "/" ]]; then
+if [[ -z "$RUNTIME_ROOT" || "$RUNTIME_ROOT" == "/" ]]; then
   echo "Refusing unsafe cleanup path: $RUNTIME_ROOT" >&2
   exit 1
 fi

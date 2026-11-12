@@ -53,3 +53,10 @@ Every private research mirror remains private. Do not remove upstream notices, r
 ## Security
 
 The acquisition workflow accepts requests only from the account owner. It reads the scoped `CODING_REPO_TOKEN` secret only inside GitHub Actions. Never print, echo, upload or write the token into repository files or artifacts. Do not execute source build scripts during the mirror operation.
+
+
+## Acquisition workflow implementation safeguards
+
+The owner-triggered acquisition controller validates the raw JSON request against the exact canonical catalog URL and verifies the source, destination and full commit SHA on the same catalog row. It re-queries the live source default-branch HEAD and requires exact SHA equality; ancestry alone is insufficient. Every issue-derived field is validated and emitted through unique multiline GitHub Actions output delimiters.
+
+Destinations must be new private non-fork repositories. An existing destination is resumable only when its repository description contains the exact source, commit, category and acquisition-mode provenance marker, and every existing ref is a matching source ref. Unexpected refs or divergent history cause a hard stop; the workflow never overwrites or repurposes an unrelated repository. Mirror verification checks writable refs, reachable object IDs, Git connectivity, default branch, exact pinned SHA, privacy and non-fork status. Reference-only verification requires exactly one README.md file on main and no copied upstream content or history. Temporary Git remotes are removed, and the workflow does not execute upstream code or expose the coding token to logs/artifacts.

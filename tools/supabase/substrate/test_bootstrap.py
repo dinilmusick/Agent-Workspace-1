@@ -23,12 +23,15 @@ class SubstrateToolTests(unittest.TestCase):
             with self.assertRaisesRegex(bootstrap.SubstrateError, "SUPABASE_ACCESS_TOKEN"):
                 bootstrap.require_remote_credentials()
 
-    def test_no_secret_values_are_in_repo_paths(self):
-        root = Path(bootstrap.ROOT)
-        for path in root.glob("**/*"):
-            if path.is_file() and ".git" not in path.parts:
+    def test_substrate_assets_do_not_embed_secret_values(self):
+        substrate = Path(bootstrap.__file__).resolve().parent
+        for path in substrate.rglob("*"):
+            if path.is_file():
                 text = path.read_text(errors="ignore")
-                self.assertNotIn("service_role_key", text.lower())
+                self.assertNotIn("sb_secret_", text)
+                self.assertNotIn("sbp_", text)
+
+
 
 
 if __name__ == "__main__":

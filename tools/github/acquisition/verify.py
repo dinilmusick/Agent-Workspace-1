@@ -1,0 +1,107 @@
+#!/usr/bin/env python3
+"""Read-only second-pass verifier for a completed private acquisition."""
+from __future__ import annotations
+import base64, json, os, pathlib, subprocess, sys, tempfile, urllib.error, urllib.parse, urllib.request
+from acquire import reference_readme
+
+API = "https://api.github.com"
+OWNER = "dinilmusick"
+
+def api_get(token, path):
+    request = urllib.request.Request(API + path, headers={
+        "Accept":"application/vnd.github+json","Authorization":f"Bearer {token}",
+        "X-GitHub-Api-Version":"2022-11-28","User-Agent":"ULTRST-read-only-acquisition-verifier"})
+    try:
+        with urllib.request.urlopen(request,timeout=60) as response:
+            return json.load(response)
+    except urllib.error.HTTPError as exc:
+        detail=exc.read(4096).decode("utf-8",errors="replace")
+        raise RuntimeError(f"Read-only GitHub API GET failed ({exc.code}): {detail}") from None
+
+def git(args,cwd=None,env=None):
+    result=subprocess.run(["git",*args],cwd=cwd,env=env,text=True,capture_output=True)
+    if result.returncode:
+        raise RuntimeError(f"Read-only git {' '.join(args)} failed ({result.returncode}): {result.stderr[-4000:]}")
+    return result
+
+def refs(repo):
+    output=git(["for-each-ref","--format=%(refname) %(objectname)"],cwd=repo).stdout
+    return {line.split(" ",1)[0]:line.split(" ",1)[1] for line in output.splitlines() if line.strip()}
+
+def objects(repo):
+    output=git(["rev-list","--objects","--all"],cwd=repo).stdout
+    return sorted({line.split(" ",1)[0] for line in output.splitlines() if line.strip()})
+
+def summary(message):
+    path=os.environ.get("GITHUB_STEP_SUMMARY")
+    if path:
+        with open(path,"a",encoding="utf-8") as handle: handle.write(message.rstrip()+"\n")
+
+def main():
+    token=os.environ["GH_TOKEN"]
+    source=os.environ["SOURCE"]
+    target=f"{OWNER}/{os.environ['TARGET']}"
+    commit=os.environ["SOURCE_COMMIT"]
+    branch=os.environ["SOURCE_DEFAULT_BRANCH"]
+    category=os.environ["CATEGORY"]
+    license_id=os.environ["LICENSE_ID"]
+    mode=os.environ["MODE"]
+    source_meta=api_get(token,f"/repos/{source}")
+    if source_meta.get("archived") or source_meta.get("disabled"):
+        raise RuntimeError("Upstream is archived or disabled.")
+    live=api_get(token,f"/repos/{source}/commits/{urllib.parse.quote(branch,safe='')}")
+    if live.get("sha")!=commit:
+        raise RuntimeError("Source default branch moved after acquisition.")
+    target_meta=api_get(token,f"/repos/{target}")
+    expected_description=f"ULTRST private {mode}; upstream={source}; commit={commit}; category={category}"
+    if target_meta.get("private") is not True or target_meta.get("fork") is not False:
+        raise RuntimeError("Destination is not private and independent (non-fork).")
+    if target_meta.get("description")!=expected_description:
+        raise RuntimeError("Destination provenance description does not exactly match the requested source, commit, mode and category.")
+    expected_branch="main" if mode=="reference-only" else branch
+    if target_meta.get("default_branch")!=expected_branch:
+        raise RuntimeError("Destination default branch metadata mismatch.")
+    auth=base64.b64encode(f"x-access-token:{token}".encode()).decode()
+    git_env=os.environ.copy()
+    git_env.update({"GIT_TERMINAL_PROMPT":"0","GIT_CONFIG_COUNT":"1","GIT_CONFIG_KEY_0":"http.extraheader",
+        "GIT_CONFIG_VALUE_0":f"AUTHORIZATION: basic {auth}"})
+    target_url=f"https://github.com/{target}.git"
+    with tempfile.TemporaryDirectory(prefix="ultrst-readonly-verify-") as tmp:
+        root=pathlib.Path(tmp)
+        destination=root/"destination.git"
+        git(["clone","--mirror",target_url,str(destination)],env=git_env)
+        git(["fsck","--full","--no-reflogs","--connectivity-only"],cwd=destination)
+        destination_refs=refs(destination)
+        if mode=="reference-only":
+            expected=reference_readme(source,commit,branch,category,license_id)
+            tree=git(["ls-tree","-r","--name-only","refs/heads/main"],cwd=destination).stdout.splitlines()
+            body=git(["show","refs/heads/main:README.md"],cwd=destination).stdout
+            if set(destination_refs)!={"refs/heads/main"} or tree!=["README.md"] or body!=expected:
+                raise RuntimeError("Reference-only destination is not exactly one provenance README.")
+            result="Read-only verifier confirmed private/non-fork metadata, exact provenance and README-only contents."
+        else:
+            source_path=root/"source.git"
+            git(["clone","--mirror",f"https://github.com/{source}.git",str(source_path)])
+            for ref in list(refs(source_path)):
+                if ref.startswith(("refs/pull/","refs/merge-queue/","refs/remotes/")):
+                    git(["update-ref","-d",ref],cwd=source_path)
+            git(["remote","remove","origin"],cwd=source_path)
+            if git(["remote"],cwd=source_path).stdout.strip():
+                raise RuntimeError("Read-only source comparison clone retained a remote.")
+            source_refs=refs(source_path)
+            if source_refs.get(f"refs/heads/{branch}")!=commit:
+                raise RuntimeError("Upstream source clone does not resolve to the approved default-branch SHA.")
+            if destination_refs!=source_refs:
+                raise RuntimeError("Independent read-only verifier found Git ref mismatches.")
+            if objects(destination)!=objects(source_path):
+                raise RuntimeError("Independent read-only verifier found reachable history/object mismatches.")
+            result="Read-only verifier independently matched every writable ref and reachable object ID, plus exact default branch, pin, private/non-fork metadata and provenance."
+    summary(f"## Independent read-only acquisition verification\n\n- Status: **passed**\n- Destination: https://github.com/{target}\n- Upstream: https://github.com/{source}\n- Pinned commit: {commit}\n- Mode: {mode}\n- Result: {result}\n\nThis confirms acquisition only; commercial clearance remains separate.")
+    print(json.dumps({"destination":target,"source":source,"commit":commit,"mode":mode,"verification":"passed","result":result},indent=2))
+
+if __name__=="__main__":
+    try: main()
+    except Exception as exc:
+        print(f"Independent verification failed: {exc}",file=sys.stderr)
+        summary(f"## Independent read-only acquisition verification\n\n- Status: **failed**\n- Reason: {exc}")
+        sys.exit(1)

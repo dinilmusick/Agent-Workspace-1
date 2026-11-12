@@ -69,7 +69,7 @@ def catalog_authorization(catalog: str, request: dict[str, str]) -> dict[str, st
         cells = [cell.strip() for cell in line.split("|")]
         if len(cells) < 6:
             continue
-        source_match = re.search(r"https://github\\.com/([^/]+)/([^/)\\s]+)", cells[2], re.IGNORECASE)
+        source_match = re.search(r"https://github\.com/([^/]+)/([^/)\s]+)", cells[2], re.IGNORECASE)
         if not source_match:
             continue
         row_source = f"{source_match.group(1)}/{source_match.group(2)}".lower()

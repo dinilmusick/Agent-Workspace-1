@@ -62,6 +62,15 @@ class AcquisitionRequestValidationTests(unittest.TestCase):
         self.assertFalse(catalog_line_authorizes(row.replace("tpl-commerce-spree", "tpl-other"), self.request))
         self.assertFalse(catalog_line_authorizes(row.replace(sha, "b" * 40), self.request))
 
+    def test_workflow_contract_uses_valid_github_expression_delimiters(self):
+        workflow_path = Path(__file__).resolve().parents[3] / ".github/workflows/independent-commercial-acquisition.yml"
+        workflow = workflow_path.read_text()
+        self.assertIn("${{ github.event.issue.number }}", workflow)
+        self.assertIn("${{ github.event.repository.default_branch }}", workflow)
+        self.assertIn("${{ secrets.CODING_REPO_TOKEN }}", workflow)
+        self.assertNotRegex(workflow, r"\$\{ (?:github|secrets|steps|job)\.")
+        self.assertIn("actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683", workflow)
+
     def test_github_output_uses_delimited_values(self):
         with tempfile.TemporaryDirectory() as directory:
             output = Path(directory) / "output"

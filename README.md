@@ -32,6 +32,10 @@ The runner is ephemeral, has read-only repository permissions, does not persist 
 - [Security model](docs/security.md)
 - [Workspace layout](docs/workspace-layout.md)
 
+## Model and agent tools
+
+- [Model/agent tools](tools/models/README.md): disposable external model/agent launchers; current Argon/Carbon wrapper and the contract for future providers.
+
 ## Agent tools and skills
 
 - [Looper](tools/looper/README.md): bounded loop-state controller for agent iterations.

@@ -1,0 +1,16 @@
+{
+  "name": "argon-webapp",
+  "kind": "transient-model-tool",
+  "upstream": "https://github.com/veerack/argon-webapp",
+  "ref": "main",
+  "runtime": "local",
+  "models": [
+    "gemini-4-argon",
+    "gemini-4-carbon"
+  ],
+  "interface": "local-web-ui",
+  "workspace_access": "explicit-target-only",
+  "credentials": "local-google-application-default-credentials",
+  "persistent_agent_workspace_dependency": false,
+  "runtime_cleanup": "tools/models/argon-webapp/cleanup.sh"
+}

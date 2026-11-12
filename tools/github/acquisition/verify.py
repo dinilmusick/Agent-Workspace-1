@@ -117,7 +117,8 @@ def main():
             if not set(objects(source_path)).issubset(set(objects(destination))):
                 raise RuntimeError("Independent read-only verifier found upstream reachable objects missing from destination history.")
             result=f"Read-only verifier matched every live upstream writable ref and reachable object ID, plus exact default branch, pin, private/non-fork metadata and provenance; preserved {len(archive_refs)} prior ref tip(s) in refs/ultrst-archive/."
-    summary(f"## Independent read-only acquisition verification\n\n- Status: **passed**\n- Destination: https://github.com/{target}\n- Upstream: https://github.com/{source}\n- Pinned commit: {commit}\n- Mode: {mode}\n- Result: {result}\n\nThis confirms acquisition only; commercial clearance remains separate.")
+    archive_details = "\n".join(f"- {ref} ({sha})" for ref,sha in sorted(archive_refs.items())) if mode != "reference-only" else "- None"
+    summary(f"## Independent read-only acquisition verification\n\n- Status: **passed**\n- Destination: https://github.com/{target}\n- Upstream: https://github.com/{source}\n- Pinned commit: {commit}\n- Mode: {mode}\n- Result: {result}\n\n### Preserved history refs\n\n{archive_details}\n\nThis confirms acquisition only; commercial clearance remains separate.")
     print(json.dumps({"destination":target,"source":source,"commit":commit,"mode":mode,"verification":"passed","result":result},indent=2))
 
 if __name__=="__main__":

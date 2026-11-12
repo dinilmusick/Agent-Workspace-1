@@ -27,7 +27,9 @@ class SupabaseConfig:
     def from_environment(cls) -> "SupabaseConfig":
         url = os.environ.get("SUPABASE_URL", "").strip().rstrip("/")
         key = (
-            os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "").strip()
+            os.environ.get("SUPABASE_SECRET_KEY", "").strip()
+            or os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "").strip()
+            or os.environ.get("SUPABASE_PUBLISHABLE_KEY", "").strip()
             or os.environ.get("SUPABASE_ANON_KEY", "").strip()
         )
         if not url:

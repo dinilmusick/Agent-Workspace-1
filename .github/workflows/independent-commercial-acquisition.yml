@@ -9,7 +9,7 @@ permissions:
   issues: write
 
 concurrency:
-  group: repository-acquisition-${{ github.event.issue.number }}
+  group: repository-acquisition-${ github.event.issue.number }}
   cancel-in-progress: false
 
 jobs:
@@ -17,332 +17,71 @@ jobs:
     if: >-
       github.event.repository.full_name == 'dinilmusick/Agent-Workspace-1' &&
       github.event.issue.user.login == 'dinilmusick' &&
-      startsWith(github.event.issue.title, '[acquire-repo]')
+      startsWith(github.event.issue.title, '[acquire-repo] ')
     runs-on: ubuntu-latest
     timeout-minutes: 120
     steps:
-      - name: Checkout acquisition controller
+      - name: Checkout trusted acquisition controller
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
+          ref: ${ github.event.repository.default_branch }}
           persist-credentials: false
 
-      - name: Resolve source, pinned revision, and acquisition mode
+      - name: Run acquisition request validation tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest tools/github/acquisition/test_validate_request.py
+
+      - name: Resolve and validate source pin and catalog authorization
         id: request
         env:
-          GH_TOKEN: ${{ secrets.CODING_REPO_TOKEN }}
-          ISSUE_BODY: ${{ github.event.issue.body }}
+          GH_TOKEN: ${ secrets.CODING_REPO_TOKEN }}
+          ISSUE_BODY: ${ github.event.issue.body }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/github/acquisition/validate_request.py
+
+      - name: Acquire and independently verify private destination
+        env:
+          GH_TOKEN: ${ secrets.CODING_REPO_TOKEN }}
+          SOURCE: ${ steps.request.outputs.SOURCE }}
+          TARGET: ${ steps.request.outputs.TARGET }}
+          CATEGORY: ${ steps.request.outputs.CATEGORY }}
+          LICENSE_ID: ${ steps.request.outputs.LICENSE_ID }}
+          SOURCE_COMMIT: ${ steps.request.outputs.SOURCE_COMMIT }}
+          SOURCE_DEFAULT_BRANCH: ${ steps.request.outputs.SOURCE_DEFAULT_BRANCH }}
+          MODE: ${ steps.request.outputs.MODE }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/github/acquisition/acquire.py
+
+      - name: Report acquisition result on request issue
+        if: always()
+        env:
+          GH_TOKEN: ${ secrets.CODING_REPO_TOKEN }}
+          ISSUE_NUMBER: ${ github.event.issue.number }}
+          JOB_STATUS: ${ job.status }}
+          RUN_URL: ${ github.server_url }}/${ github.repository }}/actions/runs/${ github.run_id }}
         shell: bash
         run: |
           set -euo pipefail
           python3 - <<'PY'
-          import json, os, re, urllib.request
-          req = json.loads(os.environ.get("ISSUE_BODY", ""))
-          source = req.get("source_repository", "")
-          target = req.get("target_repository", "")
-          category = req.get("category", "")
-          requested_commit = req.get("source_commit", "")
-          requested_mode = req.get("acquisition_mode", "auto")
-          approval_record = req.get("approval_record", "")
-          if not re.fullmatch(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+", source):
-              raise SystemExit("Invalid source_repository")
-          if not re.fullmatch(r"tpl-[a-z0-9]+(?:-[a-z0-9]+)*", target):
-              raise SystemExit("target_repository must use tpl-kebab-case")
-          if not category or len(category) > 100:
-              raise SystemExit("A short category is required")
-          if requested_mode not in {"auto", "mirror", "reference-only"}:
-              raise SystemExit("acquisition_mode must be auto, mirror, or reference-only")
-          if not approval_record.startswith("https://github.com/dinilmusick/Agent-Workspace-1/"):
-              raise SystemExit("approval_record must link to workspace acquisition authorization")
-          token = os.environ["GH_TOKEN"]
-          headers = {"Accept":"application/vnd.github+json","Authorization":f"Bearer {token}","X-GitHub-Api-Version":"2022-11-28"}
-          def api(url):
-              request = urllib.request.Request(url, headers=headers)
-              with urllib.request.urlopen(request, timeout=45) as response:
-                  return json.load(response)
-          meta = api("https://api.github.com/repos/" + source)
-          if meta.get("archived") or meta.get("disabled"):
-              raise SystemExit("Archived or disabled source repositories are not eligible")
-          default_branch = meta.get("default_branch") or ""
-          if not default_branch:
-              raise SystemExit("Source repository has no default branch")
-          license_id = (meta.get("license") or {}).get("spdx_id") or "NOASSERTION"
-          branch_meta = api("https://api.github.com/repos/" + source + "/commits/" + default_branch)
-          branch_head = branch_meta.get("sha", "")
-          if not re.fullmatch(r"[0-9a-f]{40}", branch_head):
-              raise SystemExit("Could not resolve current source default-branch commit")
-          if requested_commit:
-              if not re.fullmatch(r"[0-9a-f]{40}", requested_commit):
-                  raise SystemExit("source_commit must be a full 40-character lowercase SHA")
-              commit_meta = api("https://api.github.com/repos/" + source + "/commits/" + requested_commit)
-              source_commit = commit_meta.get("sha")
-              if source_commit != requested_commit:
-                  raise SystemExit("Pinned source_commit does not resolve")
-              if source_commit != branch_head:
-                  raise SystemExit("Pinned source_commit is no longer the current source default-branch HEAD; refresh the catalog before acquisition")
+          import json, os, urllib.request
+          status = os.environ.get("JOB_STATUS", "unknown")
+          run_url = os.environ["RUN_URL"]
+          if status == "success":
+              body = f"Private acquisition completed and destination verification passed.\n\nActions evidence: {run_url}\n\nThis is private research acquisition only, not commercial clearance."
           else:
-              source_commit = branch_head
-          # Explicitly source-available / non-open-source licenses and missing license
-          # metadata are represented as link-and-metadata references, not copied code.
-          # Full private source mirrors are limited to recognized open-source
-          # licenses. Copyleft licenses are included: private study is allowed,
-          # while downstream distribution/network obligations must be reviewed later.
-          open_source_ids = {
-              "MIT", "Apache-2.0", "BSD-2-Clause", "BSD-3-Clause", "ISC", "0BSD",
-              "Zlib", "PostgreSQL", "Unlicense", "BSL-1.0", "BlueOak-1.0.0",
-              "AFL-3.0", "Artistic-2.0", "CDDL-1.0", "CDDL-1.1", "CPL-1.0",
-              "EPL-1.0", "EPL-2.0", "EUPL-1.1", "EUPL-1.2", "IPL-1.0",
-              "MPL-1.1", "MPL-2.0", "OSL-3.0", "Python-2.0", "PSF-2.0",
-              "Ruby", "UPL-1.0", "ZPL-2.1", "MulanPSL-2.0", "OpenSSL",
-              "GPL-2.0", "GPL-2.0-only", "GPL-2.0-or-later",
-              "GPL-3.0", "GPL-3.0-only", "GPL-3.0-or-later",
-              "LGPL-2.1", "LGPL-2.1-only", "LGPL-2.1-or-later",
-              "LGPL-3.0", "LGPL-3.0-only", "LGPL-3.0-or-later",
-              "AGPL-3.0", "AGPL-3.0-only", "AGPL-3.0-or-later"
-          }
-          mirrorable = license_id in open_source_ids
-          if requested_mode == "auto":
-              mode = "mirror" if mirrorable else "reference-only"
-          elif requested_mode == "mirror":
-              if not mirrorable:
-                  raise SystemExit(f"Cannot mirror code with missing or source-available license metadata: {license_id}")
-              mode = "mirror"
-          else:
-              mode = "reference-only"
-          output = os.environ["GITHUB_OUTPUT"]
-          with open(output, "a") as f:
-              f.write(f"source={source}\n")
-              f.write(f"target={target}\n")
-              f.write(f"category={category}\n")
-              f.write(f"license={license_id}\n")
-              f.write(f"source_commit={source_commit}\n")
-              f.write(f"source_default_branch={default_branch}\n")
-              f.write(f"mode={mode}\n")
-              f.write(f"approval_record={approval_record}\n")
-              f.write(f"description={category} private {'source mirror' if mode == 'mirror' else 'reference record'}; upstream: {source}\n")
-          print(json.dumps({
-              "source":source,"target":target,"category":category,"license_metadata":license_id,
-              "source_default_branch":default_branch,"source_commit":source_commit,
-              "acquisition_mode":mode,"approval_record":approval_record
-          }, indent=2))
+              body = f"Acquisition did not complete successfully. No successful acquisition is claimed. Inspect the Actions run for the precise failure.\n\nActions evidence: {run_url}"
+          payload = json.dumps({"body": body}).encode()
+          request = urllib.request.Request(
+              f"https://api.github.com/repos/dinilmusick/Agent-Workspace-1/issues/{os.environ['ISSUE_NUMBER']}/comments",
+              data=payload, method="POST",
+              headers={"Accept":"application/vnd.github+json","Authorization":f"Bearer {os.environ['GH_TOKEN']}",
+                       "X-GitHub-Api-Version":"2022-11-28","Content-Type":"application/json"})
+          with urllib.request.urlopen(request, timeout=30) as response:
+              response.read()
           PY
-
-      - name: Create or safely reuse private destination
-        env:
-          GH_TOKEN: ${{ secrets.CODING_REPO_TOKEN }}
-          TARGET: dinilmusick/${{ steps.request.outputs.target }}
-          DESCRIPTION: ${{ steps.request.outputs.description }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          status="$(curl -sS -o /tmp/repo.json -w '%{http_code}' -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" "https://api.github.com/repos/$TARGET")"
-          if [[ "$status" == "200" ]]; then
-            python3 - <<'PY'
-          import json, os
-          d=json.load(open("/tmp/repo.json"))
-          if d.get("full_name","").lower() != os.environ["TARGET"].lower():
-              raise SystemExit("Existing destination owner/name mismatch")
-          if d.get("private") is not True or d.get("fork") is not False:
-              raise SystemExit("Existing destination must be private and not a fork")
-          print("Resuming in existing private independent destination:", os.environ["TARGET"])
-          PY
-          elif [[ "$status" == "404" ]]; then
-            payload="$(python3 -c 'import json,os; print(json.dumps({"name":os.environ["TARGET"].split("/",1)[1],"private":True,"auto_init":False,"description":os.environ["DESCRIPTION"]}))')"
-            curl --fail-with-body -sS -X POST -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" -H "Content-Type: application/json" https://api.github.com/user/repos -d "$payload" > /tmp/created.json
-            python3 -c 'import json; d=json.load(open("/tmp/created.json")); print(d["full_name"], d["html_url"])'
-          else
-            cat /tmp/repo.json >&2
-            exit 1
-          fi
-
-      - name: Mirror source or create reference-only record
-        env:
-          GH_TOKEN: ${{ secrets.CODING_REPO_TOKEN }}
-          SOURCE: ${{ steps.request.outputs.source }}
-          TARGET: dinilmusick/${{ steps.request.outputs.target }}
-          SOURCE_COMMIT: ${{ steps.request.outputs.source_commit }}
-          SOURCE_DEFAULT_BRANCH: ${{ steps.request.outputs.source_default_branch }}
-          LICENSE_ID: ${{ steps.request.outputs.license }}
-          CATEGORY: ${{ steps.request.outputs.category }}
-          ACQUISITION_MODE: ${{ steps.request.outputs.mode }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          export GIT_TERMINAL_PROMPT=0
-          auth="$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
-          if [[ "$ACQUISITION_MODE" == "reference-only" ]]; then
-            git init --bare reference.git
-            git -C reference.git symbolic-ref HEAD refs/heads/main
-            work="$(mktemp -d)"
-            git -C "$work" init -b main
-            git -C "$work" config user.name "Private Reference Catalog"
-            git -C "$work" config user.email "reference-catalog@users.noreply.github.com"
-            cat > "$work/README.md" <<EOF
-          # Private project reference
-
-          **Category:** $CATEGORY
-
-          **Upstream repository:** https://github.com/$SOURCE
-
-          **Pinned upstream revision:** $SOURCE_COMMIT
-
-          **Upstream default branch at acquisition:** $SOURCE_DEFAULT_BRANCH
-
-          **GitHub license metadata:** $LICENSE_ID
-
-          **Acquisition mode:** reference-only. No upstream source files, assets, binaries, or Git history were copied into this repository.
-
-          This private record exists to preserve the identity and exact revision of a project for architectural study and inspiration. Open the upstream repository at the pinned revision to inspect its material under the terms applicable there:
-
-          https://github.com/$SOURCE/tree/$SOURCE_COMMIT
-
-          Do not treat this record as a license grant or permission to reproduce, distribute, deploy, or incorporate upstream material.
-          EOF
-            git -C "$work" add README.md
-            git -C "$work" commit -m "docs: record private upstream project reference"
-            git -C "$work" remote add destination "https://github.com/$TARGET.git"
-            git -C "$work" -c "http.extraheader=AUTHORIZATION: basic $auth" push destination HEAD:refs/heads/main
-            git -C "$work" remote remove destination
-            git -C "$work" remote -v
-            git -C "$work" rev-parse HEAD > reference-commit.txt
-          else
-            git -c http.version=HTTP/1.1 -c "http.extraheader=AUTHORIZATION: basic $auth" clone --mirror "https://github.com/$SOURCE.git" source.git
-            git -C source.git cat-file -e "$SOURCE_COMMIT^{commit}"
-            git -C source.git merge-base --is-ancestor "$SOURCE_COMMIT" "refs/heads/$SOURCE_DEFAULT_BRANCH"
-            git -C source.git update-ref "refs/heads/$SOURCE_DEFAULT_BRANCH" "$SOURCE_COMMIT"
-            while IFS= read -r ref; do
-              [[ -z "$ref" ]] || git -C source.git update-ref -d "$ref"
-            done < <(git -C source.git for-each-ref --format="%(refname)" refs/pull refs/merge-queue)
-            git -C source.git remote remove origin
-            while IFS= read -r ref; do
-              [[ -z "$ref" ]] || git -C source.git update-ref -d "$ref"
-            done < <(git -C source.git for-each-ref --format="%(refname)" refs/remotes/origin)
-            git -C source.git remote add destination "https://github.com/$TARGET.git"
-            mapfile -t refs < <(git -C source.git for-each-ref --format="%(refname)" | grep -Ev '^refs/(pull|merge-queue|remotes)/')
-            batch_size=20
-            for ((offset=0; offset<${#refs[@]}; offset+=batch_size)); do
-              specs=()
-              for ((idx=offset; idx<offset+batch_size && idx<${#refs[@]}; idx++)); do
-                specs+=("${refs[idx]}:${refs[idx]}")
-              done
-              attempt=1
-              until git -C source.git -c http.version=HTTP/1.1 -c "http.extraheader=AUTHORIZATION: basic $auth" push destination "${specs[@]}"; do
-                if (( attempt >= 3 )); then
-                  echo "Push batch starting at ref index $offset failed after three attempts." >&2
-                  exit 1
-                fi
-                sleep $((attempt * 10))
-                attempt=$((attempt + 1))
-              done
-            done
-            git -C source.git remote remove destination
-            test -z "$(git -C source.git remote)"
-          fi
-
-      - name: Set destination default branch
-        id: default
-        env:
-          GH_TOKEN: ${{ secrets.CODING_REPO_TOKEN }}
-          TARGET: dinilmusick/${{ steps.request.outputs.target }}
-          SOURCE_DEFAULT_BRANCH: ${{ steps.request.outputs.source_default_branch }}
-          ACQUISITION_MODE: ${{ steps.request.outputs.mode }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          if [[ "$ACQUISITION_MODE" == "reference-only" ]]; then
-            default_branch="main"
-          else
-            default_branch="$SOURCE_DEFAULT_BRANCH"
-          fi
-          payload="$(BRANCH="$default_branch" python3 -c 'import json,os; print(json.dumps({"default_branch":os.environ["BRANCH"]}))')"
-          curl --fail-with-body -sS -X PATCH -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" -H "Content-Type: application/json" "https://api.github.com/repos/$TARGET" -d "$payload" >/dev/null
-          echo "Destination default branch set to $default_branch"
-          echo "branch=$default_branch" >> "$GITHUB_OUTPUT"
-
-      - name: Verify destination, refs, privacy, and provenance
-        env:
-          GH_TOKEN: ${{ secrets.CODING_REPO_TOKEN }}
-          SOURCE: ${{ steps.request.outputs.source }}
-          TARGET: dinilmusick/${{ steps.request.outputs.target }}
-          SOURCE_COMMIT: ${{ steps.request.outputs.source_commit }}
-          DEFAULT_BRANCH: ${{ steps.default.outputs.branch }}
-          ACQUISITION_MODE: ${{ steps.request.outputs.mode }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          auth="$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
-          destination_meta="$(curl --fail-with-body -sS -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" "https://api.github.com/repos/$TARGET")"
-          python3 -c 'import json,sys; d=json.loads(sys.argv[1]); assert d.get("private") is True, "destination must remain private"; assert d.get("fork") is False, "destination must not be a fork"' "$destination_meta"
-          if [[ "$ACQUISITION_MODE" == "reference-only" ]]; then
-            ref="$(git -c "http.extraheader=AUTHORIZATION: basic $auth" ls-remote --refs "https://github.com/$TARGET.git" "refs/heads/main" | awk '{print $1}')"
-            test -n "$ref"
-          else
-            source_refs="$(git -C source.git for-each-ref --format='%(refname) %(objectname)' | grep -Ev '^refs/(pull|merge-queue)/' | sort)"
-            target_refs="$(git -c "http.extraheader=AUTHORIZATION: basic $auth" ls-remote --refs "https://github.com/$TARGET.git" | awk '{print $2 " " $1}' | grep -Ev '^refs/(pull|merge-queue)/' | sort)"
-            diff -u <(printf '%s\n' "$source_refs") <(printf '%s\n' "$target_refs")
-            target_default="$(git -c "http.extraheader=AUTHORIZATION: basic $auth" ls-remote --refs "https://github.com/$TARGET.git" "refs/heads/$DEFAULT_BRANCH" | awk '{print $1}')"
-            test "$target_default" = "$SOURCE_COMMIT"
-            test -z "$(git -C source.git remote)"
-          fi
-          echo "Verified: mode=$ACQUISITION_MODE; destination is private, not a fork; default branch=$DEFAULT_BRANCH."
-
-      - name: Emit acquisition provenance record
-        env:
-          SOURCE: ${{ steps.request.outputs.source }}
-          TARGET: dinilmusick/${{ steps.request.outputs.target }}
-          LICENSE_ID: ${{ steps.request.outputs.license }}
-          CATEGORY: ${{ steps.request.outputs.category }}
-          SOURCE_COMMIT: ${{ steps.request.outputs.source_commit }}
-          MODE: ${{ steps.request.outputs.mode }}
-          APPROVAL_RECORD: ${{ steps.request.outputs.approval_record }}
-        shell: bash
-        run: |
-          {
-            echo "## Private project acquisition"
-            echo
-            echo "- Category: $CATEGORY"
-            echo "- Upstream source: https://github.com/$SOURCE"
-            echo "- Pinned source revision: $SOURCE_COMMIT"
-            echo "- GitHub license metadata: $LICENSE_ID"
-            echo "- Acquisition mode: $MODE"
-            echo "- Destination: https://github.com/$TARGET"
-            echo "- Authorization record: $APPROVAL_RECORD"
-            echo
-            echo "Private acquisition/reference only. No commercial clearance is implied. Review root and nested licenses, dependencies, assets, fonts, models, extensions, trademarks, and redistribution/source-offer obligations before incorporation or distribution."
-          } >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Comment result on request
-        if: always()
-        env:
-          GH_TOKEN: ${{ secrets.CODING_REPO_TOKEN }}
-          ISSUE_NUMBER: ${{ github.event.issue.number }}
-          JOB_STATUS: ${{ job.status }}
-          TARGET: dinilmusick/${{ steps.request.outputs.target }}
-          SOURCE: ${{ steps.request.outputs.source }}
-          LICENSE_ID: ${{ steps.request.outputs.license }}
-          SOURCE_COMMIT: ${{ steps.request.outputs.source_commit }}
-          MODE: ${{ steps.request.outputs.mode }}
-          APPROVAL_RECORD: ${{ steps.request.outputs.approval_record }}
-          DEFAULT_BRANCH: ${{ steps.default.outputs.branch }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          if [[ "$JOB_STATUS" == "success" ]]; then
-            if [[ "$MODE" == "reference-only" ]]; then
-              description="Private reference record created. No upstream code or assets were copied."
-            else
-              description="Private upstream source mirror created and refs verified."
-            fi
-            body="$description Destination: https://github.com/$TARGET
-
-          Source: https://github.com/$SOURCE
-          Pinned source revision: $SOURCE_COMMIT
-          GitHub license metadata: $LICENSE_ID
-          Acquisition mode: $MODE
-          Default branch: $DEFAULT_BRANCH
-          Authorization: $APPROVAL_RECORD
-
-          This is private acquisition/reference only, not commercial clearance. Review all upstream and third-party obligations before use or distribution."
-          else
-            body="Acquisition workflow failed. Inspect the Actions run for the exact validation or transfer error. No successful acquisition is claimed."
-          fi
-          gh api --method POST "repos/dinilmusick/Agent-Workspace-1/issues/$ISSUE_NUMBER/comments" -f body="$body"

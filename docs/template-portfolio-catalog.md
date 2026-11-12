@@ -31,7 +31,7 @@ These are the proposed missing functional projects. The commit is pinned to the 
 | Product category | Upstream source | Destination repository | Branch | GitHub SPDX | Pinned source commit | Why it is included |
 |---|---|---|---|---|---|---|
 | Headless CMS / content platform | [payloadcms/payload](https://github.com/payloadcms/payload) | `tpl-cms-payload` | main | MIT | `7a80820ce48dc71420d92e32ca076dc7d004375e` | Full TypeScript CMS, admin UI, APIs and extensible content model. Existing audit remains CONDITIONAL for commercial use. |
-| E-commerce + multi-vendor marketplace | [spree/spree](https://github.com/spree/spree) | `tpl-commerce-spree` | main | BSD-3-Clause | `ab8f82fc5d4f91beb42447f84df9106d79e7a39a` | REST API, TypeScript SDK, storefront and marketplace / B2B use cases in one source project. |
+| E-commerce + multi-vendor marketplace | [spree/spree](https://github.com/spree/spree) | `tpl-commerce-spree` | main | BSD-3-Clause | `9af32fb49de0e0c2a7aef41044046e272646fcb9` | REST API, TypeScript SDK, storefront and marketplace / B2B use cases in one source project. |
 | CRM / sales pipeline | [krayin/laravel-crm](https://github.com/krayin/laravel-crm) | `tpl-crm-krayin` | 2.2 | MIT | `ed6deebfcb8c616eaf352c893a10a6d8e666fc6e` | Complete Laravel CRM. Existing audit rejected the exact dependency set for commercial reuse; private study only. |
 | ERP / business operations | [apache/ofbiz-framework](https://github.com/apache/ofbiz-framework) | `tpl-erp-ofbiz` | trunk | Apache-2.0 | `59b32bdc3bed4abdeb9b5eaa12f5d605a3926985` | Broad Java ERP / commerce / order and business-process system. Full dependency and bundled-JAR audit remains required. |
 | Python full-stack API application | [fastapi/full-stack-fastapi-template](https://github.com/fastapi/full-stack-fastapi-template) | `tpl-backend-fastapi` | master | MIT | `aabb90126964a164e02aff39e7c385bb0598236d` | Complete API + database + frontend starter. Existing audit rejected the current lockfile graph for commercial reuse; private study only. |
@@ -163,5 +163,14 @@ All 35 additional upstream default-branch heads were re-queried against GitHub. 
 | `tpl-data-airflow` | `e024d4c15a52a843c28aa773c2d5db69fe21deea` | Corrects the timezone in a TimeSensor unit-test time-machine fixture to explicit UTC. | Accept pin; Apache-2.0 root metadata unchanged. |
 | `tpl-iot-thingsboard` | `aa08e0ae5f6ec015b26cdb4c8e5accb0b668cda1` | Merge updates the ThingsBoard AI model processor's Optional access to use the direct value accessor. | Accept pin for reference-only record; GitHub SPDX metadata remains NOASSERTION. |
 | `tpl-automation-n8n` | `f216f7f7c157373c6100bd2d79cef8b1f7565b1d` | Replaces two hard-coded editor dismiss-tooltip strings with the localized generic.dismiss translation. | Accept pin for reference-only record; GitHub SPDX metadata remains NOASSERTION. |
+
+
+A subsequent live-head check found that Spree's default branch advanced after the earlier catalog refresh. The first two acquisition attempts correctly rejected the stale default-branch pin before modifying the destination. The new head was reviewed before refreshing the catalog:
+
+| Destination | Previous pin | Reviewed current source commit | Reviewed change | Decision |
+|---|---|---|---|---|
+| `tpl-commerce-spree` | `ab8f82fc5d4f91beb42447f84df9106d79e7a39a` | `9af32fb49de0e0c2a7aef41044046e272646fcb9` | Two signed commits: Dependabot updates `peter-evans/create-pull-request` from 8.1.1 to 8.1.2; Spree fixes draft-order line removal so recalculation and status refresh occur after successful removal, rejected removals roll back under nested/order-lock transactions, and API/agent-tool/dashboard regression tests cover the behavior. Seven files changed; no dependency addition or license change identified. | Accept refreshed pin; BSD-3-Clause root metadata unchanged. |
+
+The new Spree head is a two-commit fast-forward from the previous pin. GitHub reports the latest commit signature as verified. The catalog pin now records the reviewed current default-branch HEAD; the acquisition validator will recheck it at request time.
 
 The acquisition validator requires each requested source, destination and exact commit to occur together in this catalog and independently requires that commit to equal the live default-branch HEAD at request time. A later branch movement therefore rejects acquisition until this catalog is refreshed and reviewed again.

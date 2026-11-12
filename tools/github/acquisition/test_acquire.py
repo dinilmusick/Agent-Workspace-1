@@ -132,8 +132,9 @@ class ProvenancePinMigrationTests(unittest.TestCase):
             self.migrate(comparison={"status": "diverged", "ahead_by": 2, "behind_by": 1})
 
     def test_rejects_reference_only_or_unchanged_pin_migration(self):
+        reference_description = f"ULTRST private reference-only; upstream={self.source}; commit={self.old}; category={self.category}"
         with self.assertRaisesRegex(RuntimeError, "only for private source mirrors"):
-            self.migrate(mode="reference-only")
+            self.migrate(mode="reference-only", existing_description=reference_description)
         with self.assertRaisesRegex(RuntimeError, "unchanged source pin"):
             self.migrate(new_commit=self.old)
 

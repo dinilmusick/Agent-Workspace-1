@@ -34,7 +34,7 @@ class SupabaseConfig:
             raise SupabaseClientError("SUPABASE_URL is required")
         if not key:
             raise SupabaseClientError(
-                "SUPABASE_SERVICE_ROLE_KEY or SUPABASE_ANON_KEY is required"
+                "SUPABASE_SECRET_KEY, SUPABASE_SERVICE_ROLE_KEY, SUPABASE_PUBLISHABLE_KEY, or SUPABASE_ANON_KEY is required"
             )
         if not url.startswith(("https://", "http://")):
             raise SupabaseClientError("SUPABASE_URL must be an HTTP(S) URL")

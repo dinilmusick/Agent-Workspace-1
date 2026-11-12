@@ -50,6 +50,11 @@ class AcquisitionRequestValidationTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "canonical catalog"):
             validate_request_shape({**self.request, "approval_record": "https://github.com/attacker/repo"})
 
+    def test_rejects_moved_default_branch_head(self):
+        with self.assertRaisesRegex(ValueError, "Stale source pin"):
+            assert_exact_head("a" * 40, "b" * 40)
+        assert_exact_head("a" * 40, "a" * 40)
+
     def test_catalog_authorization_requires_all_fields_on_same_row(self):
         sha = self.request["source_commit"]
         row = f"| [spree/spree](https://github.com/spree/spree) | tpl-commerce-spree | main | BSD-3-Clause | {sha} |"
@@ -60,10 +65,12 @@ class AcquisitionRequestValidationTests(unittest.TestCase):
     def test_github_output_uses_delimited_values(self):
         with tempfile.TemporaryDirectory() as directory:
             output = Path(directory) / "output"
-            write_outputs(str(output), {"SAFE_VALUE": "plain-value"})
+            write_outputs(str(output), {"SAFE_VALUE": "plain-value", "UNTRUSTED_VALUE": "first-line\nEVIL=1"})
             contents = output.read_text()
             self.assertIn("SAFE_VALUE<<ACQ_", contents)
             self.assertIn("plain-value", contents)
+            self.assertIn("UNTRUSTED_VALUE<<ACQ_", contents)
+            self.assertIn("first-line\nEVIL=1\n", contents)
             self.assertTrue(contents.endswith("\n"))
 
 if __name__ == "__main__":

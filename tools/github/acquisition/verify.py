@@ -96,7 +96,10 @@ def main():
             if source_refs.get(f"refs/heads/{branch}")!=commit:
                 raise RuntimeError("Upstream source clone does not resolve to the approved default-branch SHA.")
             if destination_refs!=source_refs:
-                raise RuntimeError("Independent read-only verifier found Git ref mismatches.")
+                missing=sorted(set(source_refs)-set(destination_refs))
+                extra=sorted(set(destination_refs)-set(source_refs))
+                changed=sorted(ref for ref in set(source_refs)&set(destination_refs) if source_refs[ref]!=destination_refs[ref])
+                raise RuntimeError(f"Independent read-only verifier found Git ref mismatches; missing={missing[:10]}, extra={extra[:10]}, changed={changed[:10]}.")
             if objects(destination)!=objects(source_path):
                 raise RuntimeError("Independent read-only verifier found reachable history/object mismatches.")
             result="Read-only verifier independently matched every writable ref and reachable object ID, plus exact default branch, pin, private/non-fork metadata and provenance."

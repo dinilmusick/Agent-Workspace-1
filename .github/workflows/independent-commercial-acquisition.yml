@@ -31,7 +31,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 -m unittest tools/github/acquisition/test_validate_request.py
+          python3 -m unittest discover -s tools/github/acquisition -p 'test_*.py'
 
       - name: Resolve and validate source pin and catalog authorization
         id: request

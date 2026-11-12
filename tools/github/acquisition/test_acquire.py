@@ -5,7 +5,7 @@ import unittest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from acquire import preserve_and_reconcile_existing_refs
+from acquire import preserve_and_reconcile_existing_refs, safe_provenance_migration
 
 
 def run_git(repo, *args, check=True):
@@ -89,6 +89,59 @@ class PreserveUpstreamHistoryTests(unittest.TestCase):
         self.assertEqual(archived[0]["source_ref"], "refs/heads/feature")
         self.assertNotIn("refs/heads/feature", source_refs)
         self.assertEqual(run_git(self.source, "rev-parse", archived[0]["archive_ref"]), self.first)
+
+
+class ProvenancePinMigrationTests(unittest.TestCase):
+    def setUp(self):
+        self.old = "a" * 40
+        self.new = "b" * 40
+        self.source = "spree/spree"
+        self.category = "E-commerce + multi-vendor marketplace"
+        self.description = f"ULTRST private mirror; upstream={self.source}; commit={self.old}; category={self.category}"
+        self.comparison = {"status": "ahead", "ahead_by": 2, "behind_by": 0}
+
+    def migrate(self, **overrides):
+        values = {
+            "existing_description": self.description,
+            "source": self.source,
+            "mode": "mirror",
+            "category": self.category,
+            "old_default_branch": "main",
+            "new_default_branch": "main",
+            "new_commit": self.new,
+            "comparison": self.comparison,
+        }
+        values.update(overrides)
+        return safe_provenance_migration(**values)
+
+    def test_allows_same_source_mode_category_and_verified_fast_forward(self):
+        self.assertEqual(self.migrate(), self.old)
+
+    def test_rejects_unrelated_source_or_category(self):
+        with self.assertRaisesRegex(RuntimeError, "different source"):
+            self.migrate(source="other/project")
+        with self.assertRaisesRegex(RuntimeError, "different source"):
+            self.migrate(category="Different category")
+
+    def test_rejects_default_branch_rename(self):
+        with self.assertRaisesRegex(RuntimeError, "default branch"):
+            self.migrate(new_default_branch="trunk")
+
+    def test_rejects_diverged_or_behind_pin(self):
+        with self.assertRaisesRegex(RuntimeError, "strict ancestor"):
+            self.migrate(comparison={"status": "diverged", "ahead_by": 2, "behind_by": 1})
+
+    def test_rejects_reference_only_or_unchanged_pin_migration(self):
+        reference_description = f"ULTRST private reference-only; upstream={self.source}; commit={self.old}; category={self.category}"
+        with self.assertRaisesRegex(RuntimeError, "only for private source mirrors"):
+            self.migrate(mode="reference-only", existing_description=reference_description)
+        with self.assertRaisesRegex(RuntimeError, "unchanged source pin"):
+            self.migrate(new_commit=self.old)
+
+    def test_rejects_unrecognized_provenance_marker(self):
+        with self.assertRaisesRegex(RuntimeError, "recognized ULTRST"):
+            self.migrate(existing_description="unrelated repository description")
+
 
 
 if __name__ == "__main__":

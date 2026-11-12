@@ -109,7 +109,7 @@ class AcquisitionRequestValidationTests(unittest.TestCase):
             cells = [cell.strip() for cell in line.split("|")]
             if len(cells) < 6:
                 continue
-            source_match = re.search(r"https://github\\.com/([^/]+)/([^/)\\s]+)", cells[2], re.IGNORECASE)
+            source_match = re.search(r"https://github\.com/([^/]+)/([^/)\s]+)", cells[2], re.IGNORECASE)
             if not source_match:
                 continue
             commit_cell = cells[6] if mode == "mirror" else cells[5]

@@ -41,8 +41,8 @@ These are the proposed missing functional projects. The commit is pinned to the 
 | Inventory / manufacturing operations | [inventree/InvenTree](https://github.com/inventree/InvenTree) | `tpl-inventory-inventree` | master | MIT | `7e57196d76f4560caebbff9508ea5e230341fc08` | Full inventory and parts-management product. Existing audit found LGPL runtime dependencies; private study only. |
 | Healthcare / FHIR platform | [medplum/medplum](https://github.com/medplum/medplum) | `tpl-health-medplum` | main | Apache-2.0 | `e7e7e40191440fca0d06ded9d2b56c11c639058f` | Full healthcare interoperability platform and FHIR server. Existing audit found an unlicensed bundled font; private study only until corrected. |
 | Appointment scheduling / booking | [calcom/cal.diy](https://github.com/calcom/cal.diy) | `tpl-booking-caldiy` | main | MIT | `ef7954d16ab50882ca2f263c551537115b8a8bb1` | Active self-hosted appointment-scheduling application. Treat as the community Cal.diy project, not a statement about Cal.com licensing. |
-| BI / analytics dashboards | [apache/superset](https://github.com/apache/superset) | `tpl-bi-superset` | master | Apache-2.0 | `deee513dab356e05104a3e5d4e6bace8be2681ca` | Mature business-intelligence and data-visualization application. |
-| ELT / data integration | [meltano/meltano](https://github.com/meltano/meltano) | `tpl-data-meltano` | main | MIT | `a2872768422ad20063304fadb645502757ff14f0` | Declarative, code-first ELT and connector platform. |
+| BI / analytics dashboards | [apache/superset](https://github.com/apache/superset) | `tpl-bi-superset` | master | Apache-2.0 | `58a1a5c7e8f759383573ba15ba509e8d1bc49015` | Mature business-intelligence and data-visualization application. |
+| ELT / data integration | [meltano/meltano](https://github.com/meltano/meltano) | `tpl-data-meltano` | main | MIT | `23fab6f99554b0de7ce17d6ede3b8a45bc3234a9` | Declarative, code-first ELT and connector platform. |
 | Mobile application starters | [expo/examples](https://github.com/expo/examples) | `tpl-mobile-expo-examples` | master | MIT | `2cc7a440b01eb30e326b91cf1f3aae41e749d128` | Official working examples across Expo / React Native mobile use cases. |
 | Desktop application framework (Rust) | [tauri-apps/tauri](https://github.com/tauri-apps/tauri) | `tpl-desktop-tauri` | dev | Apache-2.0 | `5edd31c8a8914674c217b21a660a914823da2dae` | Native desktop/mobile runtime and examples for web-fronted Rust applications. |
 | Desktop application starter (Electron) | [electron-react-boilerplate/electron-react-boilerplate](https://github.com/electron-react-boilerplate/electron-react-boilerplate) | `tpl-desktop-electron` | main | MIT | `e5b8242d8b21a4290c3a1f18ae3b64167e9de04a` | Complete Electron + React desktop starter. |
@@ -58,7 +58,7 @@ These are the proposed missing functional projects. The commit is pinned to the 
 | Social network / federated publishing | [mastodon/mastodon](https://github.com/mastodon/mastodon) | `tpl-social-mastodon` | main | AGPL-3.0 | `b31c484d97c9b7f109ecdcc3de140ac2e865fd4d` | Complete federated social-network product. |
 | Document management / archive | [paperless-ngx/paperless-ngx](https://github.com/paperless-ngx/paperless-ngx) | `tpl-documents-paperless` | dev | GPL-3.0 | `a1d76f3a19c9bf7067491de6f0a12672676ae9f1` | Full document ingestion, OCR, tagging and archive application. |
 | Cloud security assessment | [prowler-cloud/prowler](https://github.com/prowler-cloud/prowler) | `tpl-cloud-security-prowler` | master | Apache-2.0 | `f485982d4cf4be87a76c6906f44e42675fec2913` | Multi-cloud security posture assessment and reporting tool. |
-| Data workflow orchestration | [apache/airflow](https://github.com/apache/airflow) | `tpl-data-airflow` | main | Apache-2.0 | `30f51ff2d4bb33a736de58c5119a6abd9450744d` | Production-grade DAG-based workflow scheduling and execution; complements Temporal rather than replacing it. |
+| Data workflow orchestration | [apache/airflow](https://github.com/apache/airflow) | `tpl-data-airflow` | main | Apache-2.0 | `e024d4c15a52a843c28aa773c2d5db69fe21deea` | Production-grade DAG-based workflow scheduling and execution; complements Temporal rather than replacing it. |
 
 ## 3. Additional reference-only candidates
 
@@ -67,11 +67,11 @@ GitHub did not provide a recognized SPDX license identifier for these exact repo
 | Product category | Upstream source | Destination reference | Branch | Observed source commit | Reason for reference-only treatment |
 |---|---|---|---|---|---|
 | Customer support / helpdesk | [chatwoot/chatwoot](https://github.com/chatwoot/chatwoot) | `tpl-helpdesk-chatwoot` | develop | `bf541372d1e75d7b65a17169e7057a24e7af44ad` | GitHub API returned NOASSERTION; inspect the complete root and dependency license data before mirroring. |
-| IoT / device management | [thingsboard/thingsboard](https://github.com/thingsboard/thingsboard) | `tpl-iot-thingsboard` | master | `96dad8f89d4858cfb7da565988ce8870e6c2b925` | GitHub API returned NOASSERTION; root licensing and edition boundaries need manual review. |
+| IoT / device management | [thingsboard/thingsboard](https://github.com/thingsboard/thingsboard) | `tpl-iot-thingsboard` | master | `aa08e0ae5f6ec015b26cdb4c8e5accb0b668cda1` | GitHub API returned NOASSERTION; root licensing and edition boundaries need manual review. |
 | Search service / search engine | [meilisearch/meilisearch](https://github.com/meilisearch/meilisearch) | `tpl-search-meilisearch` | main | `c25aa858ba9caa5a19faf6958f43a170cc0b7ebc` | GitHub API returned NOASSERTION; verify the exact license and edition boundary before mirroring. |
 | Event ticketing / event operations | [pretix/pretix](https://github.com/pretix/pretix) | `tpl-events-pretix` | master | `137059dd4e7a7f4643199323b69a85824bffc28e` | License includes special additional terms and service-purpose restrictions; do not mirror automatically. |
 | AI product / agentic workflow workspace | [langgenius/dify](https://github.com/langgenius/dify) | `tpl-ai-dify` | main | `b800daffd08a458ec922869a2b08a6dd4b904e06` | Dify Open Source License contains added conditions; use reference-only until reviewed. |
-| Automation / app integration | [n8n-io/n8n](https://github.com/n8n-io/n8n) | `tpl-automation-n8n` | master | `09118f75262ea9353bc99f5a53b780b888d86952` | Sustainable Use / fair-code terms; reference-only. Existing Node-RED remains the open-source automation starter. |
+| Automation / app integration | [n8n-io/n8n](https://github.com/n8n-io/n8n) | `tpl-automation-n8n` | master | `f216f7f7c157373c6100bd2d79cef8b1f7565b1d` | Sustainable Use / fair-code terms; reference-only. Existing Node-RED remains the open-source automation starter. |
 
 ## 4. Coverage summary and consolidation rules
 
@@ -150,3 +150,18 @@ Ranking is based on product breadth and likely paid-project reuse first, then th
 38. Search infrastructure — Meilisearch reference-only.
 
 Acquisition order should follow the priorities, but the manifest pins each candidate independently so parallel private acquisition can proceed once the discovery goal is verified. No product is marked commercially cleared by this ranking.
+
+
+## 5. Live upstream-head refresh and pin review — 2026-11-12
+
+All 35 additional upstream default-branch heads were re-queried against GitHub. Thirty pins remained exact. Five catalog pins had moved and were refreshed only after reviewing the new commit metadata and patches:
+
+| Destination | Refreshed source commit | Reviewed change | Decision |
+|---|---|---|---|
+| `tpl-bi-superset` | `58a1a5c7e8f759383573ba15ba509e8d1bc49015` | Superset API metadata handling now skips schema columns absent from explicit Marshmallow schemas; adds regression coverage for unfiltered `_info` endpoints. | Accept pin; Apache-2.0 root metadata unchanged. |
+| `tpl-data-meltano` | `23fab6f99554b0de7ce17d6ede3b8a45bc3234a9` | Documentation lockfile updates fast-xml-parser from 5.11.2 to 5.12.0 and its transitive dependency integrity/version records. | Accept pin; MIT root metadata unchanged. |
+| `tpl-data-airflow` | `e024d4c15a52a843c28aa773c2d5db69fe21deea` | Corrects the timezone in a TimeSensor unit-test time-machine fixture to explicit UTC. | Accept pin; Apache-2.0 root metadata unchanged. |
+| `tpl-iot-thingsboard` | `aa08e0ae5f6ec015b26cdb4c8e5accb0b668cda1` | Merge updates the ThingsBoard AI model processor's Optional access to use the direct value accessor. | Accept pin for reference-only record; GitHub SPDX metadata remains NOASSERTION. |
+| `tpl-automation-n8n` | `f216f7f7c157373c6100bd2d79cef8b1f7565b1d` | Replaces two hard-coded editor dismiss-tooltip strings with the localized generic.dismiss translation. | Accept pin for reference-only record; GitHub SPDX metadata remains NOASSERTION. |
+
+The acquisition validator requires each requested source, destination and exact commit to occur together in this catalog and independently requires that commit to equal the live default-branch HEAD at request time. A later branch movement therefore rejects acquisition until this catalog is refreshed and reviewed again.

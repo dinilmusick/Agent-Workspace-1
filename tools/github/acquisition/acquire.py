@@ -244,8 +244,12 @@ def main():
             if final_refs.get(f"refs/heads/{source_branch}") != source_commit:
                 raise RuntimeError("Destination default branch does not equal the pinned source commit.")
             result = f"Private independent mirror verified: all live writable refs, reachable history, pinned default branch, privacy and non-fork status match; preserved {len(archived_history)} previous ref tip(s) under refs/ultrst-archive/."
-        write_summary(f"## Acquisition result\n\n- Status: **success**\n- Destination: https://github.com/{target}\n- Upstream: https://github.com/{source}\n- Source commit: {source_commit}\n- Source default branch: {source_branch}\n- GitHub SPDX metadata: {license_id}\n- Acquisition mode: {mode}\n- Verification: {result}\n\nPrivate research acquisition only. No commercial clearance is implied.")
-        print(json.dumps({"destination": target, "source": source, "source_commit": source_commit, "mode": mode, "result": result}, indent=2))
+        archived_history = locals().get("archived_history", [])
+        archive_details = "\n".join(
+            f"- {item['source_ref']} -> {item['archive_ref']} ({item['sha']})" for item in archived_history
+        ) or "- None"
+        write_summary(f"## Acquisition result\n\n- Status: **success**\n- Destination: https://github.com/{target}\n- Upstream: https://github.com/{source}\n- Source commit: {source_commit}\n- Source default branch: {source_branch}\n- GitHub SPDX metadata: {license_id}\n- Acquisition mode: {mode}\n- Verification: {result}\n\n### Preserved previous ref tips\n\n{archive_details}\n\nPrivate research acquisition only. No commercial clearance is implied.")
+        print(json.dumps({"destination": target, "source": source, "source_commit": source_commit, "mode": mode, "archived_history": archived_history, "result": result}, indent=2))
 
 if __name__ == "__main__":
     try:

@@ -49,6 +49,9 @@ def main():
     source_meta=api_get(token,f"/repos/{source}")
     if source_meta.get("archived") or source_meta.get("disabled"):
         raise RuntimeError("Upstream is archived or disabled.")
+    live_license=(source_meta.get("license") or {}).get("spdx_id") or "NOASSERTION"
+    if live_license!=license_id:
+        raise RuntimeError("Upstream license metadata changed after request validation.")
     live=api_get(token,f"/repos/{source}/commits/{urllib.parse.quote(branch,safe='')}")
     if live.get("sha")!=commit:
         raise RuntimeError("Source default branch moved after acquisition.")
@@ -76,8 +79,9 @@ def main():
             expected=reference_readme(source,commit,branch,category,license_id)
             tree=git(["ls-tree","-r","--name-only","refs/heads/main"],cwd=destination).stdout.splitlines()
             body=git(["show","refs/heads/main:README.md"],cwd=destination).stdout
-            if set(destination_refs)!={"refs/heads/main"} or tree!=["README.md"] or body!=expected:
-                raise RuntimeError("Reference-only destination is not exactly one provenance README.")
+            commit_count=int(git(["rev-list","--count","refs/heads/main"],cwd=destination).stdout.strip())
+            if set(destination_refs)!={"refs/heads/main"} or tree!=["README.md"] or body!=expected or commit_count!=1:
+                raise RuntimeError("Reference-only destination is not exactly one provenance README commit.")
             result="Read-only verifier confirmed private/non-fork metadata, exact provenance and README-only contents."
         else:
             source_path=root/"source.git"

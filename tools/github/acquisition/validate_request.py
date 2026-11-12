@@ -94,8 +94,9 @@ def validate_catalog_authorization(catalog: str, request: dict[str, str], live_b
         raise ValueError("The exact source, destination and pinned commit are not present together in the canonical catalog.")
     if authorization["branch"] != live_branch:
         raise ValueError(f"Catalog default branch mismatch: catalog={authorization['branch']} live={live_branch}. Refresh and review the catalog.")
-    if authorization["mode"] != request["mode"]:
-        raise ValueError(f"Acquisition mode mismatch: catalog={authorization['mode']} request={request['mode']}.")
+    requested_mode = request.get("mode", request.get("acquisition_mode"))
+    if authorization["mode"] != requested_mode:
+        raise ValueError(f"Acquisition mode mismatch: catalog={authorization['mode']} request={requested_mode}.")
     if authorization["category"] != request["category"]:
         raise ValueError("Request category does not exactly match the canonical catalog.")
     if authorization["mode"] == "mirror" and authorization["license"] != license_id:

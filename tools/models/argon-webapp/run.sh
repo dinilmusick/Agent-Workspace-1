@@ -5,6 +5,14 @@ UPSTREAM_REPO="https://github.com/veerack/argon-webapp.git"
 UPSTREAM_REF="${ARGON_WEBAPP_REF:-main}"
 RUNTIME_ROOT="${ARGON_WEBAPP_RUNTIME_DIR:-$HOME/.agent-workspace/argon-webapp}"
 TARGET_WORKSPACE="${1:-}"
+CONFIG_FILE="${ARGON_WEBAPP_ENV_FILE:-$(cd "$(dirname "$0")" && pwd)/.env}"
+
+if [[ -f "$CONFIG_FILE" ]]; then
+  set -a
+  # shellcheck disable=SC1090
+  source "$CONFIG_FILE"
+  set +a
+fi
 
 if [[ -z "$TARGET_WORKSPACE" ]]; then
   echo "Usage: $0 /absolute/path/to/target/repository" >&2
@@ -38,6 +46,8 @@ export STUDIO_WORKSPACE="$TARGET_WORKSPACE"
 echo "Argon/Carbon transient tool"
 echo "Workspace: $TARGET_WORKSPACE"
 echo "Runtime:   $RUNTIME_ROOT"
+echo "Project:   ${GOOGLE_CLOUD_PROJECT:-<configure in Argon UI>}"
+echo "Location:  ${GOOGLE_CLOUD_LOCATION:-<configure in Argon UI>}"
 echo "URL:       http://localhost:4321"
 echo "Stop with Ctrl-C. Remove the transient runtime with tools/models/argon-webapp/cleanup.sh."
 

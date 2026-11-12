@@ -7,8 +7,10 @@ A dependency-free, agent-facing Supabase client for runtimes that do not have a 
 The executable is `supabase_client.py`. It reads credentials only from environment variables:
 
 - `SUPABASE_URL` — project URL.
-- `SUPABASE_SERVICE_ROLE_KEY` — preferred for trusted Agent Workspace runtimes.
-- `SUPABASE_ANON_KEY` — supported for RLS-scoped runtimes.
+- `SUPABASE_SECRET_KEY` — preferred for trusted Agent Workspace runtimes.
+- `SUPABASE_SERVICE_ROLE_KEY` — legacy compatibility.
+- `SUPABASE_PUBLISHABLE_KEY` — supported for RLS-scoped runtimes.
+- `SUPABASE_ANON_KEY` — legacy RLS-scoped compatibility.
 
 The tool never prints credentials.
 

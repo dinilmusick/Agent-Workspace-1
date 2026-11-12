@@ -1,0 +1,10 @@
+{
+  "name": "agent-substrate",
+  "source": "supabase/",
+  "migration_glob": "supabase/migrations/*.sql",
+  "seed": "supabase/seed.sql",
+  "tests": "supabase/tests/",
+  "commands": ["doctor", "plan", "push", "status", "test", "dump"],
+  "management_tool": "tools/supabase-agent-client/",
+  "credential_policy": "runtime-only"
+}

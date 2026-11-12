@@ -21,6 +21,19 @@ class FakeResponse:
 
 
 class SupabaseAgentClientTests(unittest.TestCase):
+    def test_config_prefers_current_secret_key(self):
+        with patch.dict(
+            os.environ,
+            {
+                "SUPABASE_URL": "https://example.supabase.co",
+                "SUPABASE_SECRET_KEY": "secret-key",
+                "SUPABASE_SERVICE_ROLE_KEY": "legacy",
+            },
+            clear=True,
+        ):
+            config = SupabaseConfig.from_environment()
+        self.assertEqual(config.key, "secret-key")
+
     def test_config_prefers_service_role_key_without_logging_it(self):
         with patch.dict(
             os.environ,

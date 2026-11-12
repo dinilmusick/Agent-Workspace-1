@@ -274,7 +274,10 @@ def main():
                 missing_objects = sorted(source_objects - destination_objects)
                 extra_objects = sorted(destination_objects - source_objects)
                 raise RuntimeError(f"Reachable Git object/history verification mismatch; missing_count={len(missing_objects)}, extra_count={len(extra_objects)}, missing_sample={missing_objects[:10]}, extra_sample={extra_objects[:10]}.")
-            api(token, "PATCH", f"/repos/{target}", {"default_branch": source_branch})
+            repository_update = {"default_branch": source_branch}
+            if provenance_migration_commit:
+                repository_update["description"] = description
+            api(token, "PATCH", f"/repos/{target}", repository_update)
             final_meta = api(token, "GET", f"/repos/{target}")
             if final_meta.get("private") is not True or final_meta.get("fork") is not False:
                 raise RuntimeError("Final destination privacy/non-fork verification failed.")

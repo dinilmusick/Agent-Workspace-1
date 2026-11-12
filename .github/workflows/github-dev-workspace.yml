@@ -104,16 +104,36 @@ jobs:
           persist-credentials: false
 
       - name: Checkout target repository
+        id: target_checkout
+        continue-on-error: true
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           repository: ${{ steps.request.outputs.repository }}
           ref: ${{ steps.request.outputs.ref }}
-          # Target portability repositories are public; use this workflow's read-scoped token.
-          # CODING_REPO_TOKEN remains reserved for private source checkout and explicit pushes.
-          token: ${{ github.token }}
+          token: ${{ secrets.CODING_REPO_TOKEN }}
           path: target
           fetch-depth: 0
           persist-credentials: false
+
+      - name: Fallback to anonymous checkout for public target
+        if: steps.target_checkout.outcome == 'failure'
+        env:
+          TARGET_REPOSITORY: ${{ steps.request.outputs.repository }}
+          TARGET_REF: ${{ steps.request.outputs.ref }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          private="$(curl -fsSL "https://api.github.com/repos/$TARGET_REPOSITORY" | python3 -c 'import json,sys; print(str(json.load(sys.stdin).get("private", True)).lower())')"
+          if [[ "$private" != "false" ]]; then
+            echo "Authenticated target checkout failed and the target repository is private; refusing anonymous fallback." >&2
+            exit 1
+          fi
+          rm -rf target
+          mkdir target
+          git -C target init
+          git -C target remote add origin "https://github.com/$TARGET_REPOSITORY.git"
+          git -C target fetch --no-tags --depth=1 origin "$TARGET_REF"
+          git -C target checkout --detach FETCH_HEAD
 
       - name: Prepare toolchain
         working-directory: target

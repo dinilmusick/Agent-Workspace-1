@@ -81,6 +81,9 @@ def main():
     source_meta = api(token, "GET", f"/repos/{source}")
     if source_meta.get("archived") or source_meta.get("disabled"):
         raise RuntimeError("Upstream became archived or disabled after request validation.")
+    live_license = (source_meta.get("license") or {}).get("spdx_id") or "NOASSERTION"
+    if live_license != license_id:
+        raise RuntimeError("Upstream license metadata changed after request validation.")
     live_branch = api(token, "GET", f"/repos/{source}/commits/{urllib.parse.quote(source_branch, safe='')}")
     if live_branch.get("sha") != source_commit:
         raise RuntimeError("Upstream default branch moved after validation; no destination changes were made.")
@@ -120,8 +123,9 @@ def main():
                 git(["clone", "--mirror", target_url, str(verify_path)], env=git_env)
                 tree = git(["ls-tree", "-r", "--name-only", "refs/heads/main"], cwd=verify_path).stdout.splitlines()
                 body = git(["show", "refs/heads/main:README.md"], cwd=verify_path).stdout
-                if tree != ["README.md"] or body != expected:
-                    raise RuntimeError("Existing reference-only repository is not the exact provenance-only record.")
+                commit_count = int(git(["rev-list", "--count", "refs/heads/main"], cwd=verify_path).stdout.strip())
+                if tree != ["README.md"] or body != expected or commit_count != 1:
+                    raise RuntimeError("Existing reference-only repository is not the exact single-commit provenance-only record.")
                 if destination_meta.get("default_branch") != "main":
                     raise RuntimeError("Existing reference-only repository default branch is not main.")
                 result = "Existing reference-only record independently matched README-only contents."
@@ -144,8 +148,9 @@ def main():
             final_refs = refs(verify_path)
             tree = git(["ls-tree", "-r", "--name-only", "refs/heads/main"], cwd=verify_path).stdout.splitlines()
             body = git(["show", "refs/heads/main:README.md"], cwd=verify_path).stdout
-            if set(final_refs) != {"refs/heads/main"} or tree != ["README.md"] or body != expected:
-                raise RuntimeError("Final reference-only verification failed: destination must contain only README.md.")
+            commit_count = int(git(["rev-list", "--count", "refs/heads/main"], cwd=verify_path).stdout.strip())
+            if set(final_refs) != {"refs/heads/main"} or tree != ["README.md"] or body != expected or commit_count != 1:
+                raise RuntimeError("Final reference-only verification failed: destination must contain exactly one commit and README.md.")
             final_meta = api(token, "GET", f"/repos/{target}")
             if final_meta.get("private") is not True or final_meta.get("fork") is not False or final_meta.get("default_branch") != "main":
                 raise RuntimeError("Final reference-only repository metadata verification failed.")

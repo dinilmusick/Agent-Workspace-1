@@ -108,7 +108,9 @@ jobs:
         with:
           repository: ${{ steps.request.outputs.repository }}
           ref: ${{ steps.request.outputs.ref }}
-          token: ${{ secrets.CODING_REPO_TOKEN }}
+          # Target portability repositories are public; use this workflow's read-scoped token.
+          # CODING_REPO_TOKEN remains reserved for private source checkout and explicit pushes.
+          token: ${{ github.token }}
           path: target
           fetch-depth: 0
           persist-credentials: false

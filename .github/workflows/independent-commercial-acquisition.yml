@@ -98,15 +98,24 @@ jobs:
           set -euo pipefail
           status="$(curl -sS -o /tmp/repo.json -w '%{http_code}' -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" "https://api.github.com/repos/$TARGET")"
           if [[ "$status" == "200" ]]; then
-            echo "Destination already exists; refusing to overwrite or mirror into it." >&2
-            exit 1
-          elif [[ "$status" != "404" ]]; then
+            python3 - <<'PY'
+          import json, os
+          d=json.load(open("/tmp/repo.json"))
+          expected=os.environ["TARGET"]
+          if d.get("full_name","").lower() != expected.lower():
+              raise SystemExit("Existing destination owner/name mismatch")
+          if d.get("private") is not True or d.get("fork") is not False:
+              raise SystemExit("Existing destination must be private and must not be a fork")
+          print("Resuming approved mirror into existing private independent destination:", expected)
+          PY
+          elif [[ "$status" == "404" ]]; then
+            payload="$(python3 -c 'import json,os; print(json.dumps({"name":os.environ["TARGET"].split("/",1)[1],"private":True,"auto_init":False,"description":os.environ["DESCRIPTION"]}))')"
+            curl --fail-with-body -sS -X POST -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" -H "Content-Type: application/json" https://api.github.com/user/repos -d "$payload" > /tmp/created.json
+            python3 -c 'import json; d=json.load(open("/tmp/created.json")); print(d["full_name"]); print(d["html_url"])'
+          else
             cat /tmp/repo.json >&2
             exit 1
           fi
-          payload="$(python3 -c 'import json,os; print(json.dumps({"name":os.environ["TARGET"].split("/",1)[1],"private":True,"auto_init":False,"description":os.environ["DESCRIPTION"]}))')"
-          curl --fail-with-body -sS -X POST -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" -H "Content-Type: application/json" https://api.github.com/user/repos -d "$payload" > /tmp/created.json
-          python3 -c 'import json; d=json.load(open("/tmp/created.json")); print(d["full_name"]); print(d["html_url"])'
 
       - name: Mirror all Git refs into independent repository
         env:
@@ -118,13 +127,13 @@ jobs:
           set -euo pipefail
           export GIT_TERMINAL_PROMPT=0
           auth="$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
-          git -c "http.extraheader=AUTHORIZATION: basic $auth" clone --mirror "https://github.com/$SOURCE.git" source.git
+          git -c http.version=HTTP/1.1 -c "http.extraheader=AUTHORIZATION: basic $auth" clone --mirror "https://github.com/$SOURCE.git" source.git
           # GitHub-managed pull-request and merge-queue refs are not writable.
           while IFS= read -r ref; do
             [[ -z "$ref" ]] || git -C source.git update-ref -d "$ref"
           done < <(git -C source.git for-each-ref --format="%(refname)" refs/pull refs/merge-queue)
           git -C source.git remote add destination "https://github.com/$TARGET.git"
-          git -C source.git -c "http.extraheader=AUTHORIZATION: basic $auth" push --mirror destination
+          git -C source.git -c http.version=HTTP/1.1 -c "http.extraheader=AUTHORIZATION: basic $auth" push --mirror destination
           git -C source.git remote remove origin
           test "$(git -C source.git remote)" = "destination"
 

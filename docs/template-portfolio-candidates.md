@@ -3,7 +3,7 @@
 Snapshot date: 2026-11-12 (UTC)
 Policy: [Commercial Repository Acquisition Policy](commercial-acquisition-policy.md)
 
-This register captures the first ten priority candidates. It is **not a legal clearance or acquisition approval**. Every candidate remains CONDITIONAL until dependency, bundled-asset, font, icon, model, extension, and trademark checks are complete for the exact source revision. No candidate in this register is currently authorized for cloning.
+This register captures the first ten priority candidates from the initial discovery pass. It is **not a legal clearance or commercial-use approval**. Every candidate remains CONDITIONAL until dependency, bundled-asset, font, icon, model, extension, and trademark checks are complete for the exact source revision. Private research acquisition is governed separately by docs/template-private-acquisition-authorization.md and the canonical docs/template-portfolio-catalog.md; only catalog-listed source mirrors/reference records are covered, and no private acquisition grants commercial reuse rights.
 
 ## Candidate register
 

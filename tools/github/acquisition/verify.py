@@ -114,8 +114,11 @@ def main():
                 object_type=git(["cat-file","-t",archive_sha],cwd=destination).stdout.strip()
                 if object_type not in {"commit","tag"}:
                     raise RuntimeError(f"History-preservation ref {archive_ref} does not point to a commit or tag object.")
-            if not set(objects(source_path)).issubset(set(objects(destination))):
-                raise RuntimeError("Independent read-only verifier found upstream reachable objects missing from destination history.")
+            source_objects=set(objects(source_path))
+            destination_objects=set(objects(destination))
+            if not source_objects.issubset(destination_objects):
+                missing_objects=sorted(source_objects-destination_objects)
+                raise RuntimeError(f"Independent read-only verifier found upstream objects missing from destination; count={len(missing_objects)}, sample={missing_objects[:10]}.")
             result=f"Read-only verifier matched every live upstream writable ref and reachable object ID, plus exact default branch, pin, private/non-fork metadata and provenance; preserved {len(archive_refs)} prior ref tip(s) in refs/ultrst-archive/."
     archive_details = "\n".join(f"- {ref} ({sha})" for ref,sha in sorted(archive_refs.items())) if mode != "reference-only" else "- None"
     summary(f"## Independent read-only acquisition verification\n\n- Status: **passed**\n- Destination: https://github.com/{target}\n- Upstream: https://github.com/{source}\n- Pinned commit: {commit}\n- Mode: {mode}\n- Result: {result}\n\n### Preserved history refs\n\n{archive_details}\n\nThis confirms acquisition only; commercial clearance remains separate.")

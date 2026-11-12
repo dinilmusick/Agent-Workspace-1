@@ -96,3 +96,57 @@ GitHub did not provide a recognized SPDX license identifier for these exact repo
 6. Before any commercial reuse, repeat the full legal/dependency/asset audit against the exact product configuration and source revision.
 
 The catalog is a coverage plan, not a claim that every proposed destination has already been created or independently tested.
+
+
+## 6. Acquisition and validation priority
+
+Ranking is based on product breadth and likely paid-project reuse first, then the usefulness of the codebase as a reusable implementation. GitHub stars and recent activity are maturity signals, not proof of software quality or commercial suitability.
+
+### Priority A — client-delivery starters with broad reuse
+
+1. CMS and content platforms — Payload.
+2. E-commerce and marketplaces — Spree.
+3. SaaS applications — existing Next.js SaaS starter.
+4. CRM and sales operations — Krayin.
+5. API-first backend applications — FastAPI full-stack template.
+6. AI application and agent workflows — Langflow.
+7. RAG and document intelligence — RAGFlow.
+8. Booking and scheduling — Cal.diy.
+9. Admin dashboards and internal tools — Refine.
+10. BI and analytics dashboards — Apache Superset.
+11. Customer support and helpdesk — Chatwoot reference candidate (license metadata unresolved).
+12. Subscription billing — Kill Bill.
+13. Automation and integrations — existing Node-RED; n8n reference candidate.
+14. Business websites and documentation — existing Hugo and Docusaurus.
+15. Commerce operations / order workflows — Spree plus the existing SaaS and API foundations.
+
+### Priority B — high-value specialist application starters
+
+16. ERP / business operations — Apache OFBiz.
+17. Inventory and manufacturing — InvenTree.
+18. Healthcare interoperability — Medplum.
+19. HRMS — Frappe HRMS.
+20. LMS / education — Moodle.
+21. Event ticketing — pretix reference-only.
+22. Project management — Plane compared with existing Kanboard.
+23. Community / forum software — NodeBB compared with existing Flarum skeleton.
+24. Federated social network — Mastodon.
+25. Document management and archive — Paperless-ngx.
+26. Video conferencing — Jitsi Meet.
+27. Mobile applications — Expo examples.
+28. Desktop applications — Tauri and Electron starters.
+29. Browser extensions — WXT.
+
+### Priority C — foundational infrastructure and specialist engineering tools
+
+30. General workflow orchestration — existing Temporal.
+31. Data workflow orchestration — Apache Airflow.
+32. ELT / integration pipelines — Meltano.
+33. Self-hosted PaaS — Dokku.
+34. CI/CD platform — Woodpecker.
+35. Infrastructure as code — Pulumi.
+36. Cloud security assessment — Prowler.
+37. IoT / device management — ThingsBoard reference-only.
+38. Search infrastructure — Meilisearch reference-only.
+
+Acquisition order should follow the priorities, but the manifest pins each candidate independently so parallel private acquisition can proceed once the discovery goal is verified. No product is marked commercially cleared by this ranking.

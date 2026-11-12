@@ -47,7 +47,9 @@ def validate_request_shape(req: Any) -> dict[str, str]:
     return {"source": source, "target": target, "source_commit": commit, "category": category, "mode": mode, "approval_record": approval}
 
 def catalog_line_authorizes(catalog: str, request: dict[str, str]) -> bool:
-    source, target, commit = request["source"].lower(), request["target"].lower(), request["source_commit"].lower()
+    source = request.get("source", request.get("source_repository", "")).lower()
+    target = request.get("target", request.get("target_repository", "")).lower()
+    commit = request["source_commit"].lower()
     return any(source in line.lower() and target in line.lower() and commit in line.lower() for line in catalog.splitlines() if line.lstrip().startswith("|"))
 
 def write_outputs(path: str, values: dict[str, str]) -> None:

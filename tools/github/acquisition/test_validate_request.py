@@ -1,4 +1,6 @@
 import io
+import json
+import os
 import re
 import sys
 import urllib.error
@@ -8,7 +10,7 @@ from pathlib import Path
 from unittest.mock import MagicMock, call, patch
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from acquire import api, push_mirror_refs, refspec_batches
-from validate_request import APPROVAL_URL, assert_exact_head, catalog_authorization, catalog_line_authorizes, load_issue_body, validate_catalog_authorization, validate_request_shape, write_outputs
+from validate_request import APPROVAL_URL, assert_exact_head, catalog_authorization, catalog_line_authorizes, event_issue_number, load_issue_body, validate_catalog_authorization, validate_request_shape, write_outputs
 
 class AcquisitionRequestValidationTests(unittest.TestCase):
     def setUp(self):
@@ -16,6 +18,12 @@ class AcquisitionRequestValidationTests(unittest.TestCase):
             "target_repository": "tpl-commerce-spree", "category": "E-commerce + multi-vendor marketplace",
             "acquisition_mode": "mirror", "approval_record": APPROVAL_URL}
 
+    def test_issue_number_is_read_from_workflow_event_payload(self):
+        with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8") as event_file:
+            json.dump({"issue": {"number": 908}}, event_file)
+            event_file.flush()
+            with patch.dict(os.environ, {"GITHUB_EVENT_PATH": event_file.name}):
+                self.assertEqual(event_issue_number(), "908")
     @patch("validate_request.api_json")
     def test_issue_body_is_refreshed_from_live_issue_on_retry(self, mock_api_json):
         mock_api_json.return_value = {"body": '{"source_commit":"fresh"}'}

@@ -27,7 +27,7 @@ on:
 
 permissions:
   contents: read
-  issues: read
+  issues: write
 
 jobs:
   run:
@@ -160,3 +160,17 @@ jobs:
       - name: Cleanup
         if: always()
         run: rm -rf "${CLONED_REPO:-}" /tmp/agent-workspace-artifacts
+
+      - name: Report runner result to request issue
+        if: always() && github.event_name == 'issues'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          ARTIFACT_NAME: private-repo-ci-${{ github.run_id }}
+          JOB_STATUS: ${{ job.status }}
+        run: |
+          set -euo pipefail
+          gh issue comment "$ISSUE_NUMBER" --body "$(printf 'Agent Workspace private CI finished: **%s**.\nRun: %s\nArtifact: `%s`.' "$JOB_STATUS" "$RUN_URL" "$ARTIFACT_NAME")"

@@ -4,7 +4,7 @@
 **Canonical catalog:** [docs/template-portfolio-catalog.md](template-portfolio-catalog.md)  
 **Acquisition workflow:** [independent-commercial-acquisition.yml](../.github/workflows/independent-commercial-acquisition.yml)  
 **Snapshot:** 2026-11-13  
-**Report state:** In progress — this report intentionally distinguishes completed verification from pending and rate-limited work.
+**Report state:** In progress — 14/16 requested additions are independently verified; ERPNext and Grafana remain pending.
 
 ## 1. Executive status
 
@@ -146,8 +146,8 @@ Representative source/destination manifest comparisons have passed for all eight
 
 ## 9. Remaining work at this snapshot
 
-- Complete refreshed ERPNext and Grafana verification, plus the Loki, Tempo, OpenTelemetry Collector and Keycloak verifier runs.
-- Complete the remaining Tempo destination creation and all pending verifier runs.
+- Complete the ERPNext independent read-only verifier (run 43414925330) and Grafana current-pin acquisition/verifier (queued run 43415960990).
+- Complete only the two outstanding refreshed verifications; Zammad, Prometheus, OpenTelemetry Collector and Keycloak are already independently verified.
 - Independently verify all 16 destination repositories, including complete ref/object coverage and representative project manifests.
 - Update the matrix and catalog with final workflow evidence.
 - Close ERPNext #908 and Grafana #935 only after their current pinned acquisition and independent verifier runs succeed; superseded ERPNext issue #884 is already closed.

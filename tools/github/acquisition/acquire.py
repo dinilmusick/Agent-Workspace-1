@@ -328,7 +328,7 @@ def main():
             verify_path = temp / "destination-verify.git"
             git(["clone", "--mirror", target_url, str(verify_path)], env=git_env)
             for ref in list(refs(verify_path)):
-                if ref.startswith(("refs/pull/", "refs/merge-queue/", "refs/remotes/", "refs/gh/")):
+                if not is_writable_ref(ref):
                     git(["update-ref", "-d", ref], cwd=verify_path)
             git(["fsck", "--full", "--no-reflogs", "--connectivity-only"], cwd=verify_path)
             final_refs = writable_refs(verify_path)

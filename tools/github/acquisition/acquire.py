@@ -95,6 +95,23 @@ def writable_refs(repo):
         if not ref.startswith(("refs/pull/", "refs/merge-queue/", "refs/remotes/", "refs/gh/"))
     }
 
+def refspec_batches(ref_names, batch_size=100):
+    if batch_size < 1:
+        raise ValueError("batch_size must be positive")
+    return [ref_names[index:index + batch_size] for index in range(0, len(ref_names), batch_size)]
+
+def push_mirror_refs(repo, remote, env, source_refs, default_branch, batch_size=100):
+    """Push every writable ref in bounded batches; GitHub rejects very large mirror ref transactions."""
+    default_ref = f"refs/heads/{default_branch}"
+    if default_ref not in source_refs:
+        raise RuntimeError(f"Approved default branch ref {default_ref} is absent from the source mirror.")
+    ordered_refs = [default_ref] + sorted(ref for ref in source_refs if ref != default_ref)
+    batches = refspec_batches(ordered_refs, batch_size)
+    print(f"Pushing {len(ordered_refs)} writable refs in {len(batches)} batches of at most {batch_size}.", file=sys.stderr)
+    for batch in batches:
+        refspecs = [f"+{ref}:{ref}" for ref in batch]
+        git(["push", remote, *refspecs], cwd=repo, env=env)
+
 def reachable_objects(repo):
     output = git(["rev-list", "--objects", "--all"], cwd=repo).stdout
     return sorted({line.split(" ", 1)[0] for line in output.splitlines() if line.strip()})
@@ -265,8 +282,12 @@ def main():
                         raise RuntimeError("Existing destination default-branch ref does not match its previous provenance pin.")
                 archived_history = preserve_and_reconcile_existing_refs(writable_refs(existing_path), source_refs, source_path, existing_path)
                 source_refs = writable_refs(source_path)
+            destination_refs_before = remote_refs(target_url, git_env)
+            unexpected_refs = sorted(set(destination_refs_before) - set(source_refs))
+            if unexpected_refs:
+                raise RuntimeError(f"Destination contains refs not represented in the reconciled source mirror; refusing to overwrite: {unexpected_refs[:20]}.")
             git(["remote", "add", "destination", target_url], cwd=source_path)
-            git(["push", "--mirror", "destination"], cwd=source_path, env=git_env)
+            push_mirror_refs(source_path, "destination", git_env, source_refs, source_branch)
             git(["remote", "remove", "destination"], cwd=source_path)
             if git(["remote"], cwd=source_path).stdout.strip():
                 raise RuntimeError("Temporary mirror retained a remote after push.")

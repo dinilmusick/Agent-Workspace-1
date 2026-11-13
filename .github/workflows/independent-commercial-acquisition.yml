@@ -37,7 +37,7 @@ jobs:
         id: request
         env:
           GH_TOKEN: ${{ secrets.CODING_REPO_TOKEN }}
-          ISSUE_BODY: ${{ github.event.issue.body }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
         shell: bash
         run: |
           set -euo pipefail

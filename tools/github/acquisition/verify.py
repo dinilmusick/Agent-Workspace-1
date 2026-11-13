@@ -93,7 +93,7 @@ def main():
             source_path=root/"source.git"
             git(["clone","--mirror",f"https://github.com/{source}.git",str(source_path)])
             for ref in list(refs(source_path)):
-                if ref.startswith(("refs/pull/","refs/merge-queue/","refs/remotes/","refs/gh/")):
+                if not is_writable_ref(ref):
                     git(["update-ref","-d",ref],cwd=source_path)
             git(["remote","remove","origin"],cwd=source_path)
             if git(["remote"],cwd=source_path).stdout.strip():

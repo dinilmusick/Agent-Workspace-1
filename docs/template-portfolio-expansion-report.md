@@ -74,7 +74,7 @@ No project is described as commercially cleared. Private research mirroring is n
 | Reference-only records added by this expansion | 0 | 0 |
 | Duplicate destination repositories created | 0 | 0 |
 
-All 56 currently indexed `tpl-*` repositories are private. The 44 pre-existing destinations were preserved. The only absent destination at this snapshot is Tempo. Empty repositories and repositories with only a subset of refs are not counted as verified acquisitions.
+All 59 currently indexed `tpl-*` repositories are private. The 44 pre-existing destinations were preserved. The only absent destination at this snapshot is Tempo. Empty repositories and repositories with only a subset of refs are not counted as verified acquisitions.
 
 A single unrelated open pull request remains in the control repository; no expansion change was merged through or discarded from that PR.
 

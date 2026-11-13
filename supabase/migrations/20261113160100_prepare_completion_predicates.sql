@@ -52,3 +52,15 @@ insert into public.completion_predicates(
   '{"type":"object","required":["evidence"]}'::jsonb,
   'true'::jsonb
 ) on conflict (predicate_key,version) do nothing;
+
+-- Deletion is also forbidden: changing the definition requires a new version.
+create or replace function public.prevent_completion_predicate_delete()
+returns trigger language plpgsql set search_path=public as $$
+begin
+  raise exception 'completion predicate definitions are immutable; create a new version';
+end; $$;
+
+drop trigger if exists completion_predicates_immutable_delete on public.completion_predicates;
+create trigger completion_predicates_immutable_delete
+before delete on public.completion_predicates
+for each row execute function public.prevent_completion_predicate_delete();

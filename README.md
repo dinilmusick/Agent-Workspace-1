@@ -88,3 +88,10 @@ Supabase remains the coordination/state substrate when available, but it is not 
 
 
 <!-- import-forge trigger marker -->
+
+
+## Hardened worker model
+
+Agent Workspace is designed for fragile, ephemeral agents. Workers reconstruct context from Supabase and GitHub Issues rather than chat history. Active tasks heartbeat/checkpoint about every 2 minutes and independently check ownership about every 5 minutes; tasks without a heartbeat for at least 5 minutes can be atomically recovered. Claim tokens fence stale workers. Loop contracts are authored by one worker and executed by a different worker, so success parameters cannot be self-authored and self-certified. Every worker persists progress, blockers, evidence and resume state before disappearing, and terminal completion requires independent verification.
+
+For the complete protocol, start with `AGENTS.md`, `skills/task-ledger/SKILL.md`, `skills/universal-task-router/SKILL.md`, `skills/coding-task-lifecycle/SKILL.md`, and `skills/persistent-multi-agent-execution/SKILL.md`.

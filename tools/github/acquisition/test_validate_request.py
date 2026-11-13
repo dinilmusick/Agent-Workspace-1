@@ -9,7 +9,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import MagicMock, call, patch
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from acquire import api, push_mirror_refs, refspec_batches, repository_creation_stagger
+from acquire import api, is_writable_ref, push_mirror_refs, refspec_batches, repository_creation_stagger, validate_previous_default_ref
 from validate_request import APPROVAL_URL, assert_exact_head, catalog_authorization, catalog_line_authorizes, event_issue_number, load_issue_body, validate_catalog_authorization, validate_request_shape, write_outputs
 
 class AcquisitionRequestValidationTests(unittest.TestCase):
@@ -176,6 +176,18 @@ class AcquisitionRequestValidationTests(unittest.TestCase):
         self.assertIn("refs/heads/mergify/merge-queue/", acquisition)
         self.assertIn("push_mirror_refs", acquisition)
 
+    def test_ephemeral_merge_queue_refs_are_not_mirrored(self):
+        self.assertFalse(is_writable_ref("refs/heads/mergify/merge-queue/abcdef"))
+        self.assertFalse(is_writable_ref("refs/heads/gh-readonly-queue/main/pr-123"))
+        self.assertFalse(is_writable_ref("refs/merge-queue/main/pr-123"))
+        self.assertTrue(is_writable_ref("refs/heads/develop"))
+        self.assertTrue(is_writable_ref("refs/tags/v1.0.0"))
+
+    def test_provenance_migration_recovers_already_pushed_current_default_ref(self):
+        self.assertTrue(validate_previous_default_ref("current", "previous", "current"))
+        self.assertFalse(validate_previous_default_ref("previous", "previous", "current"))
+        with self.assertRaises(RuntimeError):
+            validate_previous_default_ref("unexpected", "previous", "current")
     def test_repository_creation_stagger_is_stable_and_bounded(self):
         first = repository_creation_stagger("tpl-platform-keycloak")
         self.assertEqual(first, repository_creation_stagger("tpl-platform-keycloak"))

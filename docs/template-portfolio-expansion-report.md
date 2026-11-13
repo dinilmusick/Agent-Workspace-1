@@ -12,7 +12,7 @@ The catalog has been extended from **44 to 60 records**: 45 full-source mirror c
 
 At this snapshot:
 
-- **9/16** new candidates have passed the canonical acquisition workflow and independent read-only verification.
+- **10/16** new candidates have passed the canonical acquisition workflow and independent read-only verification.
 - **15/16** requested destination repositories currently exist and are private; existence is not treated as source verification.
 - **1/16** destination is not yet present.
 - Airflow has been refreshed to the reviewed current upstream pin and independently verified.
@@ -39,7 +39,7 @@ No project is described as commercially cleared. Private research mirroring is n
 | 12 | Tempo | [grafana/tempo](https://github.com/grafana/tempo) — `main`, `f023741110df81cd20d014814e01058b3de53787` | [tpl-observability-tempo](https://github.com/dinilmusick/tpl-observability-tempo) | mirror | AGPL-3.0; `LICENSING.md` identifies Apache-2.0 exceptions and upstream-licensed directories | No — refreshed pin validated; destination creation/acquisition pending | pending-verification |
 | 13 | OpenTelemetry Collector | [open-telemetry/opentelemetry-collector](https://github.com/open-telemetry/opentelemetry-collector) — `main`, `4888f0b280f927f9ec356c3d8a9c02a1a37819dc` | [tpl-observability-otel-collector](https://github.com/dinilmusick/tpl-observability-otel-collector) | mirror | Apache-2.0 root; contributed receivers/exporters in separate projects need separate review | Destination exists; 7,454 raw refs are being pushed in bounded batches | pending-verification |
 | 14 | Postal | [postalserver/postal](https://github.com/postalserver/postal) — `main`, `d96eddbadeda600595d6247486f9ceb8e99cbc15` | [tpl-platform-postal](https://github.com/dinilmusick/tpl-platform-postal) | mirror | MIT; preserve the upstream MIT-LICENCE and third-party notices | Yes — independent verifier passed; `Gemfile` and `MIT-LICENCE` match byte-for-byte | acquired-and-verified |
-| 15 | Flagsmith | [Flagsmith/flagsmith](https://github.com/Flagsmith/flagsmith) — `main`, `e1d64e6f15842f93dc67f30273e50ceb1d14bcc8` | [tpl-platform-flagsmith](https://github.com/dinilmusick/tpl-platform-flagsmith) | mirror | BSD-3-Clause core; some enterprise governance/management capabilities require separate commercial licensing | Destination exists; 1,131 raw refs are being pushed in bounded batches | pending-verification |
+| 15 | Flagsmith | [Flagsmith/flagsmith](https://github.com/Flagsmith/flagsmith) — `main`, `e1d64e6f15842f93dc67f30273e50ceb1d14bcc8` | [tpl-platform-flagsmith](https://github.com/dinilmusick/tpl-platform-flagsmith) | mirror | BSD-3-Clause core; some enterprise governance/management capabilities require separate commercial licensing | Yes — independent verifier passed; `LICENSE.md` and `Dockerfile` match byte-for-byte | acquired-and-verified |
 | 16 | Keycloak | [keycloak/keycloak](https://github.com/keycloak/keycloak) — `main`, `40931dcf48618a28639e9ccc097e8c0f0b6d2802` | [tpl-platform-keycloak](https://github.com/dinilmusick/tpl-platform-keycloak) | mirror | Apache-2.0; identity reference only, not an alternative ULTRST auth authority | `pom.xml`, `LICENSE.txt` and all current refs match; independent verifier pending | pending-verification |
 
 ### Candidate issue and workflow evidence
@@ -60,7 +60,7 @@ No project is described as commercially cleared. Private research mirroring is n
 | Tempo | [#895](https://github.com/dinilmusick/Agent-Workspace-1/issues/895) | [43385416895](https://github.com/dinilmusick/Agent-Workspace-1/actions/runs/43385416895) |
 | OpenTelemetry Collector | [#896](https://github.com/dinilmusick/Agent-Workspace-1/issues/896) | [43385420872](https://github.com/dinilmusick/Agent-Workspace-1/actions/runs/43385420872) |
 | Postal | [#897](https://github.com/dinilmusick/Agent-Workspace-1/issues/897) (closed) | [43385424474](https://github.com/dinilmusick/Agent-Workspace-1/actions/runs/43385424474) — success |
-| Flagsmith | [#898](https://github.com/dinilmusick/Agent-Workspace-1/issues/898) | [43385428023](https://github.com/dinilmusick/Agent-Workspace-1/actions/runs/43385428023) |
+| Flagsmith | [#898](https://github.com/dinilmusick/Agent-Workspace-1/issues/898) (closed) | [43385428023](https://github.com/dinilmusick/Agent-Workspace-1/actions/runs/43385428023) — success |
 | Keycloak | [#899](https://github.com/dinilmusick/Agent-Workspace-1/issues/899) | [Original run](https://github.com/dinilmusick/Agent-Workspace-1/actions/runs/43385432594); current issue body refreshed to the reviewed live HEAD |
 
 ## 3. Existing portfolio integrity
@@ -70,7 +70,7 @@ No project is described as commercially cleared. Private research mirroring is n
 | Canonical catalog records | 44 | 60 |
 | Indexed private `tpl-*` repositories | 44 | 59 |
 | New requested destinations currently present | 0 | 15 of 16 |
-| New candidates independently verified | 0 | 9 of 16 |
+| New candidates independently verified | 0 | 10 of 16 |
 | Reference-only records added by this expansion | 0 | 0 |
 | Duplicate destination repositories created | 0 | 0 |
 
@@ -147,7 +147,7 @@ Representative source/destination manifest comparisons have passed for all eight
 ## 9. Remaining work at this snapshot
 
 - Complete refreshed ERPNext and Grafana verification.
-- Complete Loki, Tempo, OpenTelemetry Collector, Postal, Flagsmith and Keycloak acquisitions.
+- Complete ERPNext, Grafana, Loki, Tempo, OpenTelemetry Collector and Keycloak verification/acquisition.
 - Independently verify all 16 destination repositories, including complete ref/object coverage and representative project manifests.
 - Update the matrix and catalog with final workflow evidence.
 - Close superseded retry issues #902 and #908 after their canonical issues #899 and #884 complete.

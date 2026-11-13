@@ -113,3 +113,23 @@ Add edges from the later goal to its prerequisite (dependent → prerequisite). 
 ### Verification
 
 Run the rollback-only regression script in `supabase/tests/task-ledger-goal-dependencies.integration.sql` against the trusted Supabase connector. It proves that blocking prerequisites prevent goal activation and task claims, blocking cycles are rejected, and advisory edges remain non-blocking. The script rolls back its fixtures. Also inspect the database triggers on `goals`, `tasks` and `goal_dependencies` after schema changes.
+
+
+## Bounded v2 completion model
+
+The canonical execution hierarchy is now a bounded loop model:
+
+```
+Vision -> 1..N Goals -> 1..4 direct Tasks -> 1..4 Checkpoints
+```
+
+- A Vision may contain any number of Goals.
+- A Goal may contain at most four direct Tasks. Its `completion_parameters` projection is maintained from those tasks.
+- A Task may contain no new nested tasks in bounded-v2; additional work becomes another Task or Goal.
+- Every bounded-v2 Task has 1-4 completion parameters and exactly one Checkpoint for each parameter.
+- A Checkpoint records `parameter_id`, `objective`, `status`, `result`, `context` and `evidence`.
+- A bounded-v2 Task cannot transition to `completed` until every Checkpoint has `status=succeeded`.
+- The database triggers enforce these limits; prompts are not the authority.
+- Legacy rows remain readable so existing work can be resumed while all newly created task trees use bounded-v2.
+
+Resume therefore means loading the unfinished Goal, selecting an incomplete Task, and continuing at its persisted `current_checkpoint_index` rather than reconstructing conversational context.

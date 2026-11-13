@@ -128,15 +128,22 @@ def api_json(token: str, path: str) -> dict[str, Any]:
         detail = exc.read(4096).decode("utf-8", errors="replace")
         raise ValueError(f"GitHub API request failed ({exc.code}): {detail}") from None
 
+def load_issue_body(token: str, issue_number: str | None, fallback: str = "") -> str:
+    if issue_number:
+        issue = api_json(token, f"/repos/{WORKSPACE}/issues/{issue_number}")
+        return issue.get("body") or ""
+    return fallback
+
+
 def main() -> int:
     try:
-        raw = os.environ.get("ISSUE_BODY", "")
-        if not raw or len(raw.encode("utf-8")) > 12000:
-            raise ValueError("Issue body is empty or exceeds 12 KB.")
-        req = validate_request_shape(json.loads(raw))
         token = os.environ.get("GH_TOKEN", "")
         if not token:
             raise ValueError("CODING_REPO_TOKEN is unavailable.")
+        raw = load_issue_body(token, os.environ.get("ISSUE_NUMBER"), os.environ.get("ISSUE_BODY", ""))
+        if not raw or len(raw.encode("utf-8")) > 12000:
+            raise ValueError("Issue body is empty or exceeds 12 KB.")
+        req = validate_request_shape(json.loads(raw))
         source_meta = api_json(token, f"/repos/{req['source']}")
         if source_meta.get("archived") or source_meta.get("disabled"):
             raise ValueError("Archived or disabled upstream repositories cannot be acquired.")

@@ -12,9 +12,9 @@ The catalog has been extended from **44 to 60 records**: 45 full-source mirror c
 
 At this snapshot:
 
-- **8/16** new candidates have passed the canonical acquisition workflow and independent read-only verification.
-- **12/16** requested destination repositories currently exist and are private; existence is not treated as source verification.
-- **4/16** destinations are not yet present.
+- **9/16** new candidates have passed the canonical acquisition workflow and independent read-only verification.
+- **13/16** requested destination repositories currently exist and are private; existence is not treated as source verification.
+- **3/16** destinations are not yet present.
 - Airflow has been refreshed to the reviewed current upstream pin and independently verified.
 - Five destination-creation attempts encountered GitHub's secondary content-creation rate limit. The controller now staggers repository creation and uses exponential backoff.
 - Large upstreams with thousands of refs require bounded ref pushes. The acquisition controller now pushes refs in batches of 100 and preserves/deletes old refs only after archiving their tips.
@@ -38,7 +38,7 @@ No project is described as commercially cleared. Private research mirroring is n
 | 11 | Loki | [grafana/loki](https://github.com/grafana/loki) — `main`, `8f83d5672776aeb656fdc0f6fe3f38be3a33e80a` | [tpl-observability-loki](https://github.com/dinilmusick/tpl-observability-loki) | mirror | AGPL-3.0; `LICENSING.md` lists Apache-2.0 exceptions and vendor directories under original licenses | Not yet — destination exists but source mirroring is pending | pending-verification |
 | 12 | Tempo | [grafana/tempo](https://github.com/grafana/tempo) — `main`, `7c4ffb3826d286ed44d0cfb83734350f6bbb3eac` | [tpl-observability-tempo](https://github.com/dinilmusick/tpl-observability-tempo) | mirror | AGPL-3.0; `LICENSING.md` identifies Apache-2.0 exceptions and upstream-licensed directories | No — destination creation/retry pending | blocked-acquisition |
 | 13 | OpenTelemetry Collector | [open-telemetry/opentelemetry-collector](https://github.com/open-telemetry/opentelemetry-collector) — `main`, `4888f0b280f927f9ec356c3d8a9c02a1a37819dc` | [tpl-observability-otel-collector](https://github.com/dinilmusick/tpl-observability-otel-collector) | mirror | Apache-2.0 root; contributed receivers/exporters in separate projects need separate review | No — destination creation/retry pending | blocked-acquisition |
-| 14 | Postal | [postalserver/postal](https://github.com/postalserver/postal) — `main`, `d96eddbadeda600595d6247486f9ceb8e99cbc15` | [tpl-platform-postal](https://github.com/dinilmusick/tpl-platform-postal) | mirror | MIT; preserve the upstream MIT-LICENCE and third-party notices | No — destination creation/retry pending | blocked-acquisition |
+| 14 | Postal | [postalserver/postal](https://github.com/postalserver/postal) — `main`, `d96eddbadeda600595d6247486f9ceb8e99cbc15` | [tpl-platform-postal](https://github.com/dinilmusick/tpl-platform-postal) | mirror | MIT; preserve the upstream MIT-LICENCE and third-party notices | Yes — independent verifier passed; `Gemfile` and `MIT-LICENCE` match byte-for-byte | acquired-and-verified |
 | 15 | Flagsmith | [Flagsmith/flagsmith](https://github.com/Flagsmith/flagsmith) — `main`, `e1d64e6f15842f93dc67f30273e50ceb1d14bcc8` | [tpl-platform-flagsmith](https://github.com/dinilmusick/tpl-platform-flagsmith) | mirror | BSD-3-Clause core; some enterprise governance/management capabilities require separate commercial licensing | No — destination creation/retry pending | blocked-acquisition |
 | 16 | Keycloak | [keycloak/keycloak](https://github.com/keycloak/keycloak) — `main`, `40931dcf48618a28639e9ccc097e8c0f0b6d2802` | [tpl-platform-keycloak](https://github.com/dinilmusick/tpl-platform-keycloak) | mirror | Apache-2.0; identity reference only, not an alternative ULTRST auth authority | Not yet — destination exists but source mirroring is pending | pending-verification |
 
@@ -59,7 +59,7 @@ No project is described as commercially cleared. Private research mirroring is n
 | Loki | [#894](https://github.com/dinilmusick/Agent-Workspace-1/issues/894) | [Original run](https://github.com/dinilmusick/Agent-Workspace-1/actions/runs/43385410792); current issue body refreshed to the reviewed live HEAD |
 | Tempo | [#895](https://github.com/dinilmusick/Agent-Workspace-1/issues/895) | [43385416895](https://github.com/dinilmusick/Agent-Workspace-1/actions/runs/43385416895) |
 | OpenTelemetry Collector | [#896](https://github.com/dinilmusick/Agent-Workspace-1/issues/896) | [43385420872](https://github.com/dinilmusick/Agent-Workspace-1/actions/runs/43385420872) |
-| Postal | [#897](https://github.com/dinilmusick/Agent-Workspace-1/issues/897) | [43385424474](https://github.com/dinilmusick/Agent-Workspace-1/actions/runs/43385424474) |
+| Postal | [#897](https://github.com/dinilmusick/Agent-Workspace-1/issues/897) (closed) | [43385424474](https://github.com/dinilmusick/Agent-Workspace-1/actions/runs/43385424474) — success |
 | Flagsmith | [#898](https://github.com/dinilmusick/Agent-Workspace-1/issues/898) | [43385428023](https://github.com/dinilmusick/Agent-Workspace-1/actions/runs/43385428023) |
 | Keycloak | [#899](https://github.com/dinilmusick/Agent-Workspace-1/issues/899) | [Original run](https://github.com/dinilmusick/Agent-Workspace-1/actions/runs/43385432594); current issue body refreshed to the reviewed live HEAD |
 
@@ -68,13 +68,13 @@ No project is described as commercially cleared. Private research mirroring is n
 | Measure | Before expansion | Current snapshot |
 |---|---:|---:|
 | Canonical catalog records | 44 | 60 |
-| Indexed private `tpl-*` repositories | 44 | 56 |
-| New requested destinations currently present | 0 | 12 of 16 |
-| New candidates independently verified | 0 | 8 of 16 |
+| Indexed private `tpl-*` repositories | 44 | 57 |
+| New requested destinations currently present | 0 | 13 of 16 |
+| New candidates independently verified | 0 | 9 of 16 |
 | Reference-only records added by this expansion | 0 | 0 |
 | Duplicate destination repositories created | 0 | 0 |
 
-All 56 currently indexed `tpl-*` repositories are private. The 44 pre-existing destinations were preserved. The four absent destinations at this snapshot are Tempo, OpenTelemetry Collector, Postal and Flagsmith. Empty repositories and repositories with only a subset of refs are not counted as verified acquisitions.
+All 56 currently indexed `tpl-*` repositories are private. The 44 pre-existing destinations were preserved. The three absent destinations at this snapshot are Tempo, OpenTelemetry Collector and Flagsmith. Empty repositories and repositories with only a subset of refs are not counted as verified acquisitions.
 
 A single unrelated open pull request remains in the control repository; no expansion change was merged through or discarded from that PR.
 

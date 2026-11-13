@@ -180,6 +180,7 @@ class AcquisitionRequestValidationTests(unittest.TestCase):
         self.assertFalse(is_writable_ref("refs/heads/mergify/merge-queue/abcdef"))
         self.assertFalse(is_writable_ref("refs/heads/gh-readonly-queue/main/pr-123"))
         self.assertFalse(is_writable_ref("refs/merge-queue/main/pr-123"))
+        self.assertFalse(is_writable_ref("refs/heads/create-pull-request/patch"))
         self.assertTrue(is_writable_ref("refs/heads/develop"))
         self.assertTrue(is_writable_ref("refs/tags/v1.0.0"))
 

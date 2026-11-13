@@ -100,8 +100,8 @@ def refspec_batches(ref_names, batch_size=100):
         raise ValueError("batch_size must be positive")
     return [ref_names[index:index + batch_size] for index in range(0, len(ref_names), batch_size)]
 
-def push_mirror_refs(repo, remote, env, source_refs, default_branch, batch_size=100):
-    """Push every writable ref in bounded batches; GitHub rejects very large mirror ref transactions."""
+def push_mirror_refs(repo, remote, env, source_refs, default_branch, stale_refs=(), batch_size=100):
+    """Push every writable ref in bounded batches, then remove only refs whose tips were archived."""
     default_ref = f"refs/heads/{default_branch}"
     if default_ref not in source_refs:
         raise RuntimeError(f"Approved default branch ref {default_ref} is absent from the source mirror.")
@@ -111,6 +111,9 @@ def push_mirror_refs(repo, remote, env, source_refs, default_branch, batch_size=
     for batch in batches:
         refspecs = [f"+{ref}:{ref}" for ref in batch]
         git(["push", remote, *refspecs], cwd=repo, env=env)
+    stale_refs = sorted(set(stale_refs))
+    for batch in refspec_batches(stale_refs, batch_size):
+        git(["push", remote, *[f":{ref}" for ref in batch]], cwd=repo, env=env)
 
 def reachable_objects(repo):
     output = git(["rev-list", "--objects", "--all"], cwd=repo).stdout
@@ -283,11 +286,13 @@ def main():
                 archived_history = preserve_and_reconcile_existing_refs(writable_refs(existing_path), source_refs, source_path, existing_path)
                 source_refs = writable_refs(source_path)
             destination_refs_before = remote_refs(target_url, git_env)
-            unexpected_refs = sorted(set(destination_refs_before) - set(source_refs))
+            stale_destination_refs = sorted(set(destination_refs_before) - set(source_refs))
+            preserved_deleted_refs = {item["source_ref"] for item in archived_history if item["source_ref"] not in source_refs}
+            unexpected_refs = sorted(set(stale_destination_refs) - preserved_deleted_refs)
             if unexpected_refs:
-                raise RuntimeError(f"Destination contains refs not represented in the reconciled source mirror; refusing to overwrite: {unexpected_refs[:20]}.")
+                raise RuntimeError(f"Destination contains refs not represented in the reconciled source mirror or archived history; refusing to overwrite: {unexpected_refs[:20]}.")
             git(["remote", "add", "destination", target_url], cwd=source_path)
-            push_mirror_refs(source_path, "destination", git_env, source_refs, source_branch)
+            push_mirror_refs(source_path, "destination", git_env, source_refs, source_branch, stale_destination_refs)
             git(["remote", "remove", "destination"], cwd=source_path)
             if git(["remote"], cwd=source_path).stdout.strip():
                 raise RuntimeError("Temporary mirror retained a remote after push.")

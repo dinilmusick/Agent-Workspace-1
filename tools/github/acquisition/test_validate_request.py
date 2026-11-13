@@ -7,7 +7,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from acquire import api, refspec_batches
+from acquire import api, push_mirror_refs, refspec_batches
 from validate_request import APPROVAL_URL, assert_exact_head, catalog_authorization, catalog_line_authorizes, validate_catalog_authorization, validate_request_shape, write_outputs
 
 class AcquisitionRequestValidationTests(unittest.TestCase):
@@ -162,6 +162,21 @@ class AcquisitionRequestValidationTests(unittest.TestCase):
         batches = refspec_batches(refs, batch_size=100)
         self.assertEqual([len(batch) for batch in batches], [100, 100, 5])
         self.assertEqual([ref for batch in batches for ref in batch], refs)
+    @patch("acquire.git")
+    def test_push_mirror_refs_batches_and_deletes_only_archived_refs(self, mock_git):
+        source_refs = {
+            "refs/heads/main": "a" * 40,
+            "refs/tags/v1": "b" * 40,
+            "refs/ultrst-archive/0123456789abcdef/" + "c" * 40: "c" * 40,
+        }
+        push_mirror_refs("/tmp/source.git", "destination", {}, source_refs, "main",
+                         stale_refs=["refs/heads/removed"], batch_size=2)
+        commands = [call.args[0] for call in mock_git.call_args_list]
+        self.assertEqual(commands[0], ["push", "destination",
+            "+refs/heads/main:refs/heads/main", "+refs/tags/v1:refs/tags/v1"])
+        self.assertEqual(commands[1], ["push", "destination",
+            "+refs/ultrst-archive/0123456789abcdef/" + "c" * 40 + ":refs/ultrst-archive/0123456789abcdef/" + "c" * 40])
+        self.assertEqual(commands[2], ["push", "destination", ":refs/heads/removed"])
     @patch("acquire.time.sleep")
     @patch("acquire.urllib.request.urlopen")
     def test_acquisition_api_retries_secondary_rate_limit(self, mock_urlopen, mock_sleep):

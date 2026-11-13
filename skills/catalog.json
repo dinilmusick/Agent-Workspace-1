@@ -9,9 +9,9 @@
       "public.skill_tool_links",
       "public.skill_tools"
     ],
-    "exportedAt": "2026-11-11T14:10:00.000Z"
+    "exportedAt": "2026-11-13T18:43:00+05:30"
   },
-  "count": 37,
+  "count": 41,
   "skills": [
     {
       "id": 1,
@@ -20,7 +20,7 @@
       "slug": "tldraw",
       "tools": [],
       "status": "active",
-      "version": "1.0.0"
+      "version": "1.2.5"
     },
     {
       "id": 3,
@@ -36,7 +36,7 @@
         }
       ],
       "status": "active",
-      "version": "1.2.0"
+      "version": "1.2.5"
     },
     {
       "id": 4,
@@ -70,7 +70,7 @@
         }
       ],
       "status": "active",
-      "version": "1.0.0"
+      "version": "1.4.1"
     },
     {
       "id": 7,
@@ -86,7 +86,7 @@
         }
       ],
       "status": "active",
-      "version": "2.2.0"
+      "version": "2.4.1"
     },
     {
       "id": 8,
@@ -95,7 +95,7 @@
       "slug": "security-audit",
       "tools": [],
       "status": "active",
-      "version": "1.0.0"
+      "version": "1.2.5"
     },
     {
       "id": 9,
@@ -104,7 +104,7 @@
       "slug": "devops-ci-release",
       "tools": [],
       "status": "active",
-      "version": "1.0.5"
+      "version": "1.0.7"
     },
     {
       "id": 10,
@@ -150,7 +150,7 @@
         }
       ],
       "status": "active",
-      "version": "1.0.0"
+      "version": "1.2.5"
     },
     {
       "id": 11,
@@ -159,7 +159,7 @@
       "slug": "react-performance-composition",
       "tools": [],
       "status": "active",
-      "version": "1.0.0"
+      "version": "1.2.5"
     },
     {
       "id": 12,
@@ -168,7 +168,7 @@
       "slug": "refactoring",
       "tools": [],
       "status": "active",
-      "version": "1.0.0"
+      "version": "1.2.5"
     },
     {
       "id": 13,
@@ -214,7 +214,7 @@
         }
       ],
       "status": "active",
-      "version": "1.0.0"
+      "version": "1.2.5"
     },
     {
       "id": 14,
@@ -260,7 +260,7 @@
         }
       ],
       "status": "active",
-      "version": "1.0.0"
+      "version": "1.2.5"
     },
     {
       "id": 15,
@@ -269,7 +269,7 @@
       "slug": "technical-research",
       "tools": [],
       "status": "active",
-      "version": "1.0.0"
+      "version": "1.2.5"
     },
     {
       "id": 16,
@@ -315,7 +315,7 @@
         }
       ],
       "status": "active",
-      "version": "1.0.0"
+      "version": "1.2.5"
     },
     {
       "id": 17,
@@ -324,7 +324,7 @@
       "slug": "coding-router",
       "tools": [],
       "status": "active",
-      "version": "1.2.6"
+      "version": "2.0.2"
     },
     {
       "id": 18,
@@ -333,7 +333,7 @@
       "slug": "debugging-root-cause",
       "tools": [],
       "status": "active",
-      "version": "1.0.0"
+      "version": "1.0.3"
     },
     {
       "id": 19,
@@ -342,7 +342,7 @@
       "slug": "feature-implementation",
       "tools": [],
       "status": "active",
-      "version": "1.0.0"
+      "version": "2.0.2"
     },
     {
       "id": 20,
@@ -388,7 +388,7 @@
         }
       ],
       "status": "active",
-      "version": "1.0.5"
+      "version": "2.0.2"
     },
     {
       "id": 21,
@@ -397,7 +397,7 @@
       "slug": "documentation-engineering",
       "tools": [],
       "status": "active",
-      "version": "1.0.0"
+      "version": "1.2.5"
     },
     {
       "id": 22,
@@ -406,7 +406,7 @@
       "slug": "api-contract-design",
       "tools": [],
       "status": "active",
-      "version": "1.0.0"
+      "version": "1.2.5"
     },
     {
       "id": 23,
@@ -415,7 +415,7 @@
       "slug": "agent-systems-engineering",
       "tools": [],
       "status": "active",
-      "version": "1.0.3"
+      "version": "2.0.2"
     },
     {
       "id": 24,
@@ -424,7 +424,7 @@
       "slug": "backend-api-engineering",
       "tools": [],
       "status": "active",
-      "version": "1.0.0"
+      "version": "1.2.5"
     },
     {
       "id": 25,
@@ -482,7 +482,7 @@
         }
       ],
       "status": "active",
-      "version": "1.0.0"
+      "version": "1.0.3"
     },
     {
       "id": 26,
@@ -510,7 +510,7 @@
         }
       ],
       "status": "active",
-      "version": "1.0.0"
+      "version": "1.2.5"
     },
     {
       "id": 27,
@@ -532,7 +532,7 @@
         }
       ],
       "status": "active",
-      "version": "1.0.0"
+      "version": "1.2.5"
     },
     {
       "id": 28,
@@ -541,7 +541,7 @@
       "slug": "universal-task-router",
       "tools": [],
       "status": "active",
-      "version": "2.2.0"
+      "version": "2.2.1"
     },
     {
       "id": 29,
@@ -550,7 +550,7 @@
       "slug": "personal-growth-router",
       "tools": [],
       "status": "active",
-      "version": "1.0.0"
+      "version": "1.2.5"
     },
     {
       "id": 30,
@@ -559,7 +559,7 @@
       "slug": "relational-skills",
       "tools": [],
       "status": "active",
-      "version": "1.0.0"
+      "version": "1.2.5"
     },
     {
       "id": 31,
@@ -568,7 +568,7 @@
       "slug": "fitness-coaching",
       "tools": [],
       "status": "active",
-      "version": "1.0.0"
+      "version": "1.2.5"
     },
     {
       "id": 32,
@@ -577,7 +577,7 @@
       "slug": "cooking-culinary-skills",
       "tools": [],
       "status": "active",
-      "version": "1.0.0"
+      "version": "1.2.5"
     },
     {
       "id": 33,
@@ -611,13 +611,13 @@
         }
       ],
       "status": "active",
-      "version": "1.0.3"
+      "version": "1.0.5"
     },
     {
       "id": 34,
       "name": "Semantic Resource Resolution",
       "slug": "semantic-resource-resolution",
-      "version": "1.0.0",
+      "version": "1.2.5",
       "status": "active",
       "path": "skills/semantic-resource-resolution/SKILL.md",
       "tools": []
@@ -626,7 +626,7 @@
       "id": 35,
       "name": "Obstacle Memory Management",
       "slug": "obstacle-memory-management",
-      "version": "1.0.0",
+      "version": "1.1.1",
       "status": "active",
       "path": "skills/obstacle-memory-management/SKILL.md",
       "tools": []
@@ -635,7 +635,7 @@
       "id": 36,
       "name": "Diagram Engineering",
       "slug": "diagram-engineering",
-      "version": "1.0.0",
+      "version": "1.2.5",
       "status": "active",
       "path": "skills/diagram-engineering/SKILL.md",
       "tools": []
@@ -644,10 +644,19 @@
       "id": 37,
       "name": "tldraw Agent",
       "slug": "tldraw-agent",
-      "version": "1.0.0",
+      "version": "1.2.5",
       "status": "active",
       "path": "skills/tldraw-agent/SKILL.md",
       "tools": []
+    },
+    {
+      "id": 38,
+      "name": "skill-creator",
+      "slug": "skill-creator",
+      "path": "skills/skill-creator/SKILL.md",
+      "tools": [],
+      "status": "active",
+      "version": "1.2.5"
     },
     {
       "id": 39,
@@ -663,13 +672,13 @@
         }
       ],
       "status": "active",
-      "version": "1.0.0"
+      "version": "1.1.2"
     },
     {
       "id": 40,
       "name": "GitHub Development Workspace",
       "slug": "github-development-workspace",
-      "version": "1.0.0",
+      "version": "1.1.2",
       "status": "active",
       "path": "skills/github-development-workspace/SKILL.md",
       "tools": [
@@ -685,7 +694,7 @@
       "id": 42,
       "name": "Implementation Push",
       "slug": "implementation-push",
-      "version": "1.0.0",
+      "version": "2.0.2",
       "status": "active",
       "path": "skills/implementation-push/SKILL.md",
       "tools": [
@@ -702,6 +711,24 @@
           "usage": "Run executable verification and integration checks; use Agent-Workspace-1 for broader repository/CI/ecosystem verification."
         }
       ]
+    },
+    {
+      "id": 45,
+      "name": "coding-task-lifecycle",
+      "slug": "coding-task-lifecycle",
+      "path": "skills/coding-task-lifecycle/SKILL.md",
+      "tools": [],
+      "status": "active",
+      "version": "1.0.1"
+    },
+    {
+      "id": 46,
+      "name": "persistent-multi-agent-execution",
+      "slug": "persistent-multi-agent-execution",
+      "path": "skills/persistent-multi-agent-execution/SKILL.md",
+      "tools": [],
+      "status": "active",
+      "version": "1.1.1"
     }
   ],
   "exportedAt": "2026-11-11"

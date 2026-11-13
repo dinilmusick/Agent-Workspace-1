@@ -128,6 +128,19 @@ def api_json(token: str, path: str) -> dict[str, Any]:
         detail = exc.read(4096).decode("utf-8", errors="replace")
         raise ValueError(f"GitHub API request failed ({exc.code}): {detail}") from None
 
+def event_issue_number() -> str | None:
+    event_path = os.environ.get("GITHUB_EVENT_PATH", "")
+    if not event_path:
+        return None
+    try:
+        with open(event_path, "r", encoding="utf-8") as event_file:
+            event = json.load(event_file)
+    except (OSError, json.JSONDecodeError):
+        return None
+    number = (event.get("issue") or {}).get("number") if isinstance(event, dict) else None
+    return str(number) if isinstance(number, int) else None
+
+
 def load_issue_body(token: str, issue_number: str | None, fallback: str = "") -> str:
     if issue_number:
         issue = api_json(token, f"/repos/{WORKSPACE}/issues/{issue_number}")
@@ -140,7 +153,7 @@ def main() -> int:
         token = os.environ.get("GH_TOKEN", "")
         if not token:
             raise ValueError("CODING_REPO_TOKEN is unavailable.")
-        raw = load_issue_body(token, os.environ.get("ISSUE_NUMBER"), os.environ.get("ISSUE_BODY", ""))
+        raw = load_issue_body(token, os.environ.get("ISSUE_NUMBER") or event_issue_number(), os.environ.get("ISSUE_BODY", ""))
         if not raw or len(raw.encode("utf-8")) > 12000:
             raise ValueError("Issue body is empty or exceeds 12 KB.")
         req = validate_request_shape(json.loads(raw))

@@ -58,7 +58,7 @@ These are the proposed missing functional projects. The commit is pinned to the 
 | Social network / federated publishing | [mastodon/mastodon](https://github.com/mastodon/mastodon) | `tpl-social-mastodon` | main | AGPL-3.0 | `ca8b0ffac86cc5b064a4573f16b8061716c8ab6f` | Complete federated social-network product. |
 | Document management / archive | [paperless-ngx/paperless-ngx](https://github.com/paperless-ngx/paperless-ngx) | `tpl-documents-paperless` | dev | GPL-3.0 | `a1d76f3a19c9bf7067491de6f0a12672676ae9f1` | Full document ingestion, OCR, tagging and archive application. |
 | Cloud security assessment | [prowler-cloud/prowler](https://github.com/prowler-cloud/prowler) | `tpl-cloud-security-prowler` | master | Apache-2.0 | `163343b55259eadbe559bd87226d6b8a60576286` | Multi-cloud security posture assessment and reporting tool. |
-| Data workflow orchestration | [apache/airflow](https://github.com/apache/airflow) | `tpl-data-airflow` | main | Apache-2.0 | `2617656daf5db195a088489f4c8195f842df6ee1` | Production-grade DAG-based workflow scheduling and execution; complements Temporal rather than replacing it. |
+| Data workflow orchestration | [apache/airflow](https://github.com/apache/airflow) | `tpl-data-airflow` | main | Apache-2.0 | `ea7677ed17271db01fa5ce83d708b2c58c88984b` | Production-grade DAG-based workflow scheduling and execution; refreshed after review of a 7-commit fast-forward adding Beam/Dataflow job-ID discovery and async process handling, Microsoft Graph operators/sensors/triggers and tests, language SDK docs, CI image checks; preserve Apache LICENSE/NOTICE and re-audit providers/dependencies; acquisition re-verification pending. |
 
 ## 3. Additional reference-only candidates
 

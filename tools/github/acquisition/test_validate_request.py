@@ -5,7 +5,7 @@ import urllib.error
 import tempfile
 import unittest
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, call, patch
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from acquire import api, push_mirror_refs, refspec_batches
 from validate_request import APPROVAL_URL, assert_exact_head, catalog_authorization, catalog_line_authorizes, validate_catalog_authorization, validate_request_shape, write_outputs

@@ -1,7 +1,7 @@
 ---
 name: "Task Ledger"
 slug: task-ledger
-version: 2.2.0
+version: 2.4.0
 source: Supabase Skills Database
 sourceId: 7
 status: active
@@ -240,3 +240,28 @@ Add edges from the later goal to its prerequisite (dependent → prerequisite). 
 ### Verification
 
 Run the rollback-only regression script in `supabase/tests/task-ledger-goal-dependencies.integration.sql` against the trusted Supabase connector. It proves that blocking prerequisites prevent goal activation and task claims, blocking cycles are rejected, and advisory edges remain non-blocking. The script rolls back its fixtures. Also inspect the database triggers on `goals`, `tasks` and `goal_dependencies` after schema changes.
+
+
+## Loop contract authorship boundary
+
+Tasks have two execution roles:
+
+- `loop_authoring`: define and validate the loop contract, parameter contract, completion parameters and checkpoint contract. This worker MUST NOT execute the resulting task.
+- `execution`: execute only against a persisted `ready` loop contract authored by another agent.
+
+For a loop-authoring task:
+1. Claim it with the normal atomic lease.
+2. Construct the loop script/contract from the task objective and acceptance requirements.
+3. Persist it through `task_ledger_finalize_loop_script`.
+4. That operation records the author, increments `loop_script_version`, marks the contract `ready`, returns the task to `queued`, and clears the author's lease.
+5. A later claim MUST be made by a different agent. The database rejects the author from reclaiming its own loop-authored execution task.
+
+For an execution task:
+- `loop_script_status` MUST be `ready`.
+- `loop_author_agent_id` MUST differ from the claiming agent when present.
+- The worker MUST execute the persisted loop and may not redefine its success parameters to make its own work pass.
+- Checkpoints, evidence and result parameters must satisfy the persisted loop contract.
+
+If a worker cannot continue, it must use the fenced `task_ledger_release_claim(task_id, agent_id, claim_token, release_status, reason)` operation. Only the current fencing token can release the claim. Use `queued` to return recoverable work, `blocked` when an explicit blocker requires review, and `abandoned` only when the task should not be automatically retried.
+
+The database is the enforcement boundary. Prompts and skill instructions explain the protocol, but claim eligibility, author/executor separation, fencing and release are enforced transactionally in PostgreSQL.

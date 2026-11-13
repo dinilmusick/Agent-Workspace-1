@@ -36,11 +36,11 @@ No project is described as commercially cleared. Private research mirroring is n
 | 9 | Prometheus | [prometheus/prometheus](https://github.com/prometheus/prometheus) — `main`, `49c815a0ea46c7a6a6b723e4b634c4bf36f7022c` | [tpl-observability-prometheus](https://github.com/dinilmusick/tpl-observability-prometheus) | mirror | Apache-2.0; preserve LICENSE/NOTICE and vendored notices | Yes — independent verifier passed; `go.mod` matches pinned upstream | acquired-and-verified |
 | 10 | Grafana | [grafana/grafana](https://github.com/grafana/grafana) — `main`, `2204676d80b342730f748fa651289a915681dad2` | [tpl-observability-grafana](https://github.com/dinilmusick/tpl-observability-grafana) | mirror | AGPL-3.0; `LICENSING.md` declares Apache-2.0 exceptions and original vendor licenses | Not yet — destination exists; 2,069 raw refs require bounded pushes; verification pending | pending-verification |
 | 11 | Loki | [grafana/loki](https://github.com/grafana/loki) — `main`, `8f83d5672776aeb656fdc0f6fe3f38be3a33e80a` | [tpl-observability-loki](https://github.com/dinilmusick/tpl-observability-loki) | mirror | AGPL-3.0; `LICENSING.md` lists Apache-2.0 exceptions and vendor directories under original licenses | Source refs match after excluding ephemeral merge-queue refs; `go.mod` and `LICENSE` match; independent verifier running | pending-verification |
-| 12 | Tempo | [grafana/tempo](https://github.com/grafana/tempo) — `main`, `f023741110df81cd20d014814e01058b3de53787` | [tpl-observability-tempo](https://github.com/dinilmusick/tpl-observability-tempo) | mirror | AGPL-3.0; `LICENSING.md` identifies Apache-2.0 exceptions and upstream-licensed directories | No — refreshed pin validated; destination creation/acquisition pending | pending-verification |
+| 12 | Tempo | [grafana/tempo](https://github.com/grafana/tempo) — `main`, `f023741110df81cd20d014814e01058b3de53787` | [tpl-observability-tempo](https://github.com/dinilmusick/tpl-observability-tempo) | mirror | AGPL-3.0; `LICENSING.md` identifies Apache-2.0 exceptions and upstream-licensed directories | No — reviewed two-commit fast-forward and refreshed pin; destination creation/acquisition pending | pending-verification |
 | 13 | OpenTelemetry Collector | [open-telemetry/opentelemetry-collector](https://github.com/open-telemetry/opentelemetry-collector) — `main`, `4888f0b280f927f9ec356c3d8a9c02a1a37819dc` | [tpl-observability-otel-collector](https://github.com/dinilmusick/tpl-observability-otel-collector) | mirror | Apache-2.0 root; contributed receivers/exporters in separate projects need separate review | Destination exists; 7,454 raw refs are being pushed in bounded batches | pending-verification |
 | 14 | Postal | [postalserver/postal](https://github.com/postalserver/postal) — `main`, `d96eddbadeda600595d6247486f9ceb8e99cbc15` | [tpl-platform-postal](https://github.com/dinilmusick/tpl-platform-postal) | mirror | MIT; preserve the upstream MIT-LICENCE and third-party notices | Yes — independent verifier passed; `Gemfile` and `MIT-LICENCE` match byte-for-byte | acquired-and-verified |
 | 15 | Flagsmith | [Flagsmith/flagsmith](https://github.com/Flagsmith/flagsmith) — `main`, `e1d64e6f15842f93dc67f30273e50ceb1d14bcc8` | [tpl-platform-flagsmith](https://github.com/dinilmusick/tpl-platform-flagsmith) | mirror | BSD-3-Clause core; some enterprise governance/management capabilities require separate commercial licensing | Yes — independent verifier passed; `LICENSE.md` and `Dockerfile` match byte-for-byte | acquired-and-verified |
-| 16 | Keycloak | [keycloak/keycloak](https://github.com/keycloak/keycloak) — `main`, `40931dcf48618a28639e9ccc097e8c0f0b6d2802` | [tpl-platform-keycloak](https://github.com/dinilmusick/tpl-platform-keycloak) | mirror | Apache-2.0; identity reference only, not an alternative ULTRST auth authority | `pom.xml`, `LICENSE.txt` and all current refs match; independent verifier pending | pending-verification |
+| 16 | Keycloak | [keycloak/keycloak](https://github.com/keycloak/keycloak) — `main`, `11c147887abc3a0ccdcec27f6fd1b4a4811fac12` | [tpl-platform-keycloak](https://github.com/dinilmusick/tpl-platform-keycloak) | mirror | Apache-2.0; identity reference only, not an alternative ULTRST auth authority | Reviewed HOTP concurrency security fix and regression test; refreshed acquisition/verifier pending | pending-verification |
 
 ### Candidate issue and workflow evidence
 
@@ -61,7 +61,7 @@ No project is described as commercially cleared. Private research mirroring is n
 | OpenTelemetry Collector | [#896](https://github.com/dinilmusick/Agent-Workspace-1/issues/896) | [43385420872](https://github.com/dinilmusick/Agent-Workspace-1/actions/runs/43385420872) |
 | Postal | [#897](https://github.com/dinilmusick/Agent-Workspace-1/issues/897) (closed) | [43385424474](https://github.com/dinilmusick/Agent-Workspace-1/actions/runs/43385424474) — success |
 | Flagsmith | [#898](https://github.com/dinilmusick/Agent-Workspace-1/issues/898) (closed) | [43385428023](https://github.com/dinilmusick/Agent-Workspace-1/actions/runs/43385428023) — success |
-| Keycloak | [#899](https://github.com/dinilmusick/Agent-Workspace-1/issues/899) | [Original run](https://github.com/dinilmusick/Agent-Workspace-1/actions/runs/43385432594); current issue body refreshed to the reviewed live HEAD |
+| Keycloak | [#899](https://github.com/dinilmusick/Agent-Workspace-1/issues/899) | [43385432594](https://github.com/dinilmusick/Agent-Workspace-1/actions/runs/43385432594); issue body refreshed to reviewed HOTP security-fix HEAD |
 
 ## 3. Existing portfolio integrity
 
@@ -146,8 +146,8 @@ Representative source/destination manifest comparisons have passed for all eight
 
 ## 9. Remaining work at this snapshot
 
-- Complete refreshed ERPNext and Grafana verification.
-- Complete ERPNext, Grafana, Loki, Tempo, OpenTelemetry Collector and Keycloak verification/acquisition.
+- Complete refreshed ERPNext and Grafana verification, plus the Loki, Tempo, OpenTelemetry Collector and Keycloak verifier runs.
+- Complete the remaining Tempo destination creation and all pending verifier runs.
 - Independently verify all 16 destination repositories, including complete ref/object coverage and representative project manifests.
 - Update the matrix and catalog with final workflow evidence.
 - Close superseded retry issues #902 and #908 after their canonical issues #899 and #884 complete.

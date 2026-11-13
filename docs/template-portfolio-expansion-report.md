@@ -12,7 +12,7 @@ The catalog has been extended from **44 to 60 records**: 45 full-source mirror c
 
 At this snapshot:
 
-- **10/16** new candidates have passed the canonical acquisition workflow and independent read-only verification.
+- **14/16** new candidates have passed the canonical acquisition workflow and independent read-only verification.
 - **16/16** requested destination repositories currently exist and are private; existence is not treated as source verification.
 - **0/16** destinations are missing.
 - Airflow has been refreshed to the reviewed current upstream pin and independently verified.
@@ -25,43 +25,43 @@ No project is described as commercially cleared. Private research mirroring is n
 
 | # | Project | Upstream | Destination | Acquisition mode | License review | Source verified | Final status |
 |---:|---|---|---|---|---|---|---|
-| 1 | ERPNext | [frappe/erpnext](https://github.com/frappe/erpnext) — `develop`, `e072e76ac452f7cfd9a8688b8e1bc0be9f695f59` | [tpl-business-erpnext](https://github.com/dinilmusick/tpl-business-erpnext) | mirror | GPL-3.0; documentation is hosted separately and needs its own review | README and `license.txt` match; two Mergify backport branch tips are being reconciled with preserved history | pending-verification |
-| 2 | Zammad | [zammad/zammad](https://github.com/zammad/zammad) — `develop`, `45329c81672830ed87d7a4544a13cfc0e42d8b80` | [tpl-business-zammad](https://github.com/dinilmusick/tpl-business-zammad) | mirror | AGPL-3.0; review network-copyleft obligations and any separately licensed edition components | Yes — independent verifier passed; `Gemfile` matches pinned upstream | acquired-and-verified |
+| 1 | ERPNext | [frappe/erpnext](https://github.com/frappe/erpnext) — `develop`, `0993447543070749000f2b243d976e166e98156e` | [tpl-business-erpnext](https://github.com/dinilmusick/tpl-business-erpnext) | mirror | GPL-3.0; documentation is hosted separately and needs its own review | Acquisition step passed; independent read-only verifier is running; destination HEAD and pyproject.toml match the pinned upstream | pending-verification |
+| 2 | Zammad | [zammad/zammad](https://github.com/zammad/zammad) — `develop`, `c1947ccf6ab0840b22bd7eb72148a08c9914e5c2` | [tpl-business-zammad](https://github.com/dinilmusick/tpl-business-zammad) | mirror | AGPL-3.0; review network-copyleft obligations and any separately licensed edition components | Yes — independent read-only verifier passed; `Gemfile` matches pinned upstream; refreshed run 43415116686 | acquired-and-verified |
 | 3 | Documenso | [documenso/documenso](https://github.com/documenso/documenso) — `main`, `1e2333d534e151578ffb05394428e2a7efea5f50` | [tpl-business-documenso](https://github.com/dinilmusick/tpl-business-documenso) | mirror | AGPL-3.0 Community Edition; Enterprise Edition is separately commercially licensed | Yes — independent verifier passed; `package.json` matches pinned upstream | acquired-and-verified |
 | 4 | NATS Server | [nats-io/nats-server](https://github.com/nats-io/nats-server) — `main`, `79d1d2c1b28c9714c7dfe0f14b52dcab65a2c465` | [tpl-infra-nats](https://github.com/dinilmusick/tpl-infra-nats) | mirror | Apache-2.0; retain notices and audit bundled dependencies | Yes — independent verifier passed; `go.mod` matches pinned upstream | acquired-and-verified |
 | 5 | OpenBao | [openbao/openbao](https://github.com/openbao/openbao) — `main`, `92de51f7a0586759215d299bc79118874ea54fb1` | [tpl-infra-openbao](https://github.com/dinilmusick/tpl-infra-openbao) | mirror | MPL-2.0 file-level copyleft; retain notices for covered files | Yes — independent verifier passed; `go.mod` matches pinned upstream | acquired-and-verified |
 | 6 | SeaweedFS | [seaweedfs/seaweedfs](https://github.com/seaweedfs/seaweedfs) — `master`, `a5763986628fa629cb87b58f1b885426cf664d88` | [tpl-infra-seaweedfs](https://github.com/dinilmusick/tpl-infra-seaweedfs) | mirror | Apache-2.0 root; separately offered Enterprise features are not presumed included | Yes — independent verifier passed; `go.mod` matches pinned upstream | acquired-and-verified |
 | 7 | Traefik | [traefik/traefik](https://github.com/traefik/traefik) — `master`, `b45eeb07b7b15e8b4bb85a7b0ed8a32eaa75c8c9` | [tpl-infra-traefik](https://github.com/dinilmusick/tpl-infra-traefik) | mirror | MIT; preserve notices and audit providers/plugins | Yes — independent verifier passed; `go.mod` matches pinned upstream | acquired-and-verified |
 | 8 | OpenSearch | [opensearch-project/OpenSearch](https://github.com/opensearch-project/OpenSearch) — `main`, `a8767707aa8b6db8ab15d8309936b07f6c517ad0` | [tpl-infra-opensearch](https://github.com/dinilmusick/tpl-infra-opensearch) | mirror | Apache-2.0 root; review plugin and bundled-component notices individually | Yes — independent verifier passed; `build.gradle` matches pinned upstream | acquired-and-verified |
-| 9 | Prometheus | [prometheus/prometheus](https://github.com/prometheus/prometheus) — `main`, `49c815a0ea46c7a6a6b723e4b634c4bf36f7022c` | [tpl-observability-prometheus](https://github.com/dinilmusick/tpl-observability-prometheus) | mirror | Apache-2.0; preserve LICENSE/NOTICE and vendored notices | Yes — independent verifier passed; `go.mod` matches pinned upstream | acquired-and-verified |
-| 10 | Grafana | [grafana/grafana](https://github.com/grafana/grafana) — `main`, `2204676d80b342730f748fa651289a915681dad2` | [tpl-observability-grafana](https://github.com/dinilmusick/tpl-observability-grafana) | mirror | AGPL-3.0; `LICENSING.md` declares Apache-2.0 exceptions and original vendor licenses | Not yet — destination exists; 2,069 raw refs require bounded pushes; verification pending | pending-verification |
+| 9 | Prometheus | [prometheus/prometheus](https://github.com/prometheus/prometheus) — `main`, `f4838fa8dff8b5e53f2aad412b37d68f06279c95` | [tpl-observability-prometheus](https://github.com/dinilmusick/tpl-observability-prometheus) | mirror | Apache-2.0; preserve LICENSE/NOTICE and vendored notices | Yes — independent verifier passed; `go.mod` matches pinned upstream | acquired-and-verified |
+| 10 | Grafana | [grafana/grafana](https://github.com/grafana/grafana) — `main`, `30e130607cb682db263bc94acec34b85df93bf97` | [tpl-observability-grafana](https://github.com/dinilmusick/tpl-observability-grafana) | mirror | AGPL-3.0; `LICENSING.md` declares Apache-2.0 exceptions and original vendor licenses | Current pin is refreshed to 30e130607cb682db263bc94acec34b85df93bf97 after review of the CODEOWNERS-only commit; refreshed acquisition queued | pending-verification |
 | 11 | Loki | [grafana/loki](https://github.com/grafana/loki) — `main`, `8f83d5672776aeb656fdc0f6fe3f38be3a33e80a` | [tpl-observability-loki](https://github.com/dinilmusick/tpl-observability-loki) | mirror | AGPL-3.0; `LICENSING.md` lists Apache-2.0 exceptions and vendor directories under original licenses | Yes — all writable refs and independent read-only verification passed; `go.mod` and `LICENSE` match byte-for-byte | acquired-and-verified |
 | 12 | Tempo | [grafana/tempo](https://github.com/grafana/tempo) — `main`, `f023741110df81cd20d014814e01058b3de53787` | [tpl-observability-tempo](https://github.com/dinilmusick/tpl-observability-tempo) | mirror | AGPL-3.0; `LICENSING.md` identifies Apache-2.0 exceptions and upstream-licensed directories | Yes — independent verifier passed after refreshed pin | acquired-and-verified |
-| 13 | OpenTelemetry Collector | [open-telemetry/opentelemetry-collector](https://github.com/open-telemetry/opentelemetry-collector) — `main`, `4888f0b280f927f9ec356c3d8a9c02a1a37819dc` | [tpl-observability-otel-collector](https://github.com/dinilmusick/tpl-observability-otel-collector) | mirror | Apache-2.0 root; contributed receivers/exporters in separate projects need separate review | Destination exists; 7,454 raw refs are being pushed in bounded batches | pending-verification |
+| 13 | OpenTelemetry Collector | [open-telemetry/opentelemetry-collector](https://github.com/open-telemetry/opentelemetry-collector) — `main`, `4888f0b280f927f9ec356c3d8a9c02a1a37819dc` | [tpl-observability-otel-collector](https://github.com/dinilmusick/tpl-observability-otel-collector) | mirror | Apache-2.0 root; contributed receivers/exporters in separate projects need separate review | Yes — independent read-only verifier passed; destination HEAD and go.mod match pinned upstream | pending-verification |
 | 14 | Postal | [postalserver/postal](https://github.com/postalserver/postal) — `main`, `d96eddbadeda600595d6247486f9ceb8e99cbc15` | [tpl-platform-postal](https://github.com/dinilmusick/tpl-platform-postal) | mirror | MIT; preserve the upstream MIT-LICENCE and third-party notices | Yes — independent verifier passed; `Gemfile` and `MIT-LICENCE` match byte-for-byte | acquired-and-verified |
 | 15 | Flagsmith | [Flagsmith/flagsmith](https://github.com/Flagsmith/flagsmith) — `main`, `e1d64e6f15842f93dc67f30273e50ceb1d14bcc8` | [tpl-platform-flagsmith](https://github.com/dinilmusick/tpl-platform-flagsmith) | mirror | BSD-3-Clause core; some enterprise governance/management capabilities require separate commercial licensing | Yes — independent verifier passed; `LICENSE.md` and `Dockerfile` match byte-for-byte | acquired-and-verified |
-| 16 | Keycloak | [keycloak/keycloak](https://github.com/keycloak/keycloak) — `main`, `11c147887abc3a0ccdcec27f6fd1b4a4811fac12` | [tpl-platform-keycloak](https://github.com/dinilmusick/tpl-platform-keycloak) | mirror | Apache-2.0; identity reference only, not an alternative ULTRST auth authority | Reviewed HOTP concurrency security fix and regression test; refreshed acquisition/verifier pending | pending-verification |
+| 16 | Keycloak | [keycloak/keycloak](https://github.com/keycloak/keycloak) — `main`, `11c147887abc3a0ccdcec27f6fd1b4a4811fac12` | [tpl-platform-keycloak](https://github.com/dinilmusick/tpl-platform-keycloak) | mirror | Apache-2.0; identity reference only, not an alternative ULTRST auth authority | Reviewed three-commit fast-forward for theme validation, truststore security and SAML session-ID propagation; independent read-only verifier passed; pom.xml matches pin | pending-verification |
 
 ### Candidate issue and workflow evidence
 
 | Candidate | Acquisition issue | Workflow evidence |
 |---|---|---|
-| ERPNext | [#884](https://github.com/dinilmusick/Agent-Workspace-1/issues/884) | [Original run](https://github.com/dinilmusick/Agent-Workspace-1/actions/runs/43385362354); refreshed pin is now in the live issue body for safe retry |
-| Zammad | [#885](https://github.com/dinilmusick/Agent-Workspace-1/issues/885) | [43385366767](https://github.com/dinilmusick/Agent-Workspace-1/actions/runs/43385366767) |
+| ERPNext | [#884](https://github.com/dinilmusick/Agent-Workspace-1/issues/884) | [Refreshed issue #908](https://github.com/dinilmusick/Agent-Workspace-1/issues/908); [run 43414925330](https://github.com/dinilmusick/Agent-Workspace-1/actions/runs/43414925330) in independent read-only verification |
+| Zammad | [#885](https://github.com/dinilmusick/Agent-Workspace-1/issues/885) | [43415116686](https://github.com/dinilmusick/Agent-Workspace-1/actions/runs/43415116686) — refreshed pin, independent verifier passed |
 | Documenso | [#886](https://github.com/dinilmusick/Agent-Workspace-1/issues/886) | [43385371938](https://github.com/dinilmusick/Agent-Workspace-1/actions/runs/43385371938) |
 | NATS | [#887](https://github.com/dinilmusick/Agent-Workspace-1/issues/887) | [43385378332](https://github.com/dinilmusick/Agent-Workspace-1/actions/runs/43385378332) |
 | OpenBao | [#888](https://github.com/dinilmusick/Agent-Workspace-1/issues/888) | [43385383544](https://github.com/dinilmusick/Agent-Workspace-1/actions/runs/43385383544) |
 | SeaweedFS | [#889](https://github.com/dinilmusick/Agent-Workspace-1/issues/889) | [43385387118](https://github.com/dinilmusick/Agent-Workspace-1/actions/runs/43385387118) |
 | Traefik | [#890](https://github.com/dinilmusick/Agent-Workspace-1/issues/890) | [43385391255](https://github.com/dinilmusick/Agent-Workspace-1/actions/runs/43385391255) |
 | OpenSearch | [#891](https://github.com/dinilmusick/Agent-Workspace-1/issues/891) | [43385394906](https://github.com/dinilmusick/Agent-Workspace-1/actions/runs/43385394906) |
-| Prometheus | [#892](https://github.com/dinilmusick/Agent-Workspace-1/issues/892) | [43385404100](https://github.com/dinilmusick/Agent-Workspace-1/actions/runs/43385404100) |
-| Grafana | [#893](https://github.com/dinilmusick/Agent-Workspace-1/issues/893) | [Original run](https://github.com/dinilmusick/Agent-Workspace-1/actions/runs/43385408704); current issue body refreshed to the reviewed live HEAD |
+| Prometheus | [#892](https://github.com/dinilmusick/Agent-Workspace-1/issues/892) | [43394594537](https://github.com/dinilmusick/Agent-Workspace-1/actions/runs/43394594537) — refreshed acquisition and independent verifier passed |
+| Grafana | [#893](https://github.com/dinilmusick/Agent-Workspace-1/issues/893) | [Old-pin attempt 43415120913](https://github.com/dinilmusick/Agent-Workspace-1/actions/runs/43415120913); [current-pin retry 43415960990](https://github.com/dinilmusick/Agent-Workspace-1/actions/runs/43415960990) queued after review of the upstream CODEOWNERS commit |
 | Loki | [#894](https://github.com/dinilmusick/Agent-Workspace-1/issues/894) (closed) | [43389550953](https://github.com/dinilmusick/Agent-Workspace-1/actions/runs/43389550953) — success |
 | Tempo | [#895](https://github.com/dinilmusick/Agent-Workspace-1/issues/895) (closed) | [43390820532](https://github.com/dinilmusick/Agent-Workspace-1/actions/runs/43390820532) — success |
-| OpenTelemetry Collector | [#896](https://github.com/dinilmusick/Agent-Workspace-1/issues/896) | [43385420872](https://github.com/dinilmusick/Agent-Workspace-1/actions/runs/43385420872) |
+| OpenTelemetry Collector | [#896](https://github.com/dinilmusick/Agent-Workspace-1/issues/896) | [43394584375](https://github.com/dinilmusick/Agent-Workspace-1/actions/runs/43394584375) — refreshed independent verifier passed |
 | Postal | [#897](https://github.com/dinilmusick/Agent-Workspace-1/issues/897) (closed) | [43385424474](https://github.com/dinilmusick/Agent-Workspace-1/actions/runs/43385424474) — success |
 | Flagsmith | [#898](https://github.com/dinilmusick/Agent-Workspace-1/issues/898) (closed) | [43385428023](https://github.com/dinilmusick/Agent-Workspace-1/actions/runs/43385428023) — success |
-| Keycloak | [#899](https://github.com/dinilmusick/Agent-Workspace-1/issues/899) | [43385432594](https://github.com/dinilmusick/Agent-Workspace-1/actions/runs/43385432594); issue body refreshed to reviewed HOTP security-fix HEAD |
+| Keycloak | [#899](https://github.com/dinilmusick/Agent-Workspace-1/issues/899) | [43415124296](https://github.com/dinilmusick/Agent-Workspace-1/actions/runs/43415124296) — refreshed pin and independent verifier passed |
 
 ## 3. Existing portfolio integrity
 
@@ -70,7 +70,7 @@ No project is described as commercially cleared. Private research mirroring is n
 | Canonical catalog records | 44 | 60 |
 | Indexed private `tpl-*` repositories | 44 | 60 |
 | New requested destinations currently present | 0 | 16 of 16 |
-| New candidates independently verified | 0 | 12 of 16 |
+| New candidates independently verified | 0 | 14 of 16 |
 | Reference-only records added by this expansion | 0 | 0 |
 | Duplicate destination repositories created | 0 | 0 |
 
@@ -150,7 +150,7 @@ Representative source/destination manifest comparisons have passed for all eight
 - Complete the remaining Tempo destination creation and all pending verifier runs.
 - Independently verify all 16 destination repositories, including complete ref/object coverage and representative project manifests.
 - Update the matrix and catalog with final workflow evidence.
-- Close superseded retry issues #902 and #908 after their canonical issues #899 and #884 complete.
+- Close ERPNext #908 and Grafana #935 only after their current pinned acquisition and independent verifier runs succeed; superseded ERPNext issue #884 is already closed.
 - Close all completed acquisition issues; leave only genuinely blocked work open with explicit evidence.
 - Reconcile the final portfolio coverage and task ledger status.
 

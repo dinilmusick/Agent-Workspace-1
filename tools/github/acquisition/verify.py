@@ -2,7 +2,7 @@
 """Read-only second-pass verifier for a completed private acquisition."""
 from __future__ import annotations
 import base64, json, os, pathlib, subprocess, sys, tempfile, urllib.error, urllib.parse, urllib.request
-from acquire import reference_readme
+from acquire import is_writable_ref, reference_readme
 
 API = "https://api.github.com"
 OWNER = "dinilmusick"
@@ -29,7 +29,7 @@ def refs(repo):
     return {line.split(" ",1)[0]:line.split(" ",1)[1] for line in output.splitlines() if line.strip()}
 
 def writable_refs(repo):
-    return {ref:sha for ref,sha in refs(repo).items() if not ref.startswith(("refs/pull/","refs/merge-queue/","refs/remotes/","refs/gh/"))}
+    return {ref:sha for ref,sha in refs(repo).items() if is_writable_ref(ref)}
 
 def objects(repo):
     output=git(["rev-list","--objects","--all"],cwd=repo).stdout
@@ -77,7 +77,7 @@ def main():
         destination=root/"destination.git"
         git(["clone","--mirror",target_url,str(destination)],env=git_env)
         for ref in list(refs(destination)):
-            if ref.startswith(("refs/pull/","refs/merge-queue/","refs/remotes/","refs/gh/")):
+            if not is_writable_ref(ref):
                 git(["update-ref","-d",ref],cwd=destination)
         git(["fsck","--full","--no-reflogs","--connectivity-only"],cwd=destination)
         destination_refs=writable_refs(destination)

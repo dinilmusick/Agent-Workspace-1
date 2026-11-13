@@ -8,7 +8,7 @@ from pathlib import Path
 from unittest.mock import MagicMock, call, patch
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from acquire import api, push_mirror_refs, refspec_batches
-from validate_request import APPROVAL_URL, assert_exact_head, catalog_authorization, catalog_line_authorizes, validate_catalog_authorization, validate_request_shape, write_outputs
+from validate_request import APPROVAL_URL, assert_exact_head, catalog_authorization, catalog_line_authorizes, load_issue_body, validate_catalog_authorization, validate_request_shape, write_outputs
 
 class AcquisitionRequestValidationTests(unittest.TestCase):
     def setUp(self):
@@ -16,6 +16,15 @@ class AcquisitionRequestValidationTests(unittest.TestCase):
             "target_repository": "tpl-commerce-spree", "category": "E-commerce + multi-vendor marketplace",
             "acquisition_mode": "mirror", "approval_record": APPROVAL_URL}
 
+    @patch("validate_request.api_json")
+    def test_issue_body_is_refreshed_from_live_issue_on_retry(self, mock_api_json):
+        mock_api_json.return_value = {"body": '{"source_commit":"fresh"}'}
+        body = load_issue_body("token", "908", '{"source_commit":"stale"}')
+        self.assertEqual(body, '{"source_commit":"fresh"}')
+        mock_api_json.assert_called_once_with("token", "/repos/dinilmusick/Agent-Workspace-1/issues/908")
+
+    def test_issue_body_fallback_remains_available_for_local_validation(self):
+        self.assertEqual(load_issue_body("token", None, "fallback"), "fallback")
     def test_accepts_complete_valid_request(self):
         self.assertEqual(validate_request_shape(self.request)["target"], "tpl-commerce-spree")
 

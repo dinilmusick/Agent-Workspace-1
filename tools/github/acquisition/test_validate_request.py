@@ -7,7 +7,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from acquire import api
+from acquire import api, refspec_batches
 from validate_request import APPROVAL_URL, assert_exact_head, catalog_authorization, catalog_line_authorizes, validate_catalog_authorization, validate_request_shape, write_outputs
 
 class AcquisitionRequestValidationTests(unittest.TestCase):
@@ -157,6 +157,11 @@ class AcquisitionRequestValidationTests(unittest.TestCase):
         acquisition = Path(__file__).with_name("acquire.py").read_text()
         self.assertIn("preserve_and_reconcile_existing_refs", acquisition)
 
+    def test_refspec_batches_bound_large_mirror_pushes(self):
+        refs = [f"refs/tags/v{i}" for i in range(205)]
+        batches = refspec_batches(refs, batch_size=100)
+        self.assertEqual([len(batch) for batch in batches], [100, 100, 5])
+        self.assertEqual([ref for batch in batches for ref in batch], refs)
     @patch("acquire.time.sleep")
     @patch("acquire.urllib.request.urlopen")
     def test_acquisition_api_retries_secondary_rate_limit(self, mock_urlopen, mock_sleep):

@@ -49,20 +49,20 @@ alter table public.tasks
 -- A bounded checkpoint is required to name the immutable predicate that proves it.
 create or replace function public.validate_bounded_checkpoint_predicates()
 returns trigger language plpgsql set search_path=public as $$
-declare c jsonb; predicate_key text; predicate_version integer; i integer := 0;
+declare c jsonb; checkpoint_key text; checkpoint_version integer; i integer := 0;
 begin
   if new.execution_model <> 'bounded-v2' then return new; end if;
   for c in select value from jsonb_array_elements(new.checkpoints) loop
-    predicate_key := nullif(btrim(c->>'predicate_key'),'');
-    predicate_version := coalesce((c->>'predicate_version')::integer, new.completion_predicate_version);
-    if predicate_key is null then
+    checkpoint_key := nullif(btrim(c->>'predicate_key'),'');
+    checkpoint_version := coalesce((c->>'predicate_version')::integer, new.completion_predicate_version);
+    if checkpoint_key is null then
       raise exception 'bounded-v2 checkpoint % requires predicate_key', i;
     end if;
     if not exists (
       select 1 from public.completion_predicates p
-      where p.predicate_key=predicate_key and p.version=predicate_version
+      where p.predicate_key=checkpoint_key and p.version=checkpoint_version
     ) then
-      raise exception 'completion predicate %@% is not registered', predicate_key, predicate_version;
+      raise exception 'completion predicate %@% is not registered', checkpoint_key, checkpoint_version;
     end if;
     i := i + 1;
   end loop;

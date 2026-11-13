@@ -5,6 +5,14 @@ import base64, hashlib, json, os, pathlib, re, subprocess, sys, tempfile, time, 
 API = "https://api.github.com"
 OWNER = "dinilmusick"
 
+EXCLUDED_REF_PREFIXES = (
+    "refs/pull/", "refs/merge-queue/", "refs/heads/mergify/merge-queue/",
+    "refs/heads/gh-readonly-queue/", "refs/remotes/", "refs/gh/",
+)
+
+def is_writable_ref(ref):
+    return not ref.startswith(EXCLUDED_REF_PREFIXES)
+
 def repository_creation_stagger(target_name: str) -> int:
     return int(hashlib.sha256(target_name.encode("utf-8")).hexdigest()[:4], 16) % 120
 
@@ -95,13 +103,13 @@ def remote_refs(url, env):
     return {
         line.split("\t", 1)[1]: line.split("\t", 1)[0]
         for line in output.splitlines()
-        if "\t" in line and not line.split("\t", 1)[1].startswith(("refs/pull/", "refs/merge-queue/", "refs/remotes/", "refs/gh/"))
+        if "\t" in line and is_writable_ref(line.split("\t", 1)[1])
     }
 
 def writable_refs(repo):
     return {
         ref: sha for ref, sha in refs(repo).items()
-        if not ref.startswith(("refs/pull/", "refs/merge-queue/", "refs/remotes/", "refs/gh/"))
+        if is_writable_ref(ref)
     }
 
 def refspec_batches(ref_names, batch_size=100):
@@ -275,7 +283,7 @@ def main():
             git(["clone", "--mirror", f"https://github.com/{source}.git", str(source_path)])
             git(["cat-file", "-e", f"{source_commit}^{{commit}}"], cwd=source_path)
             for ref in list(refs(source_path)):
-                if ref.startswith(("refs/pull/", "refs/merge-queue/", "refs/remotes/", "refs/gh/")):
+                if not is_writable_ref(ref):
                     git(["update-ref", "-d", ref], cwd=source_path)
             git(["remote", "remove", "origin"], cwd=source_path)
             source_refs = writable_refs(source_path)

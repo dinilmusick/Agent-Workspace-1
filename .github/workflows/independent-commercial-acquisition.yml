@@ -2,7 +2,7 @@ name: Private Repository and Reference Acquisition
 
 on:
   issues:
-    types: [opened]
+    types: [opened, edited]
 
 permissions:
   contents: read

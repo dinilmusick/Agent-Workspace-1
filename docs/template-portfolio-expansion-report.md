@@ -76,7 +76,7 @@ No project is described as commercially cleared. Private research mirroring is n
 
 All 59 currently indexed `tpl-*` repositories are private. The 44 pre-existing destinations were preserved. All 16 requested destination repositories are now present; their existence is not treated as source verification. Empty repositories and repositories with only a subset of refs are not counted as verified acquisitions.
 
-A single unrelated open pull request remains in the control repository; no expansion change was merged through or discarded from that PR.
+The only open pull request found in the control repository is unrelated (#797); no expansion change was merged through or discarded from it. Existing open acquisition issues for other, pre-existing portfolio entries were left untouched. For these 16 additions, only ERPNext #908 and Grafana #935 remain open pending their refreshed verification runs.
 
 ## 4. Airflow resolution
 
@@ -85,7 +85,7 @@ A single unrelated open pull request remains in the control repository; no expan
 **Reviewed branch/pin:** `main` / `ea7677ed17271db01fa5ce83d708b2c58c88984b`  
 **Final status:** **acquired-and-verified**
 
-The original issue [#809](https://github.com/dinilmusick/Agent-Workspace-1/issues/809) and run [43370198149](https://github.com/dinilmusick/Agent-Workspace-1/actions/runs/43370198149) had acquired source but failed independent verification after upstream moved. The seven-commit fast-forward was reviewed, including Beam/Dataflow job-ID discovery and async process handling, Microsoft Graph operators/sensors/triggers and tests, language SDK documentation and CI image checks. The refreshed request [#900](https://github.com/dinilmusick/Agent-Workspace-1/issues/900) completed successfully in [run 43385480697](https://github.com/dinilmusick/Agent-Workspace-1/actions/runs/43385480697). The independent read-only verifier passed; the destination root `pyproject.toml` matches the pinned upstream file. Issues #809 and #900 are closed as completed.
+The original issue [#809](https://github.com/dinilmusick/Agent-Workspace-1/issues/809) and run [43370198149](https://github.com/dinilmusick/Agent-Workspace-1/actions/runs/43370198149) had acquired source but failed independent verification after upstream moved. The ten-commit fast-forward was reviewed, including Beam/Dataflow job-ID discovery and async process handling, Microsoft Graph operators/sensors/triggers and tests, provider/UI dependency updates, PostgreSQL advisory-lock handling, retry-safe SQL connection errors and related regression tests. The refreshed request [#900](https://github.com/dinilmusick/Agent-Workspace-1/issues/900) completed successfully in [run 43385480697](https://github.com/dinilmusick/Agent-Workspace-1/actions/runs/43385480697). The independent read-only verifier passed; the destination root `pyproject.toml` matches the pinned upstream file. Issues #809 and #900 are closed as completed.
 
 ## 5. Licensing and commercial-use review
 

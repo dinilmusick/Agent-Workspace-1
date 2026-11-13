@@ -5,7 +5,7 @@ import unittest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from acquire import preserve_and_reconcile_existing_refs, safe_provenance_migration, writable_refs
+from acquire import object_set_mismatch, preserve_and_reconcile_existing_refs, safe_provenance_migration, writable_refs
 
 
 def run_git(repo, *args, check=True):
@@ -42,10 +42,14 @@ class PreserveUpstreamHistoryTests(unittest.TestCase):
     def test_writable_refs_excludes_github_internal_refs(self):
         run_git(self.source, "update-ref", "refs/gh/queue-intermediate-merge-commits/main", self.second)
         run_git(self.source, "update-ref", "refs/pull/1/head", self.second)
+        run_git(self.source, "update-ref", "refs/heads/mergify/merge-queue/transient", self.second)
+        run_git(self.source, "update-ref", "refs/notes/mergify/mergify/merge-queue/transient", self.second)
         refs = writable_refs(self.source)
         self.assertIn("refs/heads/main", refs)
         self.assertNotIn("refs/gh/queue-intermediate-merge-commits/main", refs)
         self.assertNotIn("refs/pull/1/head", refs)
+        self.assertNotIn("refs/heads/mergify/merge-queue/transient", refs)
+        self.assertNotIn("refs/notes/mergify/mergify/merge-queue/transient", refs)
 
     def test_allows_fast_forward_without_creating_archive(self):
         source_refs = {"refs/heads/main": self.second}
@@ -98,6 +102,13 @@ class PreserveUpstreamHistoryTests(unittest.TestCase):
         self.assertNotIn("refs/heads/feature", source_refs)
         self.assertEqual(run_git(self.source, "rev-parse", archived[0]["archive_ref"]), self.first)
 
+
+
+class ReachableObjectComparisonTests(unittest.TestCase):
+    def test_compares_list_inputs_as_sets(self):
+        missing, extra = object_set_mismatch(["a", "b", "b"], ["b", "c"])
+        self.assertEqual(missing, ["a"])
+        self.assertEqual(extra, ["c"])
 
 class ProvenancePinMigrationTests(unittest.TestCase):
     def setUp(self):

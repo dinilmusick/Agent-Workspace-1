@@ -36,7 +36,10 @@ def api(token, method, path, payload=None, allow_404=False):
 def git(args, cwd=None, env=None, check=True):
     result = subprocess.run(["git", *args], cwd=cwd, env=env, text=True, capture_output=True)
     if check and result.returncode:
-        raise RuntimeError(f"git {' '.join(args)} failed ({result.returncode}): {result.stderr[-4000:]}")
+        detail = result.stderr
+        if len(detail) > 6000:
+            detail = detail[:2500] + "\\n...[middle omitted]...\\n" + detail[-3500:]
+        raise RuntimeError(f"git {' '.join(args)} failed ({result.returncode}): {detail}")
     return result
 
 def refs(repo):

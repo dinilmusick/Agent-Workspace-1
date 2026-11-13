@@ -1,6 +1,6 @@
 # ULTRST Software Starter Portfolio — Coverage and Acquisition Manifest
 
-Snapshot: 2026-11-12 (UTC)  
+Snapshot: 2026-11-13 (UTC)  
 Vision: [ULTRST Universal Software Portfolio & Ecosystem Absorption](https://github.com/dinilmusick/Agent-Workspace-1/blob/main/docs/template-portfolio-candidates.md)  
 Coordination: Supabase vision key `ultrst-universal-software-portfolio-ecosystem-absorption`
 

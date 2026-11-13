@@ -9,15 +9,15 @@
       "public.skill_tool_links",
       "public.skill_tools"
     ],
-    "exportedAt": "2026-11-11T14:10:00.000Z"
+    "exportedAt": "2026-11-13T18:43:00+05:30"
   },
-  "count": 39,
+  "count": 41,
   "skills": [
     {
       "id": 1,
       "name": "tldraw",
       "slug": "tldraw",
-      "version": "1.0.0",
+      "version": "1.2.5",
       "status": "active",
       "path": "skills/tldraw/SKILL.md",
       "tools": []
@@ -26,7 +26,7 @@
       "id": 3,
       "name": "Prompt Map",
       "slug": "prompt-map",
-      "version": "1.2.0",
+      "version": "1.2.5",
       "status": "active",
       "path": "skills/prompt-map/SKILL.md",
       "tools": [
@@ -42,7 +42,7 @@
       "id": 4,
       "name": "Loop Generator",
       "slug": "loop-generator",
-      "version": "1.4.0",
+      "version": "1.4.1",
       "status": "active",
       "path": "skills/loop-generator/SKILL.md",
       "tools": [
@@ -76,7 +76,7 @@
       "id": 7,
       "name": "Task Ledger",
       "slug": "task-ledger",
-      "version": "2.2.0",
+      "version": "2.4.1",
       "status": "active",
       "path": "skills/task-ledger/SKILL.md",
       "tools": [
@@ -92,7 +92,7 @@
       "id": 8,
       "name": "Application Security Audit",
       "slug": "security-audit",
-      "version": "1.0.0",
+      "version": "1.2.5",
       "status": "active",
       "path": "skills/security-audit/SKILL.md",
       "tools": []
@@ -101,7 +101,7 @@
       "id": 9,
       "name": "DevOps, CI/CD and Release Engineering",
       "slug": "devops-ci-release",
-      "version": "1.0.5",
+      "version": "1.0.7",
       "status": "active",
       "path": "skills/devops-ci-release/SKILL.md",
       "tools": []
@@ -110,7 +110,7 @@
       "id": 10,
       "name": "Browser QA and Runtime Inspection",
       "slug": "browser-qa",
-      "version": "1.0.0",
+      "version": "1.2.5",
       "status": "active",
       "path": "skills/browser-qa/SKILL.md",
       "tools": []
@@ -119,7 +119,7 @@
       "id": 11,
       "name": "React Performance and Composition",
       "slug": "react-performance-composition",
-      "version": "1.0.0",
+      "version": "1.2.5",
       "status": "active",
       "path": "skills/react-performance-composition/SKILL.md",
       "tools": []
@@ -128,7 +128,7 @@
       "id": 12,
       "name": "Refactoring",
       "slug": "refactoring",
-      "version": "1.0.0",
+      "version": "1.2.5",
       "status": "active",
       "path": "skills/refactoring/SKILL.md",
       "tools": []
@@ -137,7 +137,7 @@
       "id": 13,
       "name": "Code Review",
       "slug": "code-review",
-      "version": "1.0.0",
+      "version": "1.2.5",
       "status": "active",
       "path": "skills/code-review/SKILL.md",
       "tools": []
@@ -146,7 +146,7 @@
       "id": 14,
       "name": "Codebase Architecture",
       "slug": "codebase-architecture",
-      "version": "1.0.0",
+      "version": "1.2.5",
       "status": "active",
       "path": "skills/codebase-architecture/SKILL.md",
       "tools": []
@@ -155,7 +155,7 @@
       "id": 15,
       "name": "Technical Research and Documentation Discovery",
       "slug": "technical-research",
-      "version": "1.0.0",
+      "version": "1.2.5",
       "status": "active",
       "path": "skills/technical-research/SKILL.md",
       "tools": []
@@ -164,7 +164,7 @@
       "id": 16,
       "name": "Frontend Engineering",
       "slug": "frontend-engineering",
-      "version": "1.0.0",
+      "version": "1.2.5",
       "status": "active",
       "path": "skills/frontend-engineering/SKILL.md",
       "tools": []
@@ -173,7 +173,7 @@
       "id": 17,
       "name": "Coding Router",
       "slug": "coding-router",
-      "version": "2.0.1",
+      "version": "2.0.2",
       "status": "active",
       "path": "skills/coding-router/SKILL.md",
       "tools": []
@@ -182,7 +182,7 @@
       "id": 18,
       "name": "Debugging and Root-Cause Analysis",
       "slug": "debugging-root-cause",
-      "version": "1.0.0",
+      "version": "1.0.3",
       "status": "active",
       "path": "skills/debugging-root-cause/SKILL.md",
       "tools": []
@@ -191,7 +191,7 @@
       "id": 19,
       "name": "Feature Implementation",
       "slug": "feature-implementation",
-      "version": "2.0.1",
+      "version": "2.0.2",
       "status": "active",
       "path": "skills/feature-implementation/SKILL.md",
       "tools": []
@@ -200,7 +200,7 @@
       "id": 20,
       "name": "Coding Workflow",
       "slug": "coding-workflow",
-      "version": "2.0.1",
+      "version": "2.0.2",
       "status": "active",
       "path": "skills/coding-workflow/SKILL.md",
       "tools": []
@@ -209,7 +209,7 @@
       "id": 21,
       "name": "Code Documentation and Developer Handoff",
       "slug": "documentation-engineering",
-      "version": "1.0.0",
+      "version": "1.2.5",
       "status": "active",
       "path": "skills/documentation-engineering/SKILL.md",
       "tools": []
@@ -218,7 +218,7 @@
       "id": 22,
       "name": "API Contract and Integration Design",
       "slug": "api-contract-design",
-      "version": "1.0.0",
+      "version": "1.2.5",
       "status": "active",
       "path": "skills/api-contract-design/SKILL.md",
       "tools": []
@@ -227,7 +227,7 @@
       "id": 23,
       "name": "AI Agent and Tooling Engineering",
       "slug": "agent-systems-engineering",
-      "version": "2.0.1",
+      "version": "2.0.2",
       "status": "active",
       "path": "skills/agent-systems-engineering/SKILL.md",
       "tools": []
@@ -236,7 +236,7 @@
       "id": 24,
       "name": "Backend and API Engineering",
       "slug": "backend-api-engineering",
-      "version": "1.0.0",
+      "version": "1.2.5",
       "status": "active",
       "path": "skills/backend-api-engineering/SKILL.md",
       "tools": []
@@ -245,7 +245,7 @@
       "id": 25,
       "name": "Testing Strategy",
       "slug": "testing-strategy",
-      "version": "1.0.0",
+      "version": "1.0.3",
       "status": "active",
       "path": "skills/testing-strategy/SKILL.md",
       "tools": []
@@ -254,7 +254,7 @@
       "id": 26,
       "name": "Cloud Platform and Infrastructure Engineering",
       "slug": "cloud-platform-engineering",
-      "version": "1.0.0",
+      "version": "1.2.5",
       "status": "active",
       "path": "skills/cloud-platform-engineering/SKILL.md",
       "tools": []
@@ -263,7 +263,7 @@
       "id": 27,
       "name": "Database Engineering",
       "slug": "database-engineering",
-      "version": "1.0.0",
+      "version": "1.2.5",
       "status": "active",
       "path": "skills/database-engineering/SKILL.md",
       "tools": []
@@ -272,7 +272,7 @@
       "id": 28,
       "name": "Universal Task Router",
       "slug": "universal-task-router",
-      "version": "2.2.0",
+      "version": "2.2.1",
       "status": "active",
       "path": "skills/universal-task-router/SKILL.md",
       "tools": []
@@ -281,7 +281,7 @@
       "id": 29,
       "name": "Personal Growth Router",
       "slug": "personal-growth-router",
-      "version": "1.0.0",
+      "version": "1.2.5",
       "status": "active",
       "path": "skills/personal-growth-router/SKILL.md",
       "tools": []
@@ -290,7 +290,7 @@
       "id": 30,
       "name": "Relational Skills",
       "slug": "relational-skills",
-      "version": "1.0.0",
+      "version": "1.2.5",
       "status": "active",
       "path": "skills/relational-skills/SKILL.md",
       "tools": []
@@ -299,7 +299,7 @@
       "id": 31,
       "name": "Fitness Coaching",
       "slug": "fitness-coaching",
-      "version": "1.0.0",
+      "version": "1.2.5",
       "status": "active",
       "path": "skills/fitness-coaching/SKILL.md",
       "tools": []
@@ -308,100 +308,10 @@
       "id": 32,
       "name": "Cooking and Culinary Skills",
       "slug": "cooking-culinary-skills",
-      "version": "1.0.0",
+      "version": "1.2.5",
       "status": "active",
       "path": "skills/cooking-culinary-skills/SKILL.md",
       "tools": []
-    },
-    {
-      "id": 34,
-      "name": "Semantic Resource Resolution",
-      "slug": "semantic-resource-resolution",
-      "version": "1.0.0",
-      "status": "active",
-      "path": "skills/semantic-resource-resolution/SKILL.md",
-      "tools": []
-    },
-    {
-      "id": 35,
-      "name": "Obstacle Memory Management",
-      "slug": "obstacle-memory-management",
-      "version": "1.0.0",
-      "status": "active",
-      "path": "skills/obstacle-memory-management/SKILL.md",
-      "tools": []
-    },
-    {
-      "id": 36,
-      "name": "Diagram Engineering",
-      "slug": "diagram-engineering",
-      "version": "1.0.0",
-      "status": "active",
-      "path": "skills/diagram-engineering/SKILL.md",
-      "tools": []
-    },
-    {
-      "id": 37,
-      "name": "tldraw Agent",
-      "slug": "tldraw-agent",
-      "version": "1.0.0",
-      "status": "active",
-      "path": "skills/tldraw-agent/SKILL.md",
-      "tools": []
-    },
-    {
-      "id": 39,
-      "name": "Private Repository CI Workspace Runner",
-      "slug": "private-repo-ci-workspace-runner",
-      "version": "1.0.0",
-      "status": "active",
-      "path": "skills/private-repo-ci-workspace-runner/SKILL.md",
-      "tools": [
-        {
-          "slug": "github",
-          "type": "connector",
-          "required": true,
-          "usage": "Dispatch and inspect Agent-Workspace-1 private-repository CI fallback runs."
-        }
-      ]
-    },
-    {
-      "id": 40,
-      "name": "GitHub Development Workspace",
-      "slug": "github-development-workspace",
-      "version": "1.0.0",
-      "status": "active",
-      "path": "skills/github-development-workspace/SKILL.md",
-      "tools": [
-        {
-          "slug": "github",
-          "type": "connector",
-          "required": true,
-          "usage": "Create repositories, dispatch development/scaffold workflows, inspect Actions evidence."
-        }
-      ]
-    },
-    {
-      "id": 42,
-      "name": "Implementation Push",
-      "slug": "implementation-push",
-      "version": "2.0.1",
-      "status": "active",
-      "path": "skills/implementation-push/SKILL.md",
-      "tools": [
-        {
-          "slug": "github",
-          "type": "connector",
-          "required": true,
-          "usage": "Inspect and modify the target repository and CI evidence when authorized."
-        },
-        {
-          "slug": "container",
-          "type": "other",
-          "required": true,
-          "usage": "Run executable verification and integration checks; use Agent-Workspace-1 for broader repository/CI/ecosystem verification."
-        }
-      ]
     },
     {
       "id": 33,
@@ -435,13 +345,112 @@
         }
       ],
       "status": "active",
-      "version": "1.0.3"
+      "version": "1.0.5"
+    },
+    {
+      "id": 34,
+      "name": "Semantic Resource Resolution",
+      "slug": "semantic-resource-resolution",
+      "version": "1.2.5",
+      "status": "active",
+      "path": "skills/semantic-resource-resolution/SKILL.md",
+      "tools": []
+    },
+    {
+      "id": 35,
+      "name": "Obstacle Memory Management",
+      "slug": "obstacle-memory-management",
+      "version": "1.1.1",
+      "status": "active",
+      "path": "skills/obstacle-memory-management/SKILL.md",
+      "tools": []
+    },
+    {
+      "id": 36,
+      "name": "Diagram Engineering",
+      "slug": "diagram-engineering",
+      "version": "1.2.5",
+      "status": "active",
+      "path": "skills/diagram-engineering/SKILL.md",
+      "tools": []
+    },
+    {
+      "id": 37,
+      "name": "tldraw Agent",
+      "slug": "tldraw-agent",
+      "version": "1.2.5",
+      "status": "active",
+      "path": "skills/tldraw-agent/SKILL.md",
+      "tools": []
+    },
+    {
+      "id": 38,
+      "name": "skill-creator",
+      "slug": "skill-creator",
+      "path": "skills/skill-creator/SKILL.md",
+      "tools": [],
+      "status": "active",
+      "version": "1.2.5"
+    },
+    {
+      "id": 39,
+      "name": "Private Repository CI Workspace Runner",
+      "slug": "private-repo-ci-workspace-runner",
+      "version": "1.1.2",
+      "status": "active",
+      "path": "skills/private-repo-ci-workspace-runner/SKILL.md",
+      "tools": [
+        {
+          "slug": "github",
+          "type": "connector",
+          "required": true,
+          "usage": "Dispatch and inspect Agent-Workspace-1 private-repository CI fallback runs."
+        }
+      ]
+    },
+    {
+      "id": 40,
+      "name": "GitHub Development Workspace",
+      "slug": "github-development-workspace",
+      "version": "1.1.2",
+      "status": "active",
+      "path": "skills/github-development-workspace/SKILL.md",
+      "tools": [
+        {
+          "slug": "github",
+          "type": "connector",
+          "required": true,
+          "usage": "Create repositories, dispatch development/scaffold workflows, inspect Actions evidence."
+        }
+      ]
+    },
+    {
+      "id": 42,
+      "name": "Implementation Push",
+      "slug": "implementation-push",
+      "version": "2.0.2",
+      "status": "active",
+      "path": "skills/implementation-push/SKILL.md",
+      "tools": [
+        {
+          "slug": "github",
+          "type": "connector",
+          "required": true,
+          "usage": "Inspect and modify the target repository and CI evidence when authorized."
+        },
+        {
+          "slug": "container",
+          "type": "other",
+          "required": true,
+          "usage": "Run executable verification and integration checks; use Agent-Workspace-1 for broader repository/CI/ecosystem verification."
+        }
+      ]
     },
     {
       "id": 44,
       "name": "Reconciliation Pass",
       "slug": "reconciliation-pass",
-      "version": "2.0.1",
+      "version": "2.0.2",
       "status": "active",
       "path": "skills/reconciliation-pass/SKILL.md",
       "tools": [
@@ -460,10 +469,19 @@
       ]
     },
     {
+      "id": 45,
+      "name": "coding-task-lifecycle",
+      "slug": "coding-task-lifecycle",
+      "path": "skills/coding-task-lifecycle/SKILL.md",
+      "tools": [],
+      "status": "active",
+      "version": "1.0.1"
+    },
+    {
       "id": 46,
       "name": "Persistent Multi-Agent Execution",
       "slug": "persistent-multi-agent-execution",
-      "version": "1.1.0",
+      "version": "1.1.1",
       "status": "active",
       "path": "skills/persistent-multi-agent-execution/SKILL.md",
       "tools": [

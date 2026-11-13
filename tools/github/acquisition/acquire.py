@@ -6,7 +6,7 @@ API = "https://api.github.com"
 OWNER = "dinilmusick"
 
 EXCLUDED_REF_PREFIXES = (
-    "refs/pull/", "refs/merge-queue/", "refs/heads/mergify/merge-queue/",
+    "refs/pull/", "refs/merge-queue/", "refs/heads/mergify/merge-queue/", "refs/notes/mergify/",
     "refs/heads/gh-readonly-queue/", "refs/heads/create-pull-request/", "refs/remotes/", "refs/gh/",
 )
 
@@ -135,6 +135,12 @@ def push_mirror_refs(repo, remote, env, source_refs, default_branch, stale_refs=
 def reachable_objects(repo):
     output = git(["rev-list", "--objects", "--all"], cwd=repo).stdout
     return sorted({line.split(" ", 1)[0] for line in output.splitlines() if line.strip()})
+
+def object_set_mismatch(source_objects, destination_objects):
+    """Return missing and extra object IDs without assuming caller collection types."""
+    source_set = set(source_objects)
+    destination_set = set(destination_objects)
+    return sorted(source_set - destination_set), sorted(destination_set - source_set)
 
 def reference_readme(source, commit, branch, category, license_id):
     return f"""# Private project reference
@@ -333,9 +339,8 @@ def main():
                 raise RuntimeError(f"Ref verification mismatch; missing={missing[:10]}, extra={extra[:10]}, changed={changed[:10]}.")
             source_objects = reachable_objects(source_path)
             destination_objects = reachable_objects(verify_path)
-            if source_objects != destination_objects:
-                missing_objects = sorted(source_objects - destination_objects)
-                extra_objects = sorted(destination_objects - source_objects)
+            missing_objects, extra_objects = object_set_mismatch(source_objects, destination_objects)
+            if missing_objects or extra_objects:
                 raise RuntimeError(f"Reachable Git object/history verification mismatch; missing_count={len(missing_objects)}, extra_count={len(extra_objects)}, missing_sample={missing_objects[:10]}, extra_sample={extra_objects[:10]}.")
             repository_update = {"default_branch": source_branch}
             if provenance_migration_commit:

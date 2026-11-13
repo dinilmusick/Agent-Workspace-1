@@ -13,8 +13,8 @@ The catalog has been extended from **44 to 60 records**: 45 full-source mirror c
 At this snapshot:
 
 - **10/16** new candidates have passed the canonical acquisition workflow and independent read-only verification.
-- **15/16** requested destination repositories currently exist and are private; existence is not treated as source verification.
-- **1/16** destination is not yet present.
+- **16/16** requested destination repositories currently exist and are private; existence is not treated as source verification.
+- **0/16** destinations are missing.
 - Airflow has been refreshed to the reviewed current upstream pin and independently verified.
 - Five destination-creation attempts encountered GitHub's secondary content-creation rate limit. The controller now staggers repository creation and uses exponential backoff.
 - Large upstreams with thousands of refs require bounded ref pushes. The acquisition controller now pushes refs in batches of 100 and preserves/deletes old refs only after archiving their tips.
@@ -35,7 +35,7 @@ No project is described as commercially cleared. Private research mirroring is n
 | 8 | OpenSearch | [opensearch-project/OpenSearch](https://github.com/opensearch-project/OpenSearch) — `main`, `a8767707aa8b6db8ab15d8309936b07f6c517ad0` | [tpl-infra-opensearch](https://github.com/dinilmusick/tpl-infra-opensearch) | mirror | Apache-2.0 root; review plugin and bundled-component notices individually | Yes — independent verifier passed; `build.gradle` matches pinned upstream | acquired-and-verified |
 | 9 | Prometheus | [prometheus/prometheus](https://github.com/prometheus/prometheus) — `main`, `49c815a0ea46c7a6a6b723e4b634c4bf36f7022c` | [tpl-observability-prometheus](https://github.com/dinilmusick/tpl-observability-prometheus) | mirror | Apache-2.0; preserve LICENSE/NOTICE and vendored notices | Yes — independent verifier passed; `go.mod` matches pinned upstream | acquired-and-verified |
 | 10 | Grafana | [grafana/grafana](https://github.com/grafana/grafana) — `main`, `2204676d80b342730f748fa651289a915681dad2` | [tpl-observability-grafana](https://github.com/dinilmusick/tpl-observability-grafana) | mirror | AGPL-3.0; `LICENSING.md` declares Apache-2.0 exceptions and original vendor licenses | Not yet — destination exists; 2,069 raw refs require bounded pushes; verification pending | pending-verification |
-| 11 | Loki | [grafana/loki](https://github.com/grafana/loki) — `main`, `8f83d5672776aeb656fdc0f6fe3f38be3a33e80a` | [tpl-observability-loki](https://github.com/dinilmusick/tpl-observability-loki) | mirror | AGPL-3.0; `LICENSING.md` lists Apache-2.0 exceptions and vendor directories under original licenses | Source refs match after excluding ephemeral merge-queue refs; `go.mod` and `LICENSE` match; independent verifier running | pending-verification |
+| 11 | Loki | [grafana/loki](https://github.com/grafana/loki) — `main`, `8f83d5672776aeb656fdc0f6fe3f38be3a33e80a` | [tpl-observability-loki](https://github.com/dinilmusick/tpl-observability-loki) | mirror | AGPL-3.0; `LICENSING.md` lists Apache-2.0 exceptions and vendor directories under original licenses | Yes — all writable refs and independent read-only verification passed; `go.mod` and `LICENSE` match byte-for-byte | acquired-and-verified |
 | 12 | Tempo | [grafana/tempo](https://github.com/grafana/tempo) — `main`, `f023741110df81cd20d014814e01058b3de53787` | [tpl-observability-tempo](https://github.com/dinilmusick/tpl-observability-tempo) | mirror | AGPL-3.0; `LICENSING.md` identifies Apache-2.0 exceptions and upstream-licensed directories | No — reviewed two-commit fast-forward and refreshed pin; destination creation/acquisition pending | pending-verification |
 | 13 | OpenTelemetry Collector | [open-telemetry/opentelemetry-collector](https://github.com/open-telemetry/opentelemetry-collector) — `main`, `4888f0b280f927f9ec356c3d8a9c02a1a37819dc` | [tpl-observability-otel-collector](https://github.com/dinilmusick/tpl-observability-otel-collector) | mirror | Apache-2.0 root; contributed receivers/exporters in separate projects need separate review | Destination exists; 7,454 raw refs are being pushed in bounded batches | pending-verification |
 | 14 | Postal | [postalserver/postal](https://github.com/postalserver/postal) — `main`, `d96eddbadeda600595d6247486f9ceb8e99cbc15` | [tpl-platform-postal](https://github.com/dinilmusick/tpl-platform-postal) | mirror | MIT; preserve the upstream MIT-LICENCE and third-party notices | Yes — independent verifier passed; `Gemfile` and `MIT-LICENCE` match byte-for-byte | acquired-and-verified |
@@ -56,7 +56,7 @@ No project is described as commercially cleared. Private research mirroring is n
 | OpenSearch | [#891](https://github.com/dinilmusick/Agent-Workspace-1/issues/891) | [43385394906](https://github.com/dinilmusick/Agent-Workspace-1/actions/runs/43385394906) |
 | Prometheus | [#892](https://github.com/dinilmusick/Agent-Workspace-1/issues/892) | [43385404100](https://github.com/dinilmusick/Agent-Workspace-1/actions/runs/43385404100) |
 | Grafana | [#893](https://github.com/dinilmusick/Agent-Workspace-1/issues/893) | [Original run](https://github.com/dinilmusick/Agent-Workspace-1/actions/runs/43385408704); current issue body refreshed to the reviewed live HEAD |
-| Loki | [#894](https://github.com/dinilmusick/Agent-Workspace-1/issues/894) | [Original run](https://github.com/dinilmusick/Agent-Workspace-1/actions/runs/43385410792); current issue body refreshed to the reviewed live HEAD |
+| Loki | [#894](https://github.com/dinilmusick/Agent-Workspace-1/issues/894) (closed) | [43389550953](https://github.com/dinilmusick/Agent-Workspace-1/actions/runs/43389550953) — success |
 | Tempo | [#895](https://github.com/dinilmusick/Agent-Workspace-1/issues/895) | [43385416895](https://github.com/dinilmusick/Agent-Workspace-1/actions/runs/43385416895) |
 | OpenTelemetry Collector | [#896](https://github.com/dinilmusick/Agent-Workspace-1/issues/896) | [43385420872](https://github.com/dinilmusick/Agent-Workspace-1/actions/runs/43385420872) |
 | Postal | [#897](https://github.com/dinilmusick/Agent-Workspace-1/issues/897) (closed) | [43385424474](https://github.com/dinilmusick/Agent-Workspace-1/actions/runs/43385424474) — success |
@@ -68,13 +68,13 @@ No project is described as commercially cleared. Private research mirroring is n
 | Measure | Before expansion | Current snapshot |
 |---|---:|---:|
 | Canonical catalog records | 44 | 60 |
-| Indexed private `tpl-*` repositories | 44 | 59 |
-| New requested destinations currently present | 0 | 15 of 16 |
-| New candidates independently verified | 0 | 10 of 16 |
+| Indexed private `tpl-*` repositories | 44 | 60 |
+| New requested destinations currently present | 0 | 16 of 16 |
+| New candidates independently verified | 0 | 11 of 16 |
 | Reference-only records added by this expansion | 0 | 0 |
 | Duplicate destination repositories created | 0 | 0 |
 
-All 59 currently indexed `tpl-*` repositories are private. The 44 pre-existing destinations were preserved. The only absent destination at this snapshot is Tempo. Empty repositories and repositories with only a subset of refs are not counted as verified acquisitions.
+All 59 currently indexed `tpl-*` repositories are private. The 44 pre-existing destinations were preserved. All 16 requested destination repositories are now present; their existence is not treated as source verification. Empty repositories and repositories with only a subset of refs are not counted as verified acquisitions.
 
 A single unrelated open pull request remains in the control repository; no expansion change was merged through or discarded from that PR.
 

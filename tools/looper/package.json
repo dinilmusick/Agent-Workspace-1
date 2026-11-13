@@ -1,0 +1,11 @@
+{
+  "name": "@agent-workspace/looper-predicates",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/predicate-engine.test.mjs"
+  },
+  "dependencies": {
+    "@marcbachmann/cel-js": "8.0.0"
+  }
+}

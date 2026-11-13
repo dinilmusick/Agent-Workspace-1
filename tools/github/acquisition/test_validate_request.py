@@ -90,7 +90,7 @@ class AcquisitionRequestValidationTests(unittest.TestCase):
                    "category": "AI workflow builder", "acquisition_mode": "reference-only"}
         self.assertEqual(validate_catalog_authorization(catalog, request, "main", "NOASSERTION")["mode"], "reference-only")
 
-    def test_canonical_catalog_authorizes_all_35_candidates(self):
+    def test_canonical_catalog_authorizes_all_51_candidates(self):
         catalog_path = Path(__file__).resolve().parents[3] / "docs/template-portfolio-catalog.md"
         catalog = catalog_path.read_text()
         mode = None
@@ -128,7 +128,7 @@ class AcquisitionRequestValidationTests(unittest.TestCase):
             self.assertEqual(authorization["branch"], branch)
             self.assertEqual(authorization["mode"], mode)
             counts[mode] += 1
-        self.assertEqual(counts, {"mirror": 29, "reference-only": 6})
+        self.assertEqual(counts, {"mirror": 45, "reference-only": 6})
 
     def test_workflow_contract_uses_valid_github_expression_delimiters(self):
         workflow_path = Path(__file__).resolve().parents[3] / ".github/workflows/independent-commercial-acquisition.yml"

@@ -1,9 +1,13 @@
+import io
 import re
 import sys
+import urllib.error
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import MagicMock, patch
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+from acquire import api
 from validate_request import APPROVAL_URL, assert_exact_head, catalog_authorization, catalog_line_authorizes, validate_catalog_authorization, validate_request_shape, write_outputs
 
 class AcquisitionRequestValidationTests(unittest.TestCase):
@@ -152,6 +156,24 @@ class AcquisitionRequestValidationTests(unittest.TestCase):
         self.assertIn('"refs/gh/"', verifier)
         acquisition = Path(__file__).with_name("acquire.py").read_text()
         self.assertIn("preserve_and_reconcile_existing_refs", acquisition)
+
+    @patch("acquire.time.sleep")
+    @patch("acquire.urllib.request.urlopen")
+    def test_acquisition_api_retries_secondary_rate_limit(self, mock_urlopen, mock_sleep):
+        error = urllib.error.HTTPError(
+            "https://api.github.com/user/repos", 403, "Forbidden",
+            {"Retry-After": "0"},
+            io.BytesIO(b'{"message":"You have exceeded a secondary rate limit"}'),
+        )
+        response = MagicMock()
+        response.__enter__.return_value.read.return_value = b'{"created": true}'
+        mock_urlopen.side_effect = [error, response]
+
+        result = api("token", "POST", "/user/repos", {"name": "test"})
+
+        self.assertEqual(result, {"created": True})
+        mock_sleep.assert_called_once_with(1)
+        self.assertEqual(mock_urlopen.call_count, 2)
 
     def test_github_output_uses_delimited_values(self):
         with tempfile.TemporaryDirectory() as directory:

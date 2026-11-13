@@ -164,6 +164,11 @@ def write_summary(text):
         with open(path, "a", encoding="utf-8") as handle:
             handle.write(text.rstrip() + "\n")
 
+def validate_previous_default_ref(previous_default, previous_pin, current_pin):
+    if previous_default not in {previous_pin, current_pin}:
+        raise RuntimeError("Existing destination default-branch ref matches neither its previous provenance pin nor the reviewed current pin.")
+    return previous_default == current_pin
+
 def safe_provenance_migration(existing_description, source, mode, category, old_default_branch, new_default_branch, new_commit, comparison):
     match = re.fullmatch(r"ULTRST private (mirror|reference-only); upstream=([^;]+); commit=([0-9a-f]{40}); category=(.+)", existing_description or "")
     if not match:
@@ -298,8 +303,9 @@ def main():
                 git(["fsck", "--full", "--no-reflogs", "--connectivity-only"], cwd=existing_path)
                 if provenance_migration_commit:
                     previous_default = writable_refs(existing_path).get(f"refs/heads/{source_branch}")
-                    if previous_default != provenance_migration_commit:
-                        raise RuntimeError("Existing destination default-branch ref does not match its previous provenance pin.")
+                    already_pushed_current_pin = validate_previous_default_ref(previous_default, provenance_migration_commit, source_commit)
+                    if already_pushed_current_pin:
+                        print("Recovering a partially completed provenance migration: destination default branch already equals the reviewed current pin; refs/history will be reconciled before updating provenance metadata.", file=sys.stderr)
                 archived_history = preserve_and_reconcile_existing_refs(writable_refs(existing_path), source_refs, source_path, existing_path)
                 source_refs = writable_refs(source_path)
             destination_refs_before = remote_refs(target_url, git_env)

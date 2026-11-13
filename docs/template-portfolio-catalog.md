@@ -286,3 +286,8 @@ All refreshed acquisitions remain private research mirrors only. These reviews d
 ### Grafana current-head refresh review — 2026-11-13
 
 The `grafana/grafana:main` branch advanced two commits after the previous pin `2204676d80b342730f748fa651289a915681dad2`. Reviewed the strict fast-forward to `bd77333dfff9ae7ae09f3f4fa9fd4e1117fb3158`: one commit preserves Kubernetes API status errors so deleted-stack team listing returns 404 rather than 500, with regression tests; the other adds the enterprise in-process gRPC import to the extension test import list. No root license changes. The refreshed pin is pending canonical workflow and independent verification.
+
+
+## Expansion verification report
+
+See [docs/template-portfolio-expansion-report.md](./template-portfolio-expansion-report.md) for the 16-candidate verification matrix, acquisition evidence, Airflow resolution, licensing review and portfolio coverage assessment.

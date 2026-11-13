@@ -15,6 +15,10 @@ begin
     'heartbeat-hardening-session','worker',3::smallint,'Testing five-minute recovery','{}'::jsonb,null
   );
   update public.tasks
+  set status='waiting'
+  where id<>registered.id and status in ('queued','running');
+
+  update public.tasks
   set required_capabilities=array['heartbeat-hardening']::text[]
   where id=registered.id;
 

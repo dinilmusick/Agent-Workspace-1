@@ -5,6 +5,10 @@ import base64, hashlib, json, os, pathlib, re, subprocess, sys, tempfile, time, 
 API = "https://api.github.com"
 OWNER = "dinilmusick"
 
+def repository_creation_stagger(target_name: str) -> int:
+    return int(hashlib.sha256(target_name.encode("utf-8")).hexdigest()[:4], 16) % 120
+
+
 def api(token, method, path, payload=None, allow_404=False):
     data = None if payload is None else json.dumps(payload).encode()
     request = urllib.request.Request(API + path, data=data, method=method, headers={
@@ -12,7 +16,12 @@ def api(token, method, path, payload=None, allow_404=False):
         "X-GitHub-Api-Version": "2022-11-28", "User-Agent": "ULTRST-private-acquisition-controller",
         **({"Content-Type": "application/json"} if data is not None else {}),
     })
-    for attempt in range(6):
+    if method == "POST" and path == "/user/repos" and payload:
+        stagger = repository_creation_stagger(str(payload.get("name", "")))
+        if stagger:
+            print(f"Staggering repository creation for {payload.get('name')} by {stagger}s to avoid secondary limits.", file=sys.stderr)
+            time.sleep(stagger)
+    for attempt in range(8):
         try:
             with urllib.request.urlopen(request, timeout=60) as response:
                 body = response.read()
@@ -22,13 +31,13 @@ def api(token, method, path, payload=None, allow_404=False):
                 return None
             detail = exc.read(4096).decode("utf-8", errors="replace")
             retryable = exc.code == 429 or (exc.code == 403 and "secondary rate limit" in detail.lower())
-            if retryable and attempt < 5:
+            if retryable and attempt < 7:
                 retry_after = exc.headers.get("Retry-After")
                 try:
-                    delay = max(1, float(retry_after)) if retry_after else min(30 * (attempt + 1), 300)
+                    delay = max(1, float(retry_after)) if retry_after else min(60 * (2 ** attempt), 900)
                 except (TypeError, ValueError):
-                    delay = min(30 * (attempt + 1), 300)
-                print(f"GitHub API secondary rate limit on {method} {path}; retry {attempt + 1}/5 in {delay:.0f}s.", file=sys.stderr)
+                    delay = min(60 * (2 ** attempt), 900)
+                print(f"GitHub API secondary rate limit on {method} {path}; retry {attempt + 1}/7 in {delay:.0f}s.", file=sys.stderr)
                 time.sleep(delay)
                 continue
             raise RuntimeError(f"GitHub API {method} {path} failed ({exc.code}): {detail}") from None

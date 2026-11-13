@@ -133,3 +133,6 @@ Vision -> 1..N Goals -> 1..4 direct Tasks -> 1..4 Checkpoints
 - Legacy rows remain readable so existing work can be resumed while all newly created task trees use bounded-v2.
 
 Resume therefore means loading the unfinished Goal, selecting an incomplete Task, and continuing at its persisted `current_checkpoint_index` rather than reconstructing conversational context.
+
+
+Bounded-v2 is the creation contract. Existing pre-v2 goals that already contain more than four direct tasks are explicitly retained as `legacy` rather than being silently split or discarded; a later reconciliation pass can safely migrate their work into multiple bounded goals. This preserves existing execution context while making the four-task invariant absolute for new bounded goals.

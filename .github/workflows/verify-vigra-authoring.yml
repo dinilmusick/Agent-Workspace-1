@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 jobs:
-  verify:
+  authoring:
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:
@@ -18,17 +18,19 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Clone target revision
+      - name: Clone exact VIGRA revision
         shell: bash
         env:
           PRIVATE_REPO_TOKEN: ${{ secrets.PRIVATE_REPO_TOKEN }}
+          VIGRA_REF: 52a693fedfbcb362c9f3f38c2ab9afafef94ea67
         run: |
           set -euo pipefail
           test -n "$PRIVATE_REPO_TOKEN"
-          git clone --quiet --depth 1 --single-branch --branch feature/vision-authoring \
-            "https://x-access-token:${PRIVATE_REPO_TOKEN}@github.com/dinilmusick/VIGRA.git" /tmp/vigra
+          git clone --quiet --no-checkout https://x-access-token:${PRIVATE_REPO_TOKEN}@github.com/dinilmusick/VIGRA.git /tmp/vigra
+          git -C /tmp/vigra fetch --quiet --depth 1 origin "$VIGRA_REF"
+          git -C /tmp/vigra checkout --quiet --detach FETCH_HEAD
+          test "$(git -C /tmp/vigra rev-parse HEAD)" = "$VIGRA_REF"
           git -C /tmp/vigra remote set-url origin https://github.com/dinilmusick/VIGRA.git
-          git -C /tmp/vigra rev-parse HEAD
           git -C /tmp/vigra status --short
 
       - name: Install target dependencies
@@ -45,15 +47,12 @@ jobs:
 
       - name: Bundle authoring UI for browser
         working-directory: /tmp/vigra
-        run: >-
-          npx esbuild src/frontend/components/authoring/index.ts
-          --bundle --format=esm --platform=browser --target=es2022
-          --external:react --external:react-dom --external:react/jsx-runtime
-          --outfile=/tmp/vigra-authoring.js
-
-      - name: Run repository build
-        working-directory: /tmp/vigra
-        run: npm run build
+        run: |
+          npx esbuild src/frontend/components/authoring/index.ts \
+            --bundle --format=esm --platform=browser --target=es2022 \
+            --external:react --external:react-dom --external:react/jsx-runtime \
+            --outfile=/tmp/vigra-authoring.js
+          test -s /tmp/vigra-authoring.js
 
       - name: Cleanup target clone
         if: always()

@@ -74,3 +74,10 @@ Each worker reads its complete Issue before acting and maintains a Current Imple
 A global continue or proceed prompt is safe to send to every worker. Each worker rereads its own Issue: terminal workers do nothing; resolved blockers resume; unresolved blockers remain waiting; active work continues. The user therefore does not need to track which agents are finished or blocked.
 
 Supabase remains the durable goal/non-coding coordination layer. GitHub Issues are the detailed coding execution ledger; PRs are implementation artifacts; CI is verification evidence.
+
+
+## Bounded resume contract
+
+The execution loop is deliberately capped: Vision -> Goals (unbounded) -> Tasks (max 4 per Goal) -> Checkpoints (max 4 per Task). A Task is the unit of delegated work; a Checkpoint is one atomic completion parameter inside that Task. Each checkpoint persists its objective, success/failure status, result, context and evidence. New task creation uses the bounded-v2 database contract and rejects nested tasks, more than four completion parameters, or more than four checkpoints. Task completion is database-gated until all checkpoints succeed.
+
+When a new ChatGPT conversation receives a global continuation request such as **“Do remaining tasks”**, it must load the unfinished goal from Supabase, identify the first incomplete task and resume from that task's first incomplete checkpoint. It must not depend on prior chat history. After each checkpoint, persist the checkpoint result and advance the task's checkpoint pointer before continuing.

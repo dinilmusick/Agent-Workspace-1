@@ -7,7 +7,7 @@ OWNER = "dinilmusick"
 
 EXCLUDED_REF_PREFIXES = (
     "refs/pull/", "refs/merge-queue/", "refs/heads/mergify/merge-queue/",
-    "refs/heads/gh-readonly-queue/", "refs/remotes/", "refs/gh/",
+    "refs/heads/gh-readonly-queue/", "refs/heads/create-pull-request/", "refs/remotes/", "refs/gh/",
 )
 
 def is_writable_ref(ref):

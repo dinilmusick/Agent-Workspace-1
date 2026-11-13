@@ -2,64 +2,53 @@
 
 A dependency-free, deterministic loop controller for agents. The agent plans and performs work; Looper persists iteration inputs/outputs and enforces evidence-gated completion, bounded retries, and terminal states.
 
-## Contract
+## Machine-verifiable completion predicates
+
+Bounded Task checkpoints are no longer completed by agent judgment. Each checkpoint references an immutable `(predicate_key, version)` stored in the Supabase completion predicate registry.
+
+```text
+agent performs work
+      ↓
+agent submits evidence/input
+      ↓
+predicate engine evaluates registered predicate
+      ↓
+true + evidence → checkpoint succeeds
+false            → checkpoint remains incomplete/failed
+      ↓
+all checkpoints succeed → task may complete
+      ↓
+all direct tasks complete → goal may complete
+```
+
+Predicate types: `builtin`, `cel`, and `script`. CEL uses `@marcbachmann/cel-js`; script predicates require explicitly registered application handlers. Arbitrary model-generated code is never executed.
+
+Every predicate execution records the predicate version, inputs, result, pass/fail verdict, executor identity, fencing token, and evidence. Predicate definitions are immutable; changed definitions require a new version.
+
+### Task definition binding
+
+A bounded task may provide predicates through its completion parameters:
 
 ```json
-{
-  "goal": "Fix the application and verify it in a real browser",
-  "inputContract": { "type": "object", "required": ["repository", "ref"] },
-  "outputContract": { "type": "object", "required": ["changes", "verification"] },
-  "initialInput": { "repository": "owner/repo", "ref": "main" },
-  "successCriteria": [
-    { "id": "build", "description": "Production build succeeds", "required": true },
-    { "id": "browser", "description": "Critical route renders without runtime errors", "required": true }
-  ],
-  "tools": ["GitHub", "Playwright"],
-  "iterationPolicy": { "maxIterations": 12, "repeatedFailureThreshold": 2 }
-}
+{"completion_parameters":[{"id":"build","description":"Production build succeeds","predicate":{"key":"repo.build_passes","version":1}}]}
 ```
 
-## Commands
-
-```bash
-node tools/looper/looper.mjs init tasks/example.loop.json results/example.state.json
-node tools/looper/looper.mjs record results/example.state.json results/iteration-1.json
-node tools/looper/looper.mjs status results/example.state.json
-```
-
-Each iteration result records the actual `input`, `output`, `observation`, `toolsUsed`, `evidence`, `criterionResults`, and `nextAction`.
-
-```json
-{
-  "verdict": "continue",
-  "input": { "repository": "owner/repo", "ref": "main" },
-  "output": { "changes": ["src/App.tsx"], "verification": { "build": "passed" } },
-  "observation": "Build passes; browser reports a failed API request.",
-  "criterionResults": [
-    { "criterionId": "build", "status": "satisfied", "evidence": ["actions://run/123"] },
-    { "criterionId": "browser", "status": "unsatisfied", "evidence": ["playwright://trace/123"] }
-  ],
-  "toolsUsed": ["GitHub Actions", "Playwright"],
-  "evidence": ["actions://run/123", "playwright://trace/123"],
-  "failureKey": "api-base-url",
-  "nextAction": "Trace the failed request and correct the base URL."
-}
-```
+Infrastructure-generated checkpoints use `builtin.evidence_present@1` only as a compatibility fallback. Production workflows should replace this with a predicate that actually verifies the requested outcome.
 
 ## State transitions
 
 - `ready`: initialized; no iteration has been recorded.
 - `continue`: more work is required.
-- `research_required`: the same failure occurred twice; research the exact error before another attempt. This is not terminal.
-- `completed`: every required criterion is explicitly marked satisfied and has evidence.
-- `blocked`: a real external action, permission, or human decision is required.
+- `research_required`: the same failure occurred twice; research the exact error before another attempt.
+- `completed`: every required criterion is explicitly verified.
+- `blocked`: an external action, permission, or human decision is required.
 - `cancelled`: explicitly cancelled.
 - `max_iterations`: the configured iteration budget was exhausted.
 
-A `pass` verdict cannot complete the loop unless every required criterion has evidence. A failed iteration is recorded and can be corrected; it does not immediately terminate the loop. The default iteration budget is 8 and the maximum is 100.
+The existing four-task/four-checkpoint database bounds remain authoritative.
 
 ## Design boundary and shared state
 
-Looper is the deterministic local controller, not an LLM, test runner, or evidence validator. The Loop Generator skill chooses tools and performs the work; tools produce evidence; the agent evaluates evidence and submits criterion results. For multi-agent work, Task Ledger remains the shared Supabase source of truth for task claims, nested tasks, iterations, results, and independent verification. Persist the same iteration input/output/evidence in Task Ledger when the loop belongs to a delegated task.
+Looper is the deterministic local controller, not an LLM, test runner, or arbitrary code sandbox. The completion predicate engine is the verification boundary: tools produce evidence; registered predicates determine whether a checkpoint is actually complete. Task Ledger remains the shared Supabase source of truth for delegated work.
 
-The script never executes model-generated shell strings, never assumes a tool exists, and stores no credentials.
+The runtime never executes model-generated shell strings, never treats an agent's completion claim as authoritative, and stores no credentials.

@@ -91,11 +91,17 @@ A task loop may pass only against that task's own criteria and evidence. Task su
 
 ## Stale-worker recovery
 
-A running task is eligible for reassignment only when its last heartbeat is at least 60 minutes old. An expired lease alone must never permit reassignment before the one-hour threshold. The standard goal-key claim path and generic claim RPCs enforce this inside the atomic `FOR UPDATE SKIP LOCKED` claim transaction. New claims use a minimum 60-minute lease. Do not manually rewrite task ownership.
+Running task ownership is a short heartbeat lease.
 
-A recovery rotates the claim token, increments the attempt count, assigns the new worker/session and appends a `lease_recovered` event with the previous agent, claim token, heartbeat timestamp and recovery reason. Existing task iterations, events, evidence and commit references remain intact.
-
-Never automatically reclaim a task whose status is `blocked`, a task under a blocked/failed/cancelled/abandoned parent, or a task with unresolved blocking dependencies. Respect max attempts. Workers must continue heartbeating well inside their lease interval; 60 minutes is crash recovery, not a normal heartbeat schedule.
+- Workers checkpoint and heartbeat every ~2 minutes while active.
+- Workers independently check ownership about every 5 minutes.
+- A running task is eligible for reassignment only when its last heartbeat is at least 5 minutes old.
+- Lease expiry alone never permits reassignment; heartbeat freshness is the recovery gate.
+- `claim_token` is the fencing token. Recovery rotates it, increments attempts, assigns the new worker/session and appends a `lease_recovered` event containing the previous worker and last heartbeat checkpoint.
+- Heartbeats persist `current_step` plus a JSON checkpoint containing activity, progress, discoveries, blockers and next action.
+- A worker that detects fencing loss must stop. It may append a `handoff` event with its final note, but it must not overwrite canonical task ownership/progress.
+- The next worker reads the task row and append-only events before continuing.
+- Never reclaim blocked tasks, tasks under blocked/failed/cancelled/abandoned parents, unresolved blocking dependencies, or tasks at max attempts.
 
 ## Worker protocol
 

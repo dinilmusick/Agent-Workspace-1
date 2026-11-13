@@ -189,3 +189,29 @@ The canonical local preflight is `python tools/agent-bootstrap/bootstrap.py plan
 - Add all phase edges before starting workers. Never launch a later phase merely because its tasks are queued; inspect the dependency gate and claimability.
 - Advisory dependencies never block execution. Preserve parallelism among tasks/goals that do not have blocking paths between them.
 - Regression coverage: `supabase/tests/task-ledger-goal-dependencies.integration.sql` (rollback-only fixtures).
+
+
+## Hardened ephemeral-worker protocol
+
+Every worker must assume it can disappear at any moment. The ledger is the only durable context.
+
+1. **Discover first:** load the current Task Ledger skill and call `goal_ledger_overview(null)` at orchestration start; inspect goal/task/dependency/heartbeat state before choosing work.
+2. **Route skills by trigger:** use Universal Task Router first for actionable work, then the narrowest domain/specialist skill. Load support skills before their required action. Do not use a broad skill when a narrower one exists.
+3. **Claim atomically:** never infer ownership or edit ownership fields directly. Use the canonical claim RPC and fencing `claim_token`.
+4. **Checkpoint continuously:** heartbeat/lease renewal about every 2 minutes. Every heartbeat must persist current step, activity, progress, discoveries, blockers, evidence and next action.
+5. **Check ownership:** about every 5 minutes, verify that the same claim token/agent still owns the task. If another worker has taken it, append a final handoff note if possible, stop immediately, and never overwrite the new owner.
+6. **Recover quickly:** a running task with no heartbeat for >=5 minutes is reclaimable through the atomic claim path. The new worker must read the task row plus append-only events/checkpoints before continuing.
+7. **Separate loop authors from executors:** `loop_authoring` workers define and validate success parameters and checkpoints, persist a `ready` loop contract, then requeue. They MUST NOT execute it. `execution` workers may claim only a ready contract authored by another agent. No worker may redefine its own success conditions.
+8. **Release safely:** use the fenced release operation for `queued`, `blocked` or `abandoned` outcomes. Stale workers cannot release another worker's claim.
+9. **Independent verification:** the worker that executes a task does not verify its own success. Completion requires evidence, required parameters, independent verification and terminal state.
+10. **Persist recovery state:** blockers, resume points, evidence and decisions must live in Supabase or the canonical GitHub Issue for coding tasks, never only in chat.
+11. **Never abandon pollable work:** started CI/deploy/workflow operations must be waited on and polled to terminal, repaired/retried when appropriate, then independently verified.
+12. **Substrate parity:** if a substrate behavior changes, update the canonical Supabase skill version and the mirrored repository skill, then verify both surfaces. Do not let repository instructions drift from the ledger.
+
+### Skill timing matrix
+
+`ordinary conversation -> no skill`; `actionable goal -> universal-task-router + task-ledger`; `coding -> coding-router + coding-task-lifecycle + narrow specialist`; `loop design -> loop-generator`; `tldraw/Vision -> tldraw`; `obstacle/failure -> obstacle-memory-management + debugging`; `implementation push -> implementation-push`; `reconciliation -> reconciliation-pass`; `multi-agent execution -> persistent-multi-agent-execution`; `new/update skill -> skill-creator`. Always consult Task Ledger before claiming work.
+
+### Ephemeral-worker invariant
+
+`chat_context=cache`; `ledger/Issue=memory`; `claim_token=fence`; `heartbeat=presence`; `checkpoint=resume_point`; `independentVerifier=quality_gate`. If the worker dies after any action, another agent must be able to reconstruct the next safe action without asking the user for missing context.

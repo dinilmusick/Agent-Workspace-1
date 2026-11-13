@@ -9,7 +9,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import MagicMock, call, patch
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from acquire import api, push_mirror_refs, refspec_batches
+from acquire import api, push_mirror_refs, refspec_batches, repository_creation_stagger
 from validate_request import APPROVAL_URL, assert_exact_head, catalog_authorization, catalog_line_authorizes, event_issue_number, load_issue_body, validate_catalog_authorization, validate_request_shape, write_outputs
 
 class AcquisitionRequestValidationTests(unittest.TestCase):
@@ -174,6 +174,11 @@ class AcquisitionRequestValidationTests(unittest.TestCase):
         acquisition = Path(__file__).with_name("acquire.py").read_text()
         self.assertIn("preserve_and_reconcile_existing_refs", acquisition)
 
+    def test_repository_creation_stagger_is_stable_and_bounded(self):
+        first = repository_creation_stagger("tpl-platform-keycloak")
+        self.assertEqual(first, repository_creation_stagger("tpl-platform-keycloak"))
+        self.assertGreaterEqual(first, 0)
+        self.assertLess(first, 120)
     def test_refspec_batches_bound_large_mirror_pushes(self):
         refs = [f"refs/tags/v{i}" for i in range(205)]
         batches = refspec_batches(refs, batch_size=100)
@@ -196,7 +201,8 @@ class AcquisitionRequestValidationTests(unittest.TestCase):
         self.assertEqual(commands[2], ["push", "destination", ":refs/heads/removed"])
     @patch("acquire.time.sleep")
     @patch("acquire.urllib.request.urlopen")
-    def test_acquisition_api_retries_secondary_rate_limit(self, mock_urlopen, mock_sleep):
+    @patch("acquire.repository_creation_stagger", return_value=0)
+    def test_acquisition_api_retries_secondary_rate_limit(self, mock_stagger, mock_urlopen, mock_sleep):
         error = urllib.error.HTTPError(
             "https://api.github.com/user/repos", 403, "Forbidden",
             {"Retry-After": "0"},

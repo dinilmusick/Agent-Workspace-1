@@ -1,0 +1,62 @@
+name: Verify VIGRA authoring branch
+
+on:
+  push:
+    branches:
+      - verify/vigra-authoring
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - name: Checkout Agent Workspace
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+
+      - name: Clone target revision
+        shell: bash
+        env:
+          PRIVATE_REPO_TOKEN: ${{ secrets.PRIVATE_REPO_TOKEN }}
+        run: |
+          set -euo pipefail
+          test -n "$PRIVATE_REPO_TOKEN"
+          git clone --quiet --depth 1 --single-branch --branch feature/vision-authoring \
+            "https://x-access-token:${PRIVATE_REPO_TOKEN}@github.com/dinilmusick/VIGRA.git" /tmp/vigra
+          git -C /tmp/vigra remote set-url origin https://github.com/dinilmusick/VIGRA.git
+          git -C /tmp/vigra rev-parse HEAD
+          git -C /tmp/vigra status --short
+
+      - name: Install target dependencies
+        working-directory: /tmp/vigra
+        run: |
+          set -euo pipefail
+          node --version
+          npm --version
+          npm install --no-package-lock --no-audit --no-fund
+
+      - name: Run authoring validation tests
+        working-directory: /tmp/vigra
+        run: node --experimental-strip-types --test src/libraries/authoring/validation.test.mjs
+
+      - name: Bundle authoring UI for browser
+        working-directory: /tmp/vigra
+        run: >-
+          npx esbuild src/frontend/components/authoring/index.ts
+          --bundle --format=esm --platform=browser --target=es2022
+          --external:react --external:react-dom --external:react/jsx-runtime
+          --outfile=/tmp/vigra-authoring.js
+
+      - name: Run repository build
+        working-directory: /tmp/vigra
+        run: npm run build
+
+      - name: Cleanup target clone
+        if: always()
+        run: |
+          rm -rf /tmp/vigra /tmp/vigra-authoring.js
+          test ! -e /tmp/vigra

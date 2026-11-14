@@ -1,3 +1,12 @@
+---
+name: "Work Modality Routing"
+slug: work-modality-routing
+version: 2.0.0
+source: Supabase Skills Database
+sourceId: 47
+status: active
+---
+
 # Work Modality Routing
 
 Canonical work-routing contract after Universal Task Router classification.

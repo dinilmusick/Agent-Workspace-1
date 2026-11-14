@@ -503,7 +503,7 @@
       "id": 47,
       "name": "Work Modality Routing",
       "slug": "work-modality-routing",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "status": "active",
       "path": "skills/work-modality-routing/SKILL.md",
       "tools": [

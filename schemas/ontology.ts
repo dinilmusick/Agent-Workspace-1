@@ -25,8 +25,21 @@ export interface Target {
   metadata?: Record<string, unknown>;
 }
 
+export interface UniverseDefinition {
+  id: string;
+  universeKey: string;
+  ownerUserId?: string;
+  name: string;
+  description?: string;
+  parameters: Record<string, unknown>;
+  metadata: Record<string, unknown>;
+  status: "planned" | "active" | "paused" | "archived" | "retired";
+  contextVersion: number;
+}
+
 export interface SystemDefinition {
   id: string;
+  universeId: string;
   systemKey: string;
   parentSystemId?: string;
   name: string;
@@ -70,9 +83,9 @@ export interface SystemFunctionDefinition {
   metadata: Record<string, unknown>;
 }
 
-export interface SystemFunctionSubsystemLink {
+export interface SystemFunctionSystemLink {
   functionId: string;
-  subsystemId: string;
+  systemId: string;
   contribution: string;
   ordinal: number;
   metadata: Record<string, unknown>;
@@ -87,6 +100,18 @@ export interface SystemRelationship {
     | "hosts" | "deployed_on" | "derived_from" | "related_to";
   description: string;
   metadata: Record<string, unknown>;
+}
+
+export interface SystemWormhole {
+  id: string;
+  sourceSystemId: string;
+  targetSystemId: string;
+  status: "pending" | "active" | "paused" | "closed";
+  syncMode: "bidirectional" | "source_to_target" | "target_to_source";
+  syncScope: Record<string, boolean>;
+  description?: string;
+  metadata: Record<string, unknown>;
+  lastSyncedAt?: string;
 }
 
 export interface OmniLoopEdit {

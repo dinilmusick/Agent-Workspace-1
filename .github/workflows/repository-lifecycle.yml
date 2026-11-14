@@ -1,0 +1,39 @@
+name: Repository lifecycle bridge
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  lifecycle:
+    if: github.actor == 'dinilmusick' && startsWith(github.event.issue.title, '[repo-lifecycle]')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Execute repository lifecycle script
+        env:
+          GITHUB_TOKEN: ${{ secrets.CODING_REPO_TOKEN }}
+        run: |
+          set -euo pipefail
+          python3 tools/github/repository_lifecycle.py --help >/dev/null
+          python3 - <<'PY'
+          import json, os, subprocess
+          body = os.environ["ISSUE_BODY"]
+          request = json.loads(body)
+          op = request.get("operation")
+          allowed = {"create", "rename", "delete", "verify"}
+          if op not in allowed:
+              raise SystemExit("unsupported lifecycle operation")
+          args = request.get("args", {})
+          cmd = ["python3", "tools/github/repository_lifecycle.py", op]
+          for key, value in args.items():
+              flag = "--" + key.replace("_", "-")
+              cmd.extend([flag, str(value)])
+          subprocess.run(cmd, check=True)
+          PY
+        env:
+          ISSUE_BODY: ${{ github.event.issue.body }}

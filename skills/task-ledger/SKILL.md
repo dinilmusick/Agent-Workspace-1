@@ -1,7 +1,7 @@
 ---
 name: "Task Ledger"
 slug: task-ledger
-version: 2.7.0
+version: 2.8.0
 source: Supabase Skills Database
 sourceId: 7
 status: active
@@ -299,3 +299,21 @@ A blocker with notoriety **>5** is **notorious** and must be surfaced to the use
 ## User priority versus blocker notoriety
 
 Goals have `user_priority` normalized to **0..1**; higher means higher priority. Use `goal_ledger_set_priority(goal_key, priority, agent_id)` to change it. User priority and blocker notoriety are independent signals: global claims order by goal priority, then blocker notoriety, then existing task priority; goal-scoped claims order by blocker notoriety before task priority. Never use priority as a substitute for blocker notoriety.
+
+## First-class work modalities
+The ledger distinguishes request mode from execution task type. request_mode is conversational or work. A work request may also carry a registered work_modality.
+
+A modality is a planning/execution mode, not a task type. Modalities create durable work structure:
+work prompt → modality → Universe/System/Vision resolution → Goal → 1–4-action tasks → worker execution → independent verification.
+
+The canonical modality catalogue is public.work_modalities. Current core modalities are implementation-push, new-repo, feature, reconciliation and obstacle-system-tweak. Do not execute a modality prompt as one undifferentiated task.
+
+When a modality is requested:
+- resolve the existing System/Universe/Vision first;
+- create missing persistent structure according to System-first rules;
+- create the Goal with request_mode=work and the modality slug;
+- persist the full task tree before worker execution;
+- keep each task within the 1–4 action law and independent-verification gate;
+- record the request in public.work_requests when the substrate path supports it.
+
+obstacle-system-tweak is specifically for eliminating a durable obstacle at the System level. Its Goal should reference the canonical obstacle, inspect repeated occurrences and resolutions, change the System rather than only the immediate task, and include recurrence-focused verification.

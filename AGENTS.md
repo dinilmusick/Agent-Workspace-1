@@ -237,3 +237,17 @@ When a user repeatedly works on the same enduring subject or long-standing probl
 - Parent/child System relationships are legal only within the same Universe. Enforce `parent.universe_id = child.universe_id`; never create cross-Universe parentage.
 - Once a System exists for the subject, do not continue creating parallel work outside it. New work on that subject belongs inside the existing System unless it explicitly belongs to another System and the relationship is recorded.
 - Repeated user work on the same subject should resolve to the existing System before creating another goal/task.
+
+
+## First-class work modalities
+
+Every incoming prompt is either **conversation** or **work**. Work is either a **direct task** or a **work modality**. Direct-task prompts execute an already-defined task through the normal claim/loop/evidence/independent-verification lifecycle. A modality prompt requests a way of working and MUST create or reuse durable work structure before execution.
+
+- Resolve an existing Universe/System/Vision before creating a new one.
+- For persistent work, prefer existing System → create System in an existing appropriate Universe → create Universe then System.
+- Parent/child Systems MUST share the same universe_id.
+- Create/reuse the related Goal, record request_mode=work and the registered modality, then decompose into 1–4-action tasks with dependencies, checkpoints, acceptance criteria and independent verification.
+- Core modalities: implementation-push, new-repo, feature, reconciliation, obstacle-system-tweak.
+- obstacle-system-tweak selects a high-notoriety durable obstacle and changes the concerned System so the obstacle's recurrence is reduced; it is not a local workaround task.
+- Use public.work_modalities as the canonical modality catalogue and public.work_requests for actionable request classification/history when supported.
+- Never silently execute a modality prompt as one task and never invent an unregistered modality.

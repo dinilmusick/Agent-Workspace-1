@@ -18,3 +18,7 @@ ASYNC=start→poll→inspect→fix/retry→poll;never abandon pollable work.
 ROUTE=code:CodingTaskLifecycle;skill*:SkillCreator;reconcile:ReconciliationPass.
 DONE=terminal+evidence+independentVerify+reconcile.
 BOOTSTRAP=local→Workspace→target|private bridge→all checks;remote actions only if needed.
+GITHUB=repo lifecycle primary via tools/github; connector=fallback only.
+GITHUB_PRIMARY=create|rename|delete|visibility|clone|repo-admin→use tools/github scripts/workflows first; verify result.
+GITHUB_FALLBACK=if local tools/github are unavailable, inapplicable, fail, or lack the required operation, use the GitHub connector/API if it can perform the operation; never prefer connector over an available working repository tool.
+GITHUB_LIFECYCLE=visionRepo:create public→associate with Vision→work→verify→complete→lookup associated repo→delete repo→clear Vision; repository deletion is a deterministic finalization step, not an optional manual cleanup.

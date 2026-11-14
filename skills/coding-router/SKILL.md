@@ -9,6 +9,8 @@ status: active
 
 # Coding Router
 
+Domain router invoked only after Universal Task Router has classified a prompt as WORK_RESPONSE. It must not reclassify conversation versus work.
+
 Top-level coding task router that classifies engineering intent and selects the smallest sufficient set of specialized coding skills.
 
 ## Linked tools

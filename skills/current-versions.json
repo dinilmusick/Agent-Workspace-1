@@ -44,6 +44,6 @@
     "reconciliation-pass": "2.0.2",
     "coding-task-lifecycle": "1.1.0",
     "persistent-multi-agent-execution": "1.2.0",
-    "work-modality-routing": "1.0.0"
+    "work-modality-routing": "1.0.1"
   }
 }

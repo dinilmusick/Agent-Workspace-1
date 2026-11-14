@@ -7,16 +7,19 @@
 - **GitHub Actions Agent Compute Workspace** is the sole general-purpose finite code-execution environment.
 - Use connected Supabase PostgreSQL tools directly for all goal/task operations. There is no Edge Function or repository-hosted CLI worker layer in the supported architecture.
 
-## Entry routing
+## Agent entry contract
 
-1. Treat ordinary conversation as conversation; do not invoke a skill automatically.
-2. For an actionable goal, read `skills/universal-task-router/SKILL.md`.
-3. Resolve current skill versions from `skills/current-versions.json` and Supabase `public.skills.current_version_id`.
-4. For coding goals, activate `skills/coding-router/SKILL.md` and its narrow specialist skills.
-5. For multi-stage or ambiguous goals, use Prompt Map; for repeated action/verification, use Loop Generator and Looper.
-6. For multi-agent work, use Task Ledger in Supabase as the shared source of truth.
-7. For explicit implementation-push requests, route to the dedicated Implementation Push skill and require the full completion/verification loop.
+Every incoming user message is classified into exactly one response type:
 
+- CONVERSATIONAL_RESPONSE → answer the user directly. Do not invoke the work substrate unless the user explicitly turns the exchange into work.
+- WORK_RESPONSE → the agent must use the substrate. Work is either DIRECT_TASK (execute an existing task) or WORK_MODALITY (create/reuse the durable work structure required by the requested kind of work, then execute it).
+
+Canonical flow: response_type → work_type → target/System → resolve → route → plan → persist → claim → execute → evidence → independentVerify → finalize
+
+Work types: EXECUTE | GENESIS | CONTRACT | MODIFY | MEMORY | SELF_IMPROVEMENT | INTEGRATE.
+Work modalities are narrower registered execution modes. A modality never replaces the work type.
+
+The agent instructions are the minimal entry contract; detailed procedures live in the canonical Supabase skills. Never bypass the substrate for WORK_RESPONSE. Chat history is not durable state.
 ## Skill and tool catalogue
 
 - `skills/<slug>/SKILL.md`: individual skill definitions mirrored from Supabase.
@@ -42,7 +45,7 @@
 - A running task is eligible for reassignment only when its heartbeat is at least 5 minutes old. Lease expiry alone must never bypass the five-minute inactivity threshold. Workers heartbeat about every 2 minutes and independently check ownership about every 5 minutes. Reassignment must happen through the transactional claim RPC; never overwrite task ownership directly.
 - Apply stale recovery consistently to the standard goal-key ChatGPT worker path and generic claim entry points. Recovery rotates claim tokens, increments attempts and appends a `lease_recovered` event with prior-worker evidence. Preserve all prior iterations and evidence.
 - Never automatically reclaim tasks in `blocked` state, tasks under blocked/failed/cancelled/abandoned parents, or tasks whose blocking dependencies remain unverified. Respect max attempts.
-- Worker heartbeats must renew leases during active work. A 60-minute stale threshold is crash recovery, not permission to ignore heartbeat duties.
+- Worker heartbeats must renew leases during active work. There is one stale-recovery threshold: 5 minutes without a heartbeat. Do not define a second stale threshold.
 - Recovery and goal discovery implementation details and the rollback-only integration test are documented in `docs/agent-recovery-and-goal-overview.md`.
 
 
@@ -60,17 +63,15 @@
 - A goal cannot pass until all descendants are independently verified and goal criteria have evidence.
 
 
-## New-chat goal discovery and task proposals
+## New-chat goal discovery and work creation
 
-When a new conversation begins, or the user asks what remains / what goals need completion:
-1. Call `goal_ledger_overview(null)` before proposing work. This is the global source of truth; never rely on chat history or a single remembered goal.
-2. Summarize every planning, ready, active and blocked goal using its readable `goal_key`, status, task counts, active workers, heartbeat age, queued work, blockers and verification state. Identify tasks that are actually claimable separately from queued tasks blocked by dependencies.
-3. Load the full context of a goal before recommending changes to it.
-4. Compare the user's current request and the live goal/task tree. If a concrete, relevant piece of work is missing, propose it as a task instead of silently adding it.
-5. Ask one explicit confirmation question: **“Should I add this as a task?”** Include its proposed title, scope, acceptance criteria, dependencies and readable task ID. Do not write the task until the user confirms.
-6. On confirmation, create the task under the selected goal using the canonical task-tree creation RPC. Persist its loop contract, acceptance criteria, verification plan, required tools/capabilities and dependencies. Return the generated readable task ID and the parent goal key.
-7. If no task is missing, say so. Do not manufacture tasks merely to appear proactive.
+When a new conversation begins, classify the response type first. For WORK_RESPONSE, inspect the live substrate before acting. Do not ask for confirmation to create durable work when the user's request itself clearly authorizes the work.
 
+1. Resolve the existing Universe/System/Vision before creating new durable structure.
+2. DIRECT_TASK → load and atomically claim the existing task, then execute its persisted lifecycle.
+3. WORK_MODALITY → create or reuse the required Goal/Task structure, persist work type and modality, dependencies, checkpoints, acceptance and verification, then execute it.
+4. If persistent work has no matching System, create the appropriate System/Universe according to the system-first contract.
+5. Use readable returned keys; never invent identifiers.
 ### Readable task IDs
 - New task IDs are generated by the database from the task title: `task-<descriptive-kebab-case>-<8-hex-suffix>`.
 - Use the exact returned `task_key` in discussion and handoffs. UUIDs remain internal database identifiers.

@@ -25,6 +25,70 @@ export interface Target {
   metadata?: Record<string, unknown>;
 }
 
+export interface SystemDefinition {
+  id: string;
+  systemKey: string;
+  parentSystemId?: string;
+  name: string;
+  systemType: string;
+  description: string;
+  status: "planned" | "active" | "paused" | "archived" | "retired";
+  parameters: Record<string, unknown>;
+  metadata: Record<string, unknown>;
+  contextVersion: number;
+}
+
+export interface SystemMemoryDefinition {
+  id: string;
+  systemId: string;
+  memoryKey: string;
+  title: string;
+  content: string;
+  memoryType:
+    | "general" | "decision" | "constraint" | "observation"
+    | "change" | "fact" | "warning" | "milestone";
+  importance: number;
+  status: "active" | "superseded" | "archived";
+  occurredAt: string;
+  sourceType?: string;
+  sourceId?: string;
+  metadata: Record<string, unknown>;
+}
+
+export interface SystemFunctionDefinition {
+  id: string;
+  systemId: string;
+  functionKey: string;
+  name: string;
+  description: string;
+  inputContract: Record<string, unknown>;
+  outputContract: Record<string, unknown>;
+  transformation: string;
+  improvementTarget: Record<string, unknown>;
+  acceptanceCriteria: unknown[];
+  status: "planned" | "active" | "paused" | "retired";
+  metadata: Record<string, unknown>;
+}
+
+export interface SystemFunctionSubsystemLink {
+  functionId: string;
+  subsystemId: string;
+  contribution: string;
+  ordinal: number;
+  metadata: Record<string, unknown>;
+}
+
+export interface SystemRelationship {
+  id: string;
+  sourceSystemId: string;
+  targetSystemId: string;
+  relationType:
+    | "depends_on" | "integrates_with" | "interacts_with"
+    | "hosts" | "deployed_on" | "derived_from" | "related_to";
+  description: string;
+  metadata: Record<string, unknown>;
+}
+
 export interface OmniLoopEdit {
   id: string;
   description: string;

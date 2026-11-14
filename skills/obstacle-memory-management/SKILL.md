@@ -1,7 +1,7 @@
 ---
 name: "Obstacle Memory Management"
 slug: obstacle-memory-management
-version: 1.1.0
+version: 1.2.0
 status: active
 ---
 
@@ -113,8 +113,16 @@ Never:
 
 The relational obstacle record is canonical; vectors are retrieval indexes.
 
+## Deterministic checkpoint-blocker promotion
+
+Checkpoint blockers are automatically promoted into durable `obstacles` memory when either threshold is crossed:
+- **more than 5 distinct agents** have reported the same canonical blocker; or
+- **notoriety > 10**.
+
+Promotion happens synchronously when a new blocker occurrence is recorded. The promotion is idempotent: the canonical blocker stores the resulting `obstacle_id` in metadata, so later occurrences do not create duplicate obstacle records. The obstacle receives the blocker text, occurrence context/evidence, current task/goal/agent linkage when available, severity based on the threshold, and a `checkpoint-blocker` tag.
 
 ## SUBSTRATE_PROTOCOL_V3
+
 All agents are ephemeral workers. Supabase is canonical coordination state; chat is not durable state. Before acting, load the current Task Ledger and the narrowest applicable specialist skill. Persist every meaningful checkpoint: current_step, activity, progress, discoveries, blockers, evidence and next_action.
 WORKER=discover->resolve->route->plan->persist->claim->execute->evidence->independentVerify->finalize. Claims MUST use the atomic ledger claim path. HEARTBEAT~2m->checkpoint+renew lease. OWNERSHIP_CHECK~5m->if fence is lost: append final handoff note, stop immediately, and never overwrite the new owner. Recovery is allowed after heartbeat silence>=5m; the new worker reads the task row, checkpoint and task events before continuing. Use fenced release for queued/blocked/abandoned work.
 LOOPS=separateAuthor->readyContract->independentExecutor. A loop-authoring worker defines and validates success parameters/checkpoints, persists the loop contract, then releases/requeues the task. It MUST NOT execute the resulting task. An execution worker may claim only a ready contract authored by another agent and MUST execute against those persisted parameters. No worker may redefine its own success conditions. Verification is independent.
@@ -123,4 +131,4 @@ SKILL TIMING: use this skill when its trigger matches; load supporting skills be
 
 ## Checkpoint blocker integration
 
-Checkpoint blockers are a durable substrate obstacle surface. Normalize blocker text, reuse an existing canonical blocker for equivalent wording, record an occurrence tied to task/checkpoint/agent/attempt, and use the resulting notoriety to expose repeated friction. Do not create duplicate blockers for wording variants. A blocker is not resolved until resolution evidence is recorded.
+Checkpoint blockers are a durable substrate obstacle surface. Normalize blocker text, reuse an existing blocker identity when semantically identical, record an occurrence tied to task/checkpoint/agent/attempt, and let notoriety count distinct failure occurrences. Do not create duplicate blockers for wording variants. A blocker is not resolved until resolution evidence is recorded.

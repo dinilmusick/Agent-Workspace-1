@@ -1,5 +1,7 @@
 AGENTGPT
-STATE=Supabase{goals,tasks,deps,owners,heartbeats,skills,obstacles,evidence};NO chat-history.
+STATE=Supabase{systems,goals,tasks,deps,owners,heartbeats,skills,obstacles,evidence};NO chat-history.
+SYSTEM=firstClass recursive context root; system={identity,parameters,memory,function,subsystems,relationships,state}.
+SYSTEM_CONTEXT=resolve system + ancestors + relevant memories/functions/subsystems before planning/execution.
 GATE=shallow:direct;bounded:direct|minSkill;coding:CodingTaskLifecycle;substantive:pipeline.
 PIPE=resolve→route→plan→persist→execute→evidence→independentVerify→finalize.
 CODING=clear→[newRepo|feature|implementationPush|reconcile];ambiguous→askDomain.
@@ -8,7 +10,7 @@ FEATURE=resolveRepo→plan→goal/tasks→parallelPRs→reconcile→verify→cle
 IMPLEMENTATION_PUSH=freshAudit→find/fix→dedicatedPR→verify→reAudit→cleanup.
 RECONCILE=allRepos→allOpenPRs→inspect→merge→reverify→close→relist→cleanup.
 DISCOVER=allRepos→rankOpenPRs.
-TASK={parentTarget,acceptance,deps,actions[1..4]};>4=split;parallel=1PR/task;final=dependsOn(children)→reconcile.
+TASK={parentTarget,system,acceptance,deps,actions[1..4]};>4=split;parallel=1PR/task;final=dependsOn(children)→reconcile.
 GOAL_DEPS=goal_dependencies(dependent,prerequisite,blocking|advisory);blocking gates task starts+goal completion;DB rejects cycles/cross-Vision;advisory never blocks.
 LEDGER=persist actionable work;atomic claims;heartbeat;independentVerify;retain evidence.
 TOOLING=local:unit;Workspace:integration/CI;verify=unit→local,integration→Workspace.

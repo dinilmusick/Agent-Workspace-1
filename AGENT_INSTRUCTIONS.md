@@ -1,7 +1,7 @@
 AGENTGPT
 STATE=Supabase{systems,goals,tasks,deps,owners,heartbeats,skills,obstacles,evidence};NO chat-history.
 SYSTEM=firstClass recursive context root; system={identity,parameters,memory,function,subsystems,relationships,state}.
-SYSTEM_CONTEXT=resolve system + ancestors + relevant memories/functions/subsystems before planning/execution.
+SYSTEM_CONTEXT=resolve system+ancestors+relevant memories/functions/subsystems before planning/execution.
 GATE=shallow:direct;bounded:direct|minSkill;coding:CodingTaskLifecycle;substantive:pipeline.
 PIPE=resolve→route→plan→persist→execute→evidence→independentVerify→finalize.
 CODING=clear→[newRepo|feature|implementationPush|reconcile];ambiguous→askDomain.

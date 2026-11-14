@@ -1,7 +1,7 @@
 ---
 name: "Work Modality Routing"
 slug: work-modality-routing
-version: 1.0.0
+version: 1.0.1
 source: Supabase Skills Database
 sourceId: 47
 status: active
@@ -17,7 +17,7 @@ conversation → answer directly.
 
 work/direct-task → resolve the existing task, claim it through the Task Ledger, execute its persisted loop, record evidence, and require independent verification.
 
-work/modality → do not execute the prompt as one task. Resolve the relevant Universe/System/Vision, create or reuse a Goal for the requested modality, decompose it into 1–4-action tasks, persist dependencies/checkpoints/verification, then dispatch workers.
+work/modality → do not execute the prompt as one task. Resolve the relevant Universe/System/Vision; if the work spans multiple goals/components and no related Vision exists, create the Vision and its required tldraw projection; then create or reuse a Goal for the requested modality, decompose it into 1–4-action tasks, persist dependencies/checkpoints/verification, then dispatch workers.
 
 ## First-class modalities
 
@@ -31,7 +31,7 @@ The canonical catalogue is public.work_modalities. Unknown modality requests mus
 
 ## Persistent-context rule
 
-For durable work, resolve existing System → existing appropriate Universe → create System in that Universe → create Universe then System. Never create duplicate systems for the same enduring subject. Child Systems must share the parent's universe_id.
+For durable work, resolve existing System → existing appropriate Universe → create System in that Universe → create Universe then System. For multi-goal/component work, resolve the related Vision or create it before the Goal. Never create duplicate systems for the same enduring subject. Child Systems must share the parent's universe_id.
 
 ## Obstacle elimination system tweak
 

@@ -1,25 +1,29 @@
----
-name: "Work Modality Routing"
-slug: work-modality-routing
-version: 1.0.1
-source: Supabase Skills Database
-sourceId: 47
-status: active
----
-
 # Work Modality Routing
 
-Classify every incoming prompt as conversation or work. Work is either direct-task execution or a work-modality request.
+Canonical work-routing contract after Universal Task Router classification.
 
-## Contract
+## Boundary
 
-conversation → answer directly.
+Universal Task Router owns response-type classification. This skill owns WORK_RESPONSE planning for work modalities. It must never reclassify ordinary conversation.
 
-work/direct-task → resolve the existing task, claim it through the Task Ledger, execute its persisted loop, record evidence, and require independent verification.
+Response hierarchy:
+CONVERSATIONAL_RESPONSE → direct answer
+WORK_RESPONSE → DIRECT_TASK | WORK_MODALITY
 
-work/modality → do not execute the prompt as one task. Resolve the relevant Universe/System/Vision; if the work spans multiple goals/components and no related Vision exists, create the Vision and its required tldraw projection; then create or reuse a Goal for the requested modality, decompose it into 1–4-action tasks, persist dependencies/checkpoints/verification, then dispatch workers.
+## Work types
 
-## First-class modalities
+Every WORK_RESPONSE has one work type:
+EXECUTE | GENESIS | CONTRACT | MODIFY | MEMORY | SELF_IMPROVEMENT | INTEGRATE
+
+EXECUTE = complete existing work.
+GENESIS = create governed structure: Vision, Goal, Task, System, ecosystem, repository, etc.
+CONTRACT = define loop satisfaction, completion predicates, acceptance or verification contracts.
+MODIFY = change an existing System, workflow, skill or architecture.
+MEMORY = persist useful observations, decisions, facts or learned patterns.
+SELF_IMPROVEMENT = remediate recurring problems or optimize already-working systems.
+INTEGRATE = reconcile, synchronize, merge or release existing work.
+
+## Registered modalities
 
 - implementation-push
 - new-repo
@@ -27,20 +31,26 @@ work/modality → do not execute the prompt as one task. Resolve the relevant Un
 - reconciliation
 - obstacle-system-tweak
 
-The canonical catalogue is public.work_modalities. Unknown modality requests must map to an active registered modality or be reported as a capability gap.
+The database catalogue is authoritative. Do not invent a modality. New modalities must be registered before routing.
 
-## Persistent-context rule
+## Planning contract
 
-For durable work, resolve existing System → existing appropriate Universe → create System in that Universe → create Universe then System. For multi-goal/component work, resolve the related Vision or create it before the Goal. Never create duplicate systems for the same enduring subject. Child Systems must share the parent's universe_id.
+resolve → choose work type → resolve/reuse System/Vision/Goal → decompose into 1–4-action Tasks → persist dependencies/checkpoints/acceptance/verification → claim → execute → evidence → independentVerify → finalize
 
-## Obstacle elimination system tweak
+A modality prompt creates/reuses durable work structure before execution. A direct task prompt does not create duplicate structure; it resolves and claims the existing task.
 
-Use obstacle-system-tweak when a durable/high-notoriety obstacle should be removed by changing the concerned System. Select the highest-notoriety relevant obstacle, inspect occurrences/resolutions, create a System-level Goal, implement root-cause changes, and verify recurrence reduction. Do not merely repeat a local workaround.
+## Self-improvement
+
+SELF_IMPROVEMENT may remediate recurring obstacles or optimize already-working systems. Pattern: observe → analyze → memory/obstacle → create remediation/optimization work → implement → verify → propagate.
+
+## System-first
+
+Resolve an existing System before creating another. Every System belongs to a Universe. Parent/child Systems must share the same Universe. Cross-Universe relationships use explicit relationships/wormholes, never parentage.
 
 ## Persistence
 
-Record actionable requests in public.work_requests when supported, including request_mode, work_modality, prompt, resolved goal/task, agent/session and status. Goals/tasks may carry request_mode and work_modality. Modality is a work-planning mode, not a task_type.
+Record WORK_RESPONSE classification in public.work_requests using request_mode as the persisted response_type field for compatibility. Record work_modality, prompt, resolved Goal/Task, agent/session and status. Goals and Tasks may carry the same response type and modality.
 
 ## Completion
 
-A modality request is complete only after its Goal's descendant tasks are independently verified, acceptance criteria pass, evidence is persisted and the final reconciliation is complete.
+A modality request is complete only when its descendant work is terminal, acceptance passes, evidence is persisted, independent verification succeeds and any required reconciliation is complete.

@@ -25,6 +25,8 @@ alter table public.systems add constraint systems_parent_same_universe_fk foreig
 alter table public.systems drop constraint if exists systems_parent_system_id_fkey;
 
 alter table public.system_function_subsystems rename to system_function_systems;
+alter table public.system_function_systems rename column subsystem_id to system_id;
+alter table public.system_function_systems rename constraint system_function_subsystems_subsystem_id_fkey to system_function_systems_system_id_fkey;
 
 create table public.system_wormholes (
   id uuid primary key default gen_random_uuid(),

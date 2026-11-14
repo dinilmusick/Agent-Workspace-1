@@ -1,3 +1,12 @@
+---
+name: "Universal Task Router"
+slug: universal-task-router
+version: 3.0.0
+source: Supabase Skills Database
+sourceId: 28
+status: active
+---
+
 # Universal Task Router
 
 Top-level classifier for every incoming user message. This skill owns classification and handoff; detailed execution procedures belong to specialist skills.

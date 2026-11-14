@@ -82,6 +82,18 @@ When a new conversation begins, classify the response type first. For WORK_RESPO
 
 The connected Supabase project currently has no Auth users. Browser chats use unique `agent_id` and `session_id` values within a single-owner project-scoped workspace when `auth.uid()` is null. A different chat may verify/finalize, but its agent ID must differ from task workers. This is not multi-tenant isolation. Before sharing with multiple human owners, provision Supabase Auth users and enforce owner-scoped JWT/RLS boundaries.
 
+## GitHub repository-management precedence
+
+The repository's own `tools/github` layer is the **primary GitHub management interface** for agents. Do not use the connected GitHub API/connector as the first choice when an equivalent repository-management operation is available locally.
+
+- For repository lifecycle and administration operations—including **create, rename, delete, visibility changes, cloning/acquisition and other repository-management operations**—inspect and use the appropriate `tools/github` script or workflow first.
+- Treat the connected GitHub connector/API as a **fallback**, used only when the repository tooling is unavailable, cannot perform the required operation, fails after appropriate diagnosis/retry, or the operation genuinely requires a connector capability that the repository tooling does not expose.
+- Never silently substitute the connector merely because it is easier to call. The repository tooling is the canonical operational path.
+- Verify every repository-management operation against GitHub after execution; an attempted script invocation is not evidence of success.
+- For a vision-specific public repository, record the repository association in the durable Vision/ledger state. Vision finalization must deterministically inspect that association and delete the associated temporary repository before clearing/finalizing the Vision.
+- Repository deletion is therefore part of the Vision completion lifecycle, not an optional cleanup step.
+- Use the existing credential boundary documented by `tools/github`; never expose `CODING_REPO_TOKEN` or other credentials in logs, source, task metadata or evidence.
+
 ## GitHub compute
 
 - Use `.github/workflows/agent-compute.yml` for finite arbitrary code execution.

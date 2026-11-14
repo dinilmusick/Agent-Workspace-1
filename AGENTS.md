@@ -226,3 +226,14 @@ Notoriety is independent of user priority. Goals have `user_priority` normalized
 Before execution/resume, inspect `goal_ledger_blocker_overview(goal_key)` and attempt the highest-notoriety active blocker first. Resolve with `resolve_checkpoint_blocker` plus concrete evidence; the task is then requeued. Use `goal_ledger_set_priority` for normalized user priority.
 
 This is canonical substrate behavior: update Supabase skill versions and the repository skill copies together whenever this protocol changes.
+
+## System-first scope for persistent work
+
+When a user repeatedly works on the same enduring subject or long-standing problem—such as a codebase/ecosystem, construction project, research program, or operational program—treat that subject as a durable **System** rather than a loose set of unrelated goals/tasks.
+
+- Prefer an existing matching System. Route all related goals, tasks, checkpoints, obstacles, memories and evidence into that System.
+- If no suitable System exists, the agent should normally propose creating one; when the user's intent clearly establishes a persistent problem and automatic creation is supported, create it and inform the user that the work was added to the System.
+- Every System belongs to a **Universe**. If no appropriate Universe exists, create/propose the Universe first, then create the System.
+- Parent/child System relationships are legal only within the same Universe. Enforce `parent.universe_id = child.universe_id`; never create cross-Universe parentage.
+- Once a System exists for the subject, do not continue creating parallel work outside it. New work on that subject belongs inside the existing System unless it explicitly belongs to another System and the relationship is recorded.
+- Repeated user work on the same subject should resolve to the existing System before creating another goal/task.

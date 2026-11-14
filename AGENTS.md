@@ -264,3 +264,19 @@ Every incoming prompt is either **conversation** or **work**. Work is either a *
 - obstacle-system-tweak selects a high-notoriety durable obstacle and changes the concerned System so the obstacle's recurrence is reduced; it is not a local workaround task.
 - Use public.work_modalities as the canonical modality catalogue and public.work_requests for actionable request classification/history when supported.
 - Never silently execute a modality prompt as one task and never invent an unregistered modality.
+
+## Vision transient-repository lifecycle
+
+Every newly created Vision requires one disposable public GitHub repository. The durable association lives in Supabase `public.vision_repositories`; GitHub is the execution substrate.
+
+Canonical lifecycle:
+1. Create the Vision. `vision_ledger_create` marks the transient repository requirement.
+2. Call `vision_ledger_repository_spec(vision_id)` and create the returned `agentgpt-vision-<vision_key>` repository through `tools/github` first; connector/API is fallback only.
+3. Record it with `vision_ledger_associate_repository` before doing Vision work.
+4. Execute the Vision and independently verify all linked Goals/descendant Tasks.
+5. Before finalization call `vision_ledger_mark_repository_deletion_requested`.
+6. Delete the associated repository through the primary `tools/github` lifecycle path and independently verify that GitHub returns 404/not found.
+7. Record the proof with `vision_ledger_mark_repository_deleted`.
+8. Call `vision_ledger_finalize`. The database refuses completion if the association is missing, deletion is not `deleted_verified`, there are no linked Goals, or any linked Goal/descendant Task is incomplete or unverified.
+
+Deletion is not cleanup after Vision completion. It is a prerequisite of Vision completion. Never delete `dinilmusick/ATAX`; it is the permanent substrate. The lifecycle is idempotent: if a retry finds the repository already absent, verify absence and persist `deleted_verified` rather than creating a second deletion obligation.

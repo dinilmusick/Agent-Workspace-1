@@ -1,7 +1,7 @@
 ---
 name: "Persistent Multi-Agent Execution"
 slug: persistent-multi-agent-execution
-version: 1.1.0
+version: 1.2.0
 source: Supabase Skills Database
 sourceId: 46
 status: active
@@ -72,3 +72,9 @@ WORKER=discover->resolve->route->plan->persist->claim->execute->evidence->indepe
 LOOPS=separateAuthor->readyContract->independentExecutor. A loop-authoring worker defines and validates success parameters/checkpoints, persists the loop contract, then releases/requeues the task. It MUST NOT execute the resulting task. An execution worker may claim only a ready contract authored by another agent and MUST execute against those persisted parameters. No worker may redefine its own success conditions. Verification is independent.
 CODING=GitHubIssueCanonicalExecutionState; one independent coding task->one worker->one Issue->one PR. ASYNC=started->wait/poll->inspect->repair/retry->poll->verify; never stop while a started/pollable process remains. OBSTACLE=normalize->semanticSearch->reuseOrCreate->record->resolve->verify. Never keep essential context only in chat or secrets in task records/logs.
 SKILL TIMING: use this skill for persistent multi-agent execution; workers must re-read their canonical Issue after any material state change and before resuming. Continue/proceed resumes the existing task, not a new task. If the substrate changes, update the canonical Supabase skill and repository copy, then independently verify parity.
+
+## Durable checkpoint blockers
+
+For bounded-v2 coding work, the Supabase checkpoint blocker is the durable blocker record in addition to the GitHub Issue. Use `report_checkpoint_blocker` when a worker must stop. The RPC deduplicates equivalent blockers and increments global notoriety per distinct agent/task/checkpoint/attempt.
+
+Before resuming, inspect the active blocker list and prioritize the highest-notoriety blocker. Notoriety >5 must be surfaced to the user. Resolve through `resolve_checkpoint_blocker` with concrete evidence, then continue from the persisted checkpoint.

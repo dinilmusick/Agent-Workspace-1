@@ -1,7 +1,7 @@
 ---
 name: "Universal Task Router"
 slug: universal-task-router
-version: 2.2.0
+version: 2.3.0
 source: Supabase Skills Database
 sourceId: 28
 status: active
@@ -183,3 +183,9 @@ WORKER=discover->resolve->route->plan->persist->claim->execute->evidence->indepe
 LOOPS=separateAuthor->readyContract->independentExecutor. A loop-authoring worker defines and validates success parameters/checkpoints, persists the loop contract, then releases/requeues the task. It MUST NOT execute the resulting task. An execution worker may claim only a ready contract authored by another agent and MUST execute against those persisted parameters. No worker may redefine its own success conditions. Verification is independent.
 CODING=GitHubIssueCanonicalExecutionState; one independent coding task->one worker->one Issue->one PR. ASYNC=started->wait/poll->inspect->repair/retry->poll->verify; never stop while a started/pollable process remains. OBSTACLE=normalize->semanticSearch->reuseOrCreate->record->resolve->verify. Never keep essential context only in chat or secrets in task records/logs.
 SKILL TIMING: use this skill when its trigger matches; load supporting skills before their required action, not after. Prefer the narrowest specialist skill plus only necessary support skills. If the substrate changes, update the canonical Supabase skill and repository copy, then independently verify parity.
+
+## Blocker-first routing
+
+For actionable work, after loading the goal and before normal execution, inspect `goal_ledger_blocker_overview(goal_key)`. Any active blocker with notoriety >5 is a user-attention item; surface the highest-scoring one and attempt its resolution before ordinary task work. The database claim path already orders work by goal `user_priority`, then checkpoint blocker notoriety, then task priority.
+
+If a worker cannot solve its current blocker, persist it with `report_checkpoint_blocker`, stop the task safely, and leave a deterministic resume point. Never keep an unresolved blocker only in chat.

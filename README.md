@@ -95,3 +95,10 @@ Supabase remains the coordination/state substrate when available, but it is not 
 Agent Workspace is designed for fragile, ephemeral agents. Workers reconstruct context from Supabase and GitHub Issues rather than chat history. Active tasks heartbeat/checkpoint about every 2 minutes and independently check ownership about every 5 minutes; tasks without a heartbeat for at least 5 minutes can be atomically recovered. Claim tokens fence stale workers. Loop contracts are authored by one worker and executed by a different worker, so success parameters cannot be self-authored and self-certified. Every worker persists progress, blockers, evidence and resume state before disappearing, and terminal completion requires independent verification.
 
 For the complete protocol, start with `AGENTS.md`, `skills/task-ledger/SKILL.md`, `skills/universal-task-router/SKILL.md`, `skills/coding-task-lifecycle/SKILL.md`, and `skills/persistent-multi-agent-execution/SKILL.md`.
+
+
+## Checkpoint blocker / notoriety model
+
+Bounded-v2 checkpoints persist a `blockers` array. Unresolved blockers are normalized and deduplicated globally, with one occurrence recorded per agent/task/checkpoint/attempt. The resulting **notoriety** score measures repeated failure: scores above 5 are surfaced as notorious blockers and become first-class user-attention items.
+
+User-defined goal priority is a separate normalized 0..1 signal. Claim ordering is database-enforced as goal priority → blocker notoriety → task priority. Workers inspect the blocker overview before execution, attempt the highest-notoriety active blocker first, and persist unresolved blockers through the checkpoint blocker RPCs.

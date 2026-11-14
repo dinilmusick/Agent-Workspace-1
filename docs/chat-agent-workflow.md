@@ -81,3 +81,10 @@ Supabase remains the durable goal/non-coding coordination layer. GitHub Issues a
 The execution loop is deliberately capped: Vision -> Goals (unbounded) -> Tasks (max 4 per Goal) -> Checkpoints (max 4 per Task). A Task is the unit of delegated work; a Checkpoint is one atomic completion parameter inside that Task. Each checkpoint persists its objective, success/failure status, result, context and evidence. New task creation uses the bounded-v2 database contract and rejects nested tasks, more than four completion parameters, or more than four checkpoints. Task completion is database-gated until all checkpoints succeed.
 
 When a new ChatGPT conversation receives a global continuation request such as **“Do remaining tasks”**, it must load the unfinished goal from Supabase, identify the first incomplete task and resume from that task's first incomplete checkpoint. It must not depend on prior chat history. After each checkpoint, persist the checkpoint result and advance the task's checkpoint pointer before continuing.
+
+
+## Blocker-first resume
+
+After loading a goal, workers inspect `goal_ledger_blocker_overview(goal_key)` before ordinary task execution. If an active blocker has notoriety >5, the worker surfaces the highest-scoring blocker to the user and attempts that blocker first. If the worker cannot solve a checkpoint blocker, it calls `report_checkpoint_blocker`, records the resume point/evidence, and stops the task safely.
+
+On resolution, use `resolve_checkpoint_blocker` with concrete evidence. The task returns to the queue and the next worker resumes from the persisted checkpoint rather than reconstructing context from chat history.

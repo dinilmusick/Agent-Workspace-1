@@ -42,7 +42,7 @@
       "id": 4,
       "name": "Loop Generator",
       "slug": "loop-generator",
-      "version": "1.4.1",
+      "version": "1.5.0",
       "status": "active",
       "path": "skills/loop-generator/SKILL.md",
       "tools": [
@@ -76,7 +76,7 @@
       "id": 7,
       "name": "Task Ledger",
       "slug": "task-ledger",
-      "version": "2.4.1",
+      "version": "2.5.0",
       "status": "active",
       "path": "skills/task-ledger/SKILL.md",
       "tools": [
@@ -272,7 +272,7 @@
       "id": 28,
       "name": "Universal Task Router",
       "slug": "universal-task-router",
-      "version": "2.2.1",
+      "version": "2.3.0",
       "status": "active",
       "path": "skills/universal-task-router/SKILL.md",
       "tools": []
@@ -360,7 +360,7 @@
       "id": 35,
       "name": "Obstacle Memory Management",
       "slug": "obstacle-memory-management",
-      "version": "1.1.1",
+      "version": "1.2.0",
       "status": "active",
       "path": "skills/obstacle-memory-management/SKILL.md",
       "tools": []
@@ -481,7 +481,7 @@
       "id": 46,
       "name": "Persistent Multi-Agent Execution",
       "slug": "persistent-multi-agent-execution",
-      "version": "1.1.1",
+      "version": "1.2.0",
       "status": "active",
       "path": "skills/persistent-multi-agent-execution/SKILL.md",
       "tools": [

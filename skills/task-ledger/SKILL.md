@@ -1,7 +1,7 @@
 ---
 name: "Task Ledger"
 slug: task-ledger
-version: 2.4.0
+version: 2.5.0
 source: Supabase Skills Database
 sourceId: 7
 status: active
@@ -273,3 +273,15 @@ WORKER=discover->resolve->route->plan->persist->claim->execute->evidence->indepe
 LOOPS=separateAuthor->readyContract->independentExecutor. A loop-authoring worker defines and validates success parameters/checkpoints, persists the loop contract, then releases/requeues the task. It MUST NOT execute the resulting task. An execution worker may claim only a ready contract authored by another agent and MUST execute against those persisted parameters. No worker may redefine its own success conditions. Verification is independent.
 CODING=GitHubIssueCanonicalExecutionState; one independent coding task->one worker->one Issue->one PR. ASYNC=started->wait/poll->inspect->repair/retry->poll->verify; never stop while a started/pollable process remains. OBSTACLE=normalize->semanticSearch->reuseOrCreate->record->resolve->verify. Never keep essential context only in chat or secrets in task records/logs.
 SKILL TIMING: use this skill when its trigger matches; load supporting skills before their required action, not after. Prefer the narrowest specialist skill plus only necessary support skills. If the substrate changes, update the canonical Supabase skill and repository copy, then independently verify parity.
+
+## Checkpoint blockers and notoriety
+
+Bounded-v2 checkpoints always contain a `blockers` array. Each blocker records its canonical `blocker_id`/`blocker_key`, text, status, evidence, and a global **notoriety** score.
+
+When a worker reaches a blocker it cannot resolve without help, call `report_checkpoint_blocker(task_id, checkpoint_index, blocker_text, agent_id, claim_token, context, evidence)`. The database normalizes and deduplicates the blocker, records one occurrence for the current agent/task/checkpoint/attempt, increments global notoriety, persists the blocker inside the checkpoint, and moves the task to `blocked`. Do not leave blockers only in chat.
+
+A blocker with notoriety **>5** is **notorious** and must be surfaced to the user. Before ordinary execution, inspect `goal_ledger_blocker_overview(goal_key)` and attempt the highest-notoriety active blocker first. Resolve with `resolve_checkpoint_blocker(..., resolution, evidence)`; resolution evidence is mandatory before the task is requeued.
+
+## User priority versus blocker notoriety
+
+Goals have `user_priority` normalized to **0..1**; higher means higher priority. Use `goal_ledger_set_priority(goal_key, priority, agent_id)` to change it. User priority and blocker notoriety are independent signals: global claims order by goal priority, then blocker notoriety, then existing task priority; goal-scoped claims order by blocker notoriety before task priority. Never use priority as a substitute for blocker notoriety.

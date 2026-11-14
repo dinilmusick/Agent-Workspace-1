@@ -215,3 +215,14 @@ Every worker must assume it can disappear at any moment. The ledger is the only 
 ### Ephemeral-worker invariant
 
 `chat_context=cache`; `ledger/Issue=memory`; `claim_token=fence`; `heartbeat=presence`; `checkpoint=resume_point`; `independentVerifier=quality_gate`. If the worker dies after any action, another agent must be able to reconstruct the next safe action without asking the user for missing context.
+
+
+## Checkpoint blockers and priority routing
+
+Bounded-v2 checkpoints now carry a `blockers` array. A worker that cannot resolve a checkpoint blocker must persist it with `report_checkpoint_blocker`; the database deduplicates equivalent blockers, records the agent/task/checkpoint/attempt occurrence, increments global blocker **notoriety**, stores the blocker in the checkpoint, and moves the task to `blocked`. Never keep the blocker only in chat.
+
+Notoriety is independent of user priority. Goals have `user_priority` normalized to 0..1; higher is higher priority. Global task claims select by goal priority, then checkpoint blocker notoriety, then existing task priority. Goal-scoped claims select by blocker notoriety before task priority. A blocker with notoriety >5 is **notorious** and must be surfaced to the user.
+
+Before execution/resume, inspect `goal_ledger_blocker_overview(goal_key)` and attempt the highest-notoriety active blocker first. Resolve with `resolve_checkpoint_blocker` plus concrete evidence; the task is then requeued. Use `goal_ledger_set_priority` for normalized user priority.
+
+This is canonical substrate behavior: update Supabase skill versions and the repository skill copies together whenever this protocol changes.

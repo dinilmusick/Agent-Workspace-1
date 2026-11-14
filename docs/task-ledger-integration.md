@@ -136,3 +136,18 @@ Resume therefore means loading the unfinished Goal, selecting an incomplete Task
 
 
 Bounded-v2 is the creation contract. Existing pre-v2 goals that already contain more than four direct tasks are explicitly retained as `legacy` rather than being silently split or discarded; a later reconciliation pass can safely migrate their work into multiple bounded goals. This preserves existing execution context while making the four-task invariant absolute for new bounded goals.
+
+
+## Checkpoint blockers and notoriety
+
+Bounded-v2 is now:
+
+```
+Vision -> Goals (user_priority 0..1) -> Tasks -> Checkpoints -> blockers
+```
+
+Each checkpoint object contains `blockers: []`. Blockers are globally deduplicated by normalized text and stored in `public.checkpoint_blockers`; each failed occurrence is recorded in `public.checkpoint_blocker_occurrences`. The global `notoriety` score counts distinct agent/task/checkpoint/attempt occurrences. Scores above 5 are **notorious**.
+
+Workers call `report_checkpoint_blocker` when they cannot resolve a blocker. That call persists the blocker, increments notoriety, attaches it to the checkpoint and blocks the task. Workers inspect `goal_ledger_blocker_overview` before execution/resume and attempt the highest-notoriety active blocker first. `resolve_checkpoint_blocker` records resolution evidence and safely requeues the task.
+
+User priority is separate: `goals.user_priority` is normalized 0..1, and `goal_ledger_set_priority` changes it. Claim ordering is database-enforced: goal user priority first, then blocker notoriety, then existing task priority.

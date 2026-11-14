@@ -5,8 +5,8 @@
   "versions": {
     "tldraw": "1.2.5",
     "prompt-map": "1.2.5",
-    "loop-generator": "1.4.1",
-    "task-ledger": "2.4.1",
+    "loop-generator": "1.5.0",
+    "task-ledger": "2.5.0",
     "security-audit": "1.2.5",
     "devops-ci-release": "1.0.7",
     "browser-qa": "1.2.5",
@@ -27,14 +27,14 @@
     "testing-strategy": "1.0.3",
     "cloud-platform-engineering": "1.2.5",
     "database-engineering": "1.2.5",
-    "universal-task-router": "2.2.1",
+    "universal-task-router": "2.3.0",
     "personal-growth-router": "1.2.5",
     "relational-skills": "1.2.5",
     "fitness-coaching": "1.2.5",
     "cooking-culinary-skills": "1.2.5",
     "platform-adapters": "1.0.5",
     "semantic-resource-resolution": "1.2.5",
-    "obstacle-memory-management": "1.1.1",
+    "obstacle-memory-management": "1.2.0",
     "diagram-engineering": "1.2.5",
     "tldraw-agent": "1.2.5",
     "skill-creator": "1.2.5",
@@ -43,6 +43,6 @@
     "implementation-push": "2.0.2",
     "reconciliation-pass": "2.0.2",
     "coding-task-lifecycle": "1.0.1",
-    "persistent-multi-agent-execution": "1.1.1"
+    "persistent-multi-agent-execution": "1.2.0"
   }
 }

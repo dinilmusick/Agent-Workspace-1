@@ -22,3 +22,7 @@ GITHUB=repo lifecycle primary via tools/github; connector=fallback only.
 GITHUB_PRIMARY=create|rename|delete|visibility|clone|repo-admin→use tools/github scripts/workflows first; verify result.
 GITHUB_FALLBACK=if local tools/github are unavailable, inapplicable, fail, or lack the required operation, use the GitHub connector/API if it can perform the operation; never prefer connector over an available working repository tool.
 GITHUB_LIFECYCLE=visionRepo:create public→associate with Vision→work→verify→complete→lookup associated repo→delete repo→clear Vision; repository deletion is a deterministic finalization step, not an optional manual cleanup.
+
+VISION_REPO_LIFECYCLE=create Vision→call vision_ledger_repository_spec→create that public repo through tools/github primary path→vision_ledger_associate_repository→work→independentVerify→mark deletion_requested→delete repo through tools/github→verify 404→vision_ledger_mark_repository_deleted→vision_ledger_finalize.
+VISION_FINALIZE_GATE=never clear/complete a Vision until its associated transient repository is deleted_verified; missing association or unverified deletion is a hard DB rejection.
+VISION_REPO=public transient repo named agentgpt-vision-<vision_key>; ATAX is permanent and forbidden as a Vision repo.

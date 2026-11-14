@@ -1,13 +1,15 @@
 ---
 name: "Coding Router"
 slug: coding-router
-version: 2.0.0
+version: 2.1.0
 source: Supabase Skills Database
 sourceId: 17
 status: active
 ---
 
 # Coding Router
+
+Domain router invoked only after Universal Task Router has classified a prompt as WORK_RESPONSE. It must not reclassify conversation versus work.
 
 Top-level coding task router that classifies engineering intent and selects the smallest sufficient set of specialized coding skills.
 

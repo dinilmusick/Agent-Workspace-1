@@ -1,7 +1,7 @@
 ---
 name: "Universal Task Router"
 slug: universal-task-router
-version: 2.6.0
+version: 3.0.0
 source: Supabase Skills Database
 sourceId: 28
 status: active
@@ -9,106 +9,62 @@ status: active
 
 # Universal Task Router
 
-Top-level classifier for every incoming user message. Separate ordinary conversation, bounded one-step requests and actionable goals. Route actionable goals through the smallest sufficient skills and tools.
+Top-level classifier for every incoming user message. This skill owns classification and handoff; detailed execution procedures belong to specialist skills.
 
-## 1. Conversation gate
+## Response type
 
-- **Conversation:** greetings, acknowledgements, opinions, explanations, simple factual questions, casual discussion and ordinary follow-ups. Respond directly. Do not load skills just because the topic resembles one.
-- **Direct one-step request:** a bounded request that can be completed in one response or one straightforward action. Complete directly or invoke one specialist only when it materially improves correctness. Do not create an artificial goal graph.
-- **Actionable goal:** planning, multiple dependent actions, coordination, research, tool use, persistent changes, repeated practice or verification. Continue through the routing pipeline.
+Every prompt is exactly one response type:
+- CONVERSATIONAL_RESPONSE: answer directly. No work-substrate routing.
+- WORK_RESPONSE: substrate is mandatory. Classify the work as DIRECT_TASK or WORK_MODALITY.
+Never treat WORK_RESPONSE as ordinary conversation merely because it can be answered conversationally. Never execute a WORK_MODALITY as an unstructured one-off task.
 
-The user's explicit requested mode wins. If they ask for implementation, act rather than merely describing a plan.
+## Work types
 
-## 2. Goal interpretation
+Canonical work types: EXECUTE | GENESIS | CONTRACT | MODIFY | MEMORY | SELF_IMPROVEMENT | INTEGRATE.
 
-Preserve intended outcome, scope, constraints, preferences, permissions, deadline and prior decisions. Derive observable success criteria. Use Prompt Map when the goal is multi-stage, ambiguous, cross-domain or dependency-heavy. Ask one targeted question only when an ambiguity materially changes the outcome; otherwise infer conservatively.
+EXECUTE = perform already-defined work.
+GENESIS = create durable structure such as Vision, Goal, Task, System, repository ecosystem or repository.
+CONTRACT = define acceptance, loop-satisfaction parameters, completion predicates or verification contracts.
+MODIFY = change an existing system, workflow, skill or architecture.
+MEMORY = convert observations and decisions into durable memory.
+SELF_IMPROVEMENT = analyze, remediate or optimize the substrate or governed systems.
+INTEGRATE = reconcile, merge, synchronize, release or consolidate existing work.
 
-## 3. Loop routing
+Use work type for purpose. Use work_modality for the narrower registered procedure. Modality is not a substitute for work type.
 
-For actionable goals, inspect and load Loop Generator when repeated action/observation/diagnosis/verification is needed. A multi-task goal is itself a loop, and every task is also its own loop. These are separate persisted loops, not one synthetic task tree root.
+## Mandatory WORK_RESPONSE flow
 
-The goal loop coordinates task loops and evaluates overall criteria. Task loops own task-specific execution, parameters, criteria and evidence. Use bounded iteration budgets. Stop on verified success, cancellation, safety/permission boundary, genuine blocker or budget exhaustion.
+classify → resolve Universe/System/Vision → resolve/create Goal/Task as needed → route → plan → persist → claim → execute → evidence → independentVerify → finalize
 
-## 4. Domain routing
+For persistent work, prefer existing System → existing Universe → create System in that Universe → create Universe then System. Parent/child Systems must share a Universe. Cross-Universe links use explicit relationships/wormholes instead of parentage.
 
-Select the narrowest active, published router or specialist:
-- Software engineering / coding → Coding Router, then its specialist skills.
-- Explicit implementation push / implementation pass / completion-pass requests → Implementation Push, with Coding Workflow + Testing Strategy and problem-specific supporting skills.
-- Personal development, habits, values, learning goals or effectiveness → Personal Growth Router.
-- Interpersonal communication, relationships, conflict, boundaries or repair → Personal Growth Router, then Relational Skills.
-- Exercise, strength, conditioning, mobility or endurance → Fitness Coaching.
-- Cooking, culinary technique, food science or meal preparation → Cooking and Culinary Skills.
-- Other domains → inspect active skill categories and choose the closest specialist. If none exists, use available tools/research and report the capability gap.
+## Direct tasks
 
-## 5. Recursive skill nesting
+A direct task prompt resolves an existing persisted task. Claim it atomically, execute its persisted loop/parameters, checkpoint, persist evidence, obtain independent verification and finalize. Do not create duplicate work.
 
-Treat skill routing as a graph with arbitrary practical nesting depth:
-- Inspect each selected skill's instructions, dependencies, capabilities and triggers before delegation.
-- Track visited skill IDs/slugs and detect cycles.
-- Load the smallest sufficient skill set, with one primary owner and bounded supporting skills.
-- Required dependencies must be available; optional/recommended dependencies are loaded only when relevant.
-- Stop descending when a concrete specialist owns the work. Preserve the parent-to-child handoff context.
+## Work modalities
 
-## 6. Canonical persistent-goal workflow
+A modality prompt asks the agent to perform a governed way of working. Resolve/reuse durable structure first, then create/decompose the required work into 1–4-action tasks with dependencies, checkpoints, acceptance and independent verification. Use only registered active modalities.
 
-For an agreed actionable goal requiring persistent progress, multiple tasks or independent ChatGPT conversations, load Task Ledger and Loop Generator.
+## Skill routing
 
-### Universal goal overview
-- At the beginning of every orchestration session, and whenever the user asks what goals remain, call `goal_ledger_overview(null)`.
-- Present every visible planning, ready, active and blocked goal, not only the first unfinished goal. Include readable key, status, task counts, running workers, queued tasks, blockers, stale-heartbeat flags and verification state.
-- Explain dependencies and why apparently queued work may not yet be claimable.
-- A running task is reclaimable only after 60 minutes without a heartbeat. Lease expiry alone cannot bypass this threshold; claims are reassigned atomically.
-- Use `goal_ledger_resume_by_key` to load complete context for the selected goal. The overview is discovery, not ownership; never infer a claim from it.
-- Use the atomic goal-key claim RPC only after resume. Never directly update task ownership.
+After classification, select the narrowest active specialist. Coding → Coding Router. Implementation push/reconciliation/new-repo/feature → their registered coding modalities. Self-improvement/obstacle work → obstacle-memory/self-improvement support. Loop contracts → Loop Generator. System visualization → tldraw. Do not load broad skills when a narrower owner exists.
 
-### Goal identity
-- `goals.name` is the descriptive title shown to the user.
-- `goals.goal_key` is the stable readable identifier generated from the title.
-- `goals.tags` is the searchable classification set.
-- UUIDs are internal relational keys; never present them as the goal's identity.
+## Durable state
 
-### Create
-1. Discuss and define the desired end state, context, constraints and acceptance criteria.
-2. Generate a goal-level Loop Generator contract.
-3. Decompose into direct top-level task definitions. Every task and nested task has its own complete loop contract, acceptance criteria, verification plan and task-specific parameter contract where applicable.
-4. Call `goal_ledger_create_hierarchical` with title, tags, goal loop and task definitions. Do not call legacy `goal_ledger_create_with_tasks` for new goals; do not create a synthetic root task.
-5. Add dependencies, inspect ready leaf-task parallelism and recommend the number of worker chats. The user manually opens those ChatGPT conversations.
+Supabase is canonical coordination state; chat is not durable memory. Load current skill versions from Supabase. Persist meaningful checkpoints, blockers, evidence and resume state. Independent verification is mandatory for terminal work.
 
-### Resume from a new chat
-When asked to continue, finish or resume an unfinished goal:
-1. Call `goal_ledger_list_unfinished` immediately.
-2. If exactly one unfinished goal exists, load it. If multiple exist, show title, readable key, tags and status, then ask the user to choose.
-3. If the selected goal is blocked, resume it, report its blocker and do not claim a task until it is unblocked.
-4. Call `goal_ledger_resume_by_key` and load complete goal/task context, dependencies, events, goal iterations and task iterations.
-5. Tell the user **Loaded goal: <title>**. If asked which goal is loaded, answer with the title, not the UUID.
-6. Only after selection and resume, claim one eligible task with `goal_ledger_claim_task_by_key`.
+## No duplicate routing
 
-### Execution and completion
-- Each worker chat uses a unique agent ID and session ID, claims exactly one task, executes its persisted loop, records iterations/evidence and submits the result.
-- Workers do not self-verify. An independent verifier checks every result.
-- Record goal-level cycles with `goal_ledger_record_loop_iteration`.
-- A goal loop may pass only after all descendant tasks are independently verified, all goal acceptance criteria are satisfied and non-empty evidence is recorded.
-- Finalize through `goal_ledger_finalize_by_key`. The database is canonical; recover from Supabase rather than chat history.
+This skill is the only top-level classifier. Specialist routers must not reclassify conversation versus work. They receive a WORK_RESPONSE handoff and select the narrowest domain procedure.
 
+## Universal decomposition
 
-### Proactive but consent-based task proposals
-After the global overview, compare the user's current request with the persisted task tree. If one concrete missing work item is clearly relevant, propose one task and ask the user **“Should I add this as a task?”** Include title, parent goal key, scope, observable acceptance criteria, dependencies and proposed readable slug. Do not insert it until explicit confirmation. On confirmation, call the canonical task-tree creation RPC with its complete loop and verification contract, then report the exact returned task key. Never invent/reserve a key in advance. Do not manufacture tasks when the existing tree already covers the work.
+Every substantive Task has 1–4 explicit actions. If more are required, split the work. Every Task has a target inherited from its parent and a general pattern.
 
-## 7. Task parameters
+## Lease invariant
 
-Use task `parameters` for task-specific configuration, `parameter_contract.required` for mandatory values, and `parameter_contract.properties` for JSON types and optional enum constraints. Workers submit fulfilled values in `result_in.parameter_values`. The database rejects completion if required values are missing or invalid.
-
-## 8. GitHub compute workspace
-
-When an agent needs an actual computation, program, parser, simulation, test or generated artifact, use `.github/workflows/agent-compute.yml` where an authorized workflow-dispatch capability is available. Supported runtimes: Python, Node.js, TypeScript, Bash, Go, Rust, Java, C, C++, C#, Ruby, PHP, Perl, R and PowerShell.
-
-The workflow runs on an ephemeral GitHub-hosted runner with read-only repository permission, no persisted checkout credentials, no application secrets and a bounded execution timeout. It returns an artifact. It is finite compute, not a persistent machine and does not spawn ChatGPT conversations. If the connected GitHub tools cannot dispatch workflows, create a GitHub issue titled `[agent-compute] <goal-key> <runtime>` with a JSON body containing `ref`, `runtime`, `source_file`, `arguments` and `timeout_seconds`. The issue-triggered workflow accepts only owners, members and collaborators. Track the Actions run and artifact. Never claim execution without a real run.
-
-## 9. Execution handoff and output
-
-Pass each skill a compact handoff containing goal, outcome, domain, scope, constraints, permissions, criteria, relevant context, prior work, tools, dependencies and evidence requirements. Verify at the layer where outcomes are observable.
-
-For routed tasks, retain classification, selected skill path, loop activation decision, acceptance criteria, execution order and unresolved capability gaps. Keep ordinary responses concise; do not expose internal routing mechanics unless asked.
+A running task is reclaimable only after 5 minutes without a heartbeat. Workers heartbeat about every 2 minutes and check ownership about every 5 minutes. The atomic claim path is authoritative.
 
 ## Workspace identity
 

@@ -97,7 +97,7 @@ begin
   where id=task_id_in;
 
   insert into public.task_events(task_id,event_type,agent_id,message,payload)
-  values(task_id_in,'blocker_reported',agent_id_in,'Checkpoint blocker recorded; task blocked until the blocker is resolved.',
+  values(task_id_in,'blocked',agent_id_in,'Checkpoint blocker recorded; task blocked until the blocker is resolved.',
     jsonb_build_object('checkpoint_index',checkpoint_index_in,'blocker_id',blocker.id,'blocker_key',blocker.blocker_key,'notoriety',blocker.notoriety,'occurrence_inserted',occurrence_inserted));
   return jsonb_build_object('task_id',task_id_in,'checkpoint_index',checkpoint_index_in,'blocker_id',blocker.id,'blocker_key',blocker.blocker_key,'notoriety',blocker.notoriety,'notorious',blocker.notoriety>5,'occurrence_inserted',occurrence_inserted);
 end;
@@ -120,7 +120,7 @@ begin
   c:=c||jsonb_build_object('blockers',updated);
   update public.tasks set checkpoints=jsonb_set(t.checkpoints,array[checkpoint_index_in::text],c,false),blocker=null,status='queued',
     claimed_by_agent_id=null,claimed_by_agent_name=null,claimed_session_id=null,claim_token=null,claimed_at=null,claim_expires_at=null,
-    heartbeat_at=now(),updated_at=now(),heartbeat_context=jsonb_build_object('activity','blocker_resolved','next_action','Reclaim task and retry the persisted checkpoint.')
+    heartbeat_at=now(),updated_at=now(),heartbeat_context=jsonb_build_object('activity','unblocked','next_action','Reclaim task and retry the persisted checkpoint.')
   where id=task_id_in;
   insert into public.task_events(task_id,event_type,agent_id,message,payload)
   values(task_id_in,'blocker_resolved',agent_id_in,'Checkpoint blocker resolved and task requeued.',jsonb_build_object('checkpoint_index',checkpoint_index_in,'blocker_id',blocker_id_in));

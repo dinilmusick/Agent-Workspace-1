@@ -17,6 +17,7 @@ jobs:
       - name: Execute repository lifecycle script
         env:
           GITHUB_TOKEN: ${{ secrets.CODING_REPO_TOKEN }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
         run: |
           set -euo pipefail
           python3 tools/github/repository_lifecycle.py --help >/dev/null
@@ -35,5 +36,3 @@ jobs:
               cmd.extend([flag, str(value)])
           subprocess.run(cmd, check=True)
           PY
-        env:
-          ISSUE_BODY: ${{ github.event.issue.body }}

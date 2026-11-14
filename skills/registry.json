@@ -11,7 +11,7 @@
     ],
     "exportedAt": "2026-11-13T18:43:00+05:30"
   },
-  "count": 42,
+  "count": 43,
   "skills": [
     {
       "id": 1,
@@ -514,8 +514,30 @@
           "usage": "Persist and resolve work modality catalogue and request state."
         }
       ]
+    },
+    {
+      "id": 48,
+      "name": "Vision transient repository lifecycle",
+      "slug": "vision-transient-repository-lifecycle",
+      "version": "1.0.0",
+      "status": "active",
+      "path": "skills/vision-transient-repository-lifecycle/SKILL.md",
+      "tools": [
+        {
+          "slug": "supabase",
+          "type": "connector",
+          "required": true,
+          "usage": "Persist Vision repository association, lifecycle state and finalization gates."
+        },
+        {
+          "slug": "github",
+          "type": "connector",
+          "required": true,
+          "usage": "Fallback only; primary repository lifecycle operations use ATAX tools/github."
+        }
+      ]
     }
   ],
   "toolBindingsPath": "skills/tool-bindings.json",
-  "exportedAt": "2026-11-11"
+  "exportedAt": "2026-11-14"
 }

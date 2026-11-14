@@ -157,3 +157,25 @@ end;
 $$;
 
 commit;
+-- Ensure every newly prepared bounded-v2 checkpoint has a blocker section.
+create or replace function public.prepare_bounded_checkpoint_predicates()
+returns trigger language plpgsql set search_path to public as $$
+declare i integer:=0; c jsonb; p jsonb; pred jsonb;
+begin
+  if new.execution_model <> 'bounded-v2' then return new; end if;
+  for c in select value from jsonb_array_elements(new.checkpoints) loop
+    p:=coalesce(new.completion_parameters->i,'{}'::jsonb);
+    pred:=coalesce(p->'predicate',new.task_definition->'completion_predicates'->i,jsonb_build_object('key','builtin.evidence_present','version',1));
+    c:=c||jsonb_build_object('blockers',coalesce(c->'blockers','[]'::jsonb));
+    if nullif(btrim(c->>'predicate_key'),'') is null then
+      c:=c||jsonb_build_object('predicate_key',pred->>'key','predicate_version',coalesce((pred->>'version')::integer,1));
+    end if;
+    new.checkpoints:=jsonb_set(new.checkpoints,array[i::text],c,false); i:=i+1;
+  end loop;
+  return new;
+end;
+$$;
+
+-- Claim ordering is: user goal priority -> blocker notoriety -> existing task priority.
+-- Apply the same ordering in both goal-scoped and global claim functions. Existing claim
+-- logic remains unchanged except for the ORDER BY and blocker-aware heartbeat context.

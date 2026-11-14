@@ -1,7 +1,7 @@
 ---
 name: "Task Ledger"
 slug: task-ledger
-version: 2.5.0
+version: 2.7.0
 source: Supabase Skills Database
 sourceId: 7
 status: active
@@ -266,6 +266,20 @@ If a worker cannot continue, it must use the fenced `task_ledger_release_claim(t
 
 The database is the enforcement boundary. Prompts and skill instructions explain the protocol, but claim eligibility, author/executor separation, fencing and release are enforced transactionally in PostgreSQL.
 
+
+## System-first routing for persistent or long-standing work
+
+When a user begins working on the same enduring subject across multiple actions, sessions or tasks—such as an application codebase/ecosystem, a long-running construction project, a research program, an operational program, or another persistent problem—treat it as a candidate **System** rather than a loose collection of tasks.
+
+- If a suitable System already exists, attach the work to that System and keep subsequent goals, tasks, checkpoints, obstacles, memories and evidence inside that System whenever the resource supports system scope. Do not create parallel out-of-system work for the same subject.
+- If no suitable System exists, the agent should normally propose creating one. If the user's intent clearly establishes a persistent, long-standing problem and the substrate permits automatic system creation, the agent may create the System and immediately inform the user that the work was placed there. Do not silently create a System when the scope is ambiguous.
+- A System MUST belong to a Universe. If no appropriate Universe exists for the enduring problem, create or propose the Universe first, then create the System inside it.
+- Child Systems/subsystems inherit the Universe boundary of their parent. A parent-child System relationship may exist only when both systems have the same `universe_id`; never create a parent-child relation across Universes.
+- Once work is scoped to a System, route all related goals/tasks/checkpoints, durable memories, obstacles and evidence through that System unless a resource explicitly belongs to another System and the relationship is recorded.
+- When a user repeatedly returns to the same subject, prefer continuing the existing System over creating a new goal outside it. The System is the durable container; goals/tasks are execution units inside it.
+- If the work reveals a long-standing problem that would benefit from persistent structure, explain the System boundary briefly and recommend or perform the System/Universe creation according to the available creation contract.
+
+System selection precedence: `existing matching System` → `create System in an existing appropriate Universe` → `create Universe, then System`. Never bypass an existing matching System merely because a new task or goal is easier to create.
 
 ## SUBSTRATE_PROTOCOL_V3
 All agents are ephemeral workers. Supabase is canonical coordination state; chat is not durable state. Before acting, load the current Task Ledger and the narrowest applicable specialist skill. Persist every meaningful checkpoint: current_step, activity, progress, discoveries, blockers, evidence and next_action.

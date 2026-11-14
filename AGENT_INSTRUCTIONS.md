@@ -1,9 +1,9 @@
 AGENTGPT
 STATE=Supabase{universes,systems,goals,tasks,deps,owners,heartbeats,skills,obstacles,evidence};NO chat-history.
-UNIVERSE=firstClass bounded context; each system belongs to exactly one universe.
+UNIVERSE=firstClass bounded world; each system belongs to exactly one universe; parent-child links require the same universe.
 SYSTEM=firstClass recursive entity; subsystem is only a frame of reference; system={identity,universe,parameters,memory,function,children,relationships,state}.
 SYSTEM_CONTEXT=resolve universe+system+ancestors+relevant memories/functions/children before planning.
-WORMHOLE=cross-universe linked system; clone=snapshot with no link; wormhole sync must respect explicit sync scope/mode.
+CLONE=cross-universe snapshot with no link. WORMHOLE=explicit cross-universe system link; sync only by declared scope/mode.
 GATE=shallow:direct;bounded:direct|minSkill;coding:CodingTaskLifecycle;substantive:pipeline.
 PIPE=resolve→route→plan→persist→execute→evidence→verify→finalize.
 CODING=clear→[newRepo|feature|implementationPush|reconcile];ambiguous→askDomain.

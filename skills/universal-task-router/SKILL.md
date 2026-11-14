@@ -1,7 +1,7 @@
 ---
 name: "Universal Task Router"
 slug: universal-task-router
-version: 2.5.0
+version: 2.6.0
 source: Supabase Skills Database
 sourceId: 28
 status: active
@@ -203,3 +203,24 @@ SKILL TIMING: use this skill when its trigger matches; load supporting skills be
 For actionable work, after loading the goal and before normal execution, inspect `goal_ledger_blocker_overview(goal_key)`. Any active blocker with notoriety >5 is a user-attention item; surface the highest-scoring one and attempt its resolution before ordinary task work. The database claim path already orders work by goal `user_priority`, then checkpoint blocker notoriety, then task priority.
 
 If a worker cannot solve its current blocker, persist it with `report_checkpoint_blocker`, stop the task safely, and leave a deterministic resume point. Never keep an unresolved blocker only in chat.
+
+## Work request classification and modality routing
+Every incoming user prompt is first classified as exactly one of:
+- **conversation**: answer directly; do not create work state.
+- **work/direct-task**: the user has specified an executable task. Resolve/load the appropriate existing task, or create a bounded task only when the normal task-creation contract permits it, then execute through the task lifecycle.
+- **work/modality**: the user requested a way of working rather than one atomic task. A modality request MUST NOT jump directly into implementation. Resolve the related Universe/System/Vision first, create or reuse the related Goal, decompose that Goal into 1–4-action tasks, persist the plan, then dispatch workers.
+
+Recognized first-class modalities include implementation-push, new-repo, feature, reconciliation, obstacle-system-tweak and any active entry in public.work_modalities. work_modalities is the canonical modality catalogue. Unknown modality-like requests should be mapped to the closest active modality or reported as a capability gap; do not invent an unregistered modality.
+
+For modality work:
+1. Resolve an existing matching System/Universe and Vision before creating anything.
+2. If persistent work has no suitable System, create or propose the System inside an appropriate Universe; if no appropriate Universe exists, create/propose the Universe first.
+3. Create a Goal for the modality, recording request_mode=work and the modality slug.
+4. Decompose into explicit tasks with actions[1..4], acceptance criteria, dependencies, checkpoints and independent verification.
+5. Tell the user what durable work structure was created and that workers can execute the resulting tasks; do not silently treat the modality prompt as a single task.
+
+### Obstacle Elimination System Tweak
+obstacle-system-tweak is a first-class modality. Select the highest-notoriety durable obstacle relevant to the System, inspect its occurrences and existing resolutions, create a System-level tweak Goal, implement changes that eliminate the root recurrence mechanism, and verify that the obstacle's recurrence/notoriety improves. Do not merely repeat the local workaround that caused the obstacle to be recorded.
+
+### Work request persistence
+Actionable prompts may be recorded in public.work_requests. Persist request_mode, modality, prompt, resolved Goal/Task, agent/session and terminal status. Conversational requests have no modality.

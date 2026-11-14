@@ -1,7 +1,7 @@
 ---
 name: "Coding Task Lifecycle"
 slug: coding-task-lifecycle
-version: 1.0.2
+version: 1.1.2
 source: Supabase Skills Database
 sourceId: 45
 status: active
@@ -17,3 +17,10 @@ WORKER=discover->resolve->route->plan->persist->claim->execute->evidence->indepe
 LOOPS=separateAuthor->readyContract->independentExecutor. A loop-authoring worker defines and validates success parameters/checkpoints, persists the loop contract, then releases/requeues the task. It MUST NOT execute the resulting task. An execution worker may claim only a ready contract authored by another agent and MUST execute against those persisted parameters. No worker may redefine its own success conditions. Verification is independent.
 CODING=GitHubIssueCanonicalExecutionState; one independent coding task->one worker->one Issue->one PR. ASYNC=started->wait/poll->inspect->repair/retry->poll->verify; never stop while a started/pollable process remains. OBSTACLE=normalize->semanticSearch->reuseOrCreate->record->resolve->verify. Never keep essential context only in chat or secrets in task records/logs.
 SKILL TIMING=enter this lifecycle for substantive coding intent; choose exactly one mode, persist its tasks before execution, use the corresponding specialist skills, and do not finalize until independent verification and reconciliation are complete. If the substrate changes, update the canonical Supabase skill and repository copy, then independently verify parity.
+
+## Work modality boundary
+Coding lifecycle is entered only after the Universal Task Router has classified the prompt as work and, for modality requests, created or resolved the parent Goal. A coding modality is a structured request that produces a Goal/task tree; it is not an instruction to skip planning and start editing.
+
+Supported coding work modalities include new-repo, feature, implementation-push and reconciliation. obstacle-system-tweak is cross-domain/system work and may invoke coding specialists for its implementation tasks.
+
+work modality → Goal → independent tasks → one worker/Issue/PR per coding task → verification → reconciliation. Direct task requests enter at the task execution stage and must not manufacture a modality Goal unless the request itself asks for that mode.

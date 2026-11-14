@@ -11,7 +11,7 @@
     ],
     "exportedAt": "2026-11-13T18:43:00+05:30"
   },
-  "count": 41,
+  "count": 42,
   "skills": [
     {
       "id": 1,
@@ -496,6 +496,22 @@
           "type": "connector",
           "required": true,
           "usage": "Persist parent goals/tasks and stable Issue/PR linkage."
+        }
+      ]
+    },
+    {
+      "id": 47,
+      "name": "Work Modality Routing",
+      "slug": "work-modality-routing",
+      "version": "1.0.0",
+      "status": "active",
+      "path": "skills/work-modality-routing/SKILL.md",
+      "tools": [
+        {
+          "slug": "supabase",
+          "type": "connector",
+          "required": true,
+          "usage": "Persist and resolve work modality catalogue and request state."
         }
       ]
     }

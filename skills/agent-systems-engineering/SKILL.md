@@ -1,7 +1,7 @@
 ---
 name: "AI Agent and Tooling Engineering"
 slug: agent-systems-engineering
-version: 2.1.0
+version: 2.2.0
 source: Supabase Skills Database
 sourceId: 23
 status: active
@@ -92,3 +92,10 @@ WORKER=discover->resolve->route->plan->persist->claim->execute->evidence->indepe
 LOOPS=separateAuthor->readyContract->independentExecutor. A loop-authoring worker defines and validates success parameters/checkpoints, persists the loop contract, then releases/requeues the task. It MUST NOT execute the resulting task. An execution worker may claim only a ready contract authored by another agent and MUST execute against those persisted parameters. No worker may redefine its own success conditions. Verification is independent.
 CODING=GitHubIssueCanonicalExecutionState; one independent coding task->one worker->one Issue->one PR. ASYNC=started->wait/poll->inspect->repair/retry->poll->verify; never stop while a started/pollable process remains. OBSTACLE=normalize->semanticSearch->reuseOrCreate->record->resolve->verify. Never keep essential context only in chat or secrets in task records/logs.
 SKILL TIMING: use this skill when its trigger matches; load supporting skills before their required action, not after. Prefer the narrowest specialist skill plus only necessary support skills. If the substrate changes, update the canonical Supabase skill and repository copy, then independently verify parity.
+## Work modality contract
+Treat every prompt as either conversation or work. Work has two forms: direct task and work modality. Direct task execution consumes an already-defined task. A modality is a request for a structured way of accomplishing a class of work and therefore creates/plans work before execution.
+
+The deterministic state machine is:
+classify → resolve context → route modality → create/reuse Universe/System/Vision → create Goal → decompose Tasks → persist → dispatch → execute → evidence → independentVerify → finalize.
+
+Never collapse a modality into one task. A modality Goal owns the decomposition and worker dispatch. Registered modalities live in public.work_modalities; their planning contracts are data, while agents remain responsible for evidence and verification.
